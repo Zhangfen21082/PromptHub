@@ -205,6 +205,33 @@
             <div class="mt-4 text-sm text-gray-400">
                 PromptHub - 智能提示词管理平台 🚀
             </div>
+            
+            <!-- 隐藏的管理员功能区域 -->
+            <div class="mt-6 border-t border-gray-700 pt-4">
+                <button onclick="toggleAdminPanel()" 
+                        class="text-gray-500 hover:text-gray-300 transition-colors text-xs opacity-50 hover:opacity-100"
+                        title="开发者管理面板">
+                    ⚙️ Dev
+                </button>
+                
+                <!-- 管理员面板 -->
+                <div id="adminPanel" class="hidden mt-4 p-4 bg-gray-800 rounded-lg border border-gray-600">
+                    <h4 class="text-sm font-medium text-gray-300 mb-3">🔧 开发者工具</h4>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button onclick="loadSampleData()" 
+                                class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">
+                            🚀 加载测试数据
+                        </button>
+                        <button onclick="clearAllData()" 
+                                class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors">
+                            🗑️ 清空所有数据
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        ⚠️ 操作前会自动备份数据到 data/backup/ 目录
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -2297,6 +2324,94 @@ code block
         }
 
         // 页面加载时获取数据
+        // 管理员面板相关函数
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        async function loadSampleData() {
+            try {
+                const confirmed = await customConfirm(
+                    '确认加载测试数据？',
+                    '这将覆盖当前所有数据，原数据会自动备份到 data/backup/ 目录。\n\n包含100条示例提示词和相关分类标签。'
+                );
+                
+                if (!confirmed) return;
+                
+                const passwordHash = await requestAdminPassword();
+                if (!passwordHash) return;
+                
+                showToast('正在加载测试数据...', 'info');
+                
+                const response = await fetch('/api/admin/load-sample-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password_hash: passwordHash
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast(result.message, 'success');
+                    // 重新加载页面数据
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.error || '加载测试数据失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载测试数据失败:', error);
+                showToast('加载测试数据失败', 'error');
+            }
+        }
+
+        async function clearAllData() {
+            try {
+                const confirmed = await customConfirm(
+                    '确认清空所有数据？',
+                    '这将删除所有提示词、分类和标签，原数据会自动备份到 data/backup/ 目录。\n\n此操作不可撤销！'
+                );
+                
+                if (!confirmed) return;
+                
+                const passwordHash = await requestAdminPassword();
+                if (!passwordHash) return;
+                
+                showToast('正在清空数据...', 'info');
+                
+                const response = await fetch('/api/admin/clear-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password_hash: passwordHash
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast(result.message, 'success');
+                    // 重新加载页面数据
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.error || '清空数据失败', 'error');
+                }
+            } catch (error) {
+                console.error('清空数据失败:', error);
+                showToast('清空数据失败', 'error');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
             initTagInput();

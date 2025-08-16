@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  prompthub:
+    build: .
+    container_name: prompthub
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      # 持久化数据目录
+      - ./data:/app/data
+      # 挂载配置文件（可选）
+      - ./config.json:/app/config.json:ro
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - prompthub-network
+
+networks:
+  prompthub-network:
+    driver: bridge

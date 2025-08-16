@@ -38,6 +38,13 @@
 - **CSV格式**：支持Excel等软件打开，完美支持中文
 - **安全控制**：导出操作需要管理员权限验证
 
+### 🔧 开发者工具
+- **隐藏式设计**：页面底部低调的"⚙️ Dev"按钮
+- **一键测试数据**：快速加载100条示例数据进行功能演示
+- **一键清空数据**：重置到空环境状态
+- **自动备份**：所有操作前自动备份原数据
+- **权限保护**：开发者功能需要管理员口令验证
+
 ### 📱 现代化用户界面
 - **响应式设计**：完美适配桌面、平板、手机设备
 - **现代UI风格**：使用Tailwind CSS构建的精美界面
@@ -128,6 +135,92 @@ python app.py
 
 #### 6. 访问应用
 打开浏览器访问：`http://localhost:5001`
+
+---
+
+## 🐳 Docker 部署（推荐）
+
+使用Docker可以快速部署PromptHub，无需手动配置Python环境。
+
+### 方式一：使用Docker Compose（推荐）
+
+#### 1. 克隆项目
+```bash
+git clone https://github.com/liu-kaining/PromptHub.git
+cd PromptHub
+```
+
+#### 2. 启动服务
+```bash
+# 构建并启动
+docker-compose up -d
+
+# 查看运行状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f prompthub
+```
+
+#### 3. 访问应用
+打开浏览器访问：`http://localhost:5001`
+
+#### 4. 管理服务
+```bash
+# 停止服务
+docker-compose down
+
+# 重启服务
+docker-compose restart
+
+# 更新服务
+docker-compose down
+docker-compose up -d --build
+```
+
+### 方式二：直接使用Docker
+
+#### 1. 构建镜像
+```bash
+docker build -t prompthub:latest .
+```
+
+#### 2. 运行容器
+```bash
+# 基础运行
+docker run -d \
+  --name prompthub \
+  -p 5001:5001 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/config.json:/app/config.json:ro \
+  --restart unless-stopped \
+  prompthub:latest
+
+# 查看运行状态
+docker ps
+docker logs prompthub
+```
+
+#### 3. 停止和清理
+```bash
+# 停止容器
+docker stop prompthub
+
+# 删除容器
+docker rm prompthub
+
+# 删除镜像
+docker rmi prompthub:latest
+```
+
+### Docker 部署优势
+
+- **🚀 快速部署**：一条命令即可启动完整服务
+- **🔒 环境隔离**：不依赖主机Python环境
+- **📦 轻量级**：基于Python slim镜像，体积小巧
+- **🔄 自动重启**：容器异常退出自动重启
+- **💾 数据持久化**：数据目录挂载到主机，升级不丢失
+- **⚡ 健康检查**：自动监控服务状态
 
 ## ⚙️ 配置详解
 
@@ -274,6 +367,38 @@ echo '[]' > data/tags.json
 - 完整的提示词内容
 - 创建时间信息
 
+### 🔧 开发者工具使用
+
+#### 访问开发者面板
+1. 滚动到页面底部footer区域
+2. 点击灰色的 "⚙️ Dev" 按钮
+3. 展开开发者工具面板
+
+#### 加载测试数据
+1. 点击 "🚀 加载测试数据" 按钮
+2. 确认操作（会覆盖当前数据）
+3. 输入管理员口令验证
+4. 系统自动加载100条示例数据
+5. 页面自动刷新显示新数据
+
+**包含内容：**
+- 100条精选提示词（涵盖编程、写作、分析等场景）
+- 6个主要分类（编程、写作、分析、创意、商业、教育）
+- 30+个实用标签
+
+#### 清空所有数据
+1. 点击 "🗑️ 清空所有数据" 按钮
+2. 确认清空操作（不可撤销）
+3. 输入管理员口令验证
+4. 系统清空所有数据
+5. 页面自动刷新显示空状态
+
+**安全保障：**
+- 🔐 需要管理员口令验证
+- 💾 操作前自动备份到 `data/backup/` 目录
+- 📅 备份文件带时间戳，便于追溯恢复
+- ⚠️ 操作前明确提示影响范围
+
 ## 🔧 高级配置
 
 ### 端口配置
@@ -417,7 +542,7 @@ cp backup/data/* data/
 
 ## 📋 版本更新日志
 
-### v1.0.0 (Current) - 2024年12月
+### v1.0.0 (Current) - 2025年08月
 - ✅ 完整的提示词CRUD功能
 - ✅ 分类和标签管理系统
 - ✅ 全文搜索和多维度筛选
@@ -430,6 +555,9 @@ cp backup/data/* data/
 - ✅ 多格式内容编辑器
 - ✅ 美观的自定义分类下拉框（图标化）
 - ✅ 智能标签选择体验（现有标签展示）
+- ✅ 隐藏式开发者工具（一键加载/清空测试数据）
+- ✅ Docker容器化部署支持
+- ✅ 示例数据管理和自动备份机制
 
 ### 即将发布的功能
 - 🔄 批量操作功能
