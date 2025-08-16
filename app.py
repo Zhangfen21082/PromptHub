@@ -70,7 +70,11 @@ class FileStorage:
         try:
             with open(self.prompts_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                return data.get('prompts', [])
+                # 支持两种格式：直接数组 [] 或对象 {"prompts": []}
+                if isinstance(data, list):
+                    return data
+                else:
+                    return data.get('prompts', [])
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     
@@ -82,7 +86,11 @@ class FileStorage:
         try:
             with open(self.categories_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                return data.get('categories', [])
+                # 支持两种格式：直接数组 [] 或对象 {"categories": []}
+                if isinstance(data, list):
+                    return data
+                else:
+                    return data.get('categories', [])
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     
@@ -94,7 +102,11 @@ class FileStorage:
         try:
             with open(self.tags_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                return data.get('tags', [])
+                # 支持两种格式：直接数组 [] 或对象 {"tags": []}
+                if isinstance(data, list):
+                    return data
+                else:
+                    return data.get('tags', [])
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     
@@ -543,5 +555,92 @@ def test_auth():
     else:
         return jsonify({"error": "口令错误"}), 401
 
+# 测试数据管理端点
+@app.route('/api/admin/load-sample-data', methods=['POST'])
+def load_sample_data():
+    """加载示例数据"""
+    try:
+        data = request.get_json()
+        password_hash = data.get('password_hash')
+        
+        if not verify_password(password_hash):
+            return jsonify({"error": "权限验证失败"}), 401
+        
+        import shutil
+        
+        # 复制示例数据到工作目录
+        sample_prompts = Path('data/examples/sample_prompts.json')
+        sample_categories = Path('data/examples/sample_categories.json')  
+        sample_tags = Path('data/examples/sample_tags.json')
+        
+        if not all([sample_prompts.exists(), sample_categories.exists(), sample_tags.exists()]):
+            return jsonify({"error": "示例数据文件不存在"}), 400
+        
+        # 备份当前数据
+        backup_dir = Path('data/backup')
+        backup_dir.mkdir(exist_ok=True)
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        shutil.copy2('data/prompts.json', f'data/backup/prompts_backup_{timestamp}.json')
+        shutil.copy2('data/categories.json', f'data/backup/categories_backup_{timestamp}.json')
+        shutil.copy2('data/tags.json', f'data/backup/tags_backup_{timestamp}.json')
+        
+        # 复制示例数据
+        shutil.copy2(sample_prompts, 'data/prompts.json')
+        shutil.copy2(sample_categories, 'data/categories.json')
+        shutil.copy2(sample_tags, 'data/tags.json')
+        
+        return jsonify({
+            "success": True, 
+            "message": "示例数据加载成功！已自动备份原数据",
+            "backup_timestamp": timestamp
+        })
+    
+    except Exception as e:
+        return jsonify({"error": f"加载示例数据失败: {str(e)}"}), 500
+
+@app.route('/api/admin/clear-data', methods=['POST'])
+def clear_data():
+    """清空所有数据"""
+    try:
+        data = request.get_json()
+        password_hash = data.get('password_hash')
+        
+        if not verify_password(password_hash):
+            return jsonify({"error": "权限验证失败"}), 401
+        
+        import shutil
+        
+        # 备份当前数据
+        backup_dir = Path('data/backup')
+        backup_dir.mkdir(exist_ok=True)
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        shutil.copy2('data/prompts.json', f'data/backup/prompts_backup_{timestamp}.json')
+        shutil.copy2('data/categories.json', f'data/backup/categories_backup_{timestamp}.json')
+        shutil.copy2('data/tags.json', f'data/backup/tags_backup_{timestamp}.json')
+        
+        # 清空数据文件
+        with open('data/prompts.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        with open('data/categories.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        with open('data/tags.json', 'w', encoding='utf-8') as f:
+            json.dump([], f)
+        
+        return jsonify({
+            "success": True, 
+            "message": "数据清空成功！已自动备份原数据",
+            "backup_timestamp": timestamp
+        })
+    
+    except Exception as e:
+        return jsonify({"error": f"清空数据失败: {str(e)}"}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5001)
+    config = load_config()
+    port = config.get('port', 5001)
+    debug = config.get('debug', True)
+    app.run(host='0.0.0.0', port=port, debug=debug)

@@ -42,22 +42,32 @@
 
         <!-- 统计信息 -->
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-md">
-                    <div class="text-xl md:text-2xl font-bold" id="totalPromptsCount">0</div>
-                    <div class="text-xs md:text-sm opacity-90">📝 提示词总数</div>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center flex-1">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-md">
+                        <div class="text-xl md:text-2xl font-bold" id="totalPromptsCount">0</div>
+                        <div class="text-xs md:text-sm opacity-90">📝 提示词总数</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-xl shadow-md">
+                        <div class="text-xl md:text-2xl font-bold" id="totalCategoriesCount">0</div>
+                        <div class="text-xs md:text-sm opacity-90">📁 分类总数</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-3 rounded-xl shadow-md">
+                        <div class="text-xl md:text-2xl font-bold" id="totalTagsCount">0</div>
+                        <div class="text-xs md:text-sm opacity-90">🏷️ 标签总数</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl shadow-md">
+                        <div class="text-xl md:text-2xl font-bold" id="filteredPromptsCount">0</div>
+                        <div class="text-xs md:text-sm opacity-90">🔍 当前显示</div>
+                    </div>
                 </div>
-                <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-xl shadow-md">
-                    <div class="text-xl md:text-2xl font-bold" id="totalCategoriesCount">0</div>
-                    <div class="text-xs md:text-sm opacity-90">📁 分类总数</div>
-                </div>
-                <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-3 rounded-xl shadow-md">
-                    <div class="text-xl md:text-2xl font-bold" id="totalTagsCount">0</div>
-                    <div class="text-xs md:text-sm opacity-90">🏷️ 标签总数</div>
-                </div>
-                <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl shadow-md">
-                    <div class="text-xl md:text-2xl font-bold" id="filteredPromptsCount">0</div>
-                    <div class="text-xs md:text-sm opacity-90">🔍 当前显示</div>
+                
+                <!-- 导出按钮 -->
+                <div class="flex-shrink-0">
+                    <button onclick="exportPrompts()" 
+                            class="h-full px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
+                        📥 导出数据
+                    </button>
                 </div>
             </div>
         </div>
@@ -75,16 +85,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="exportPrompts()" 
-                            class="px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium">
-                        📥 导出
-                    </button>
-                    <button onclick="showAddModal()" 
-                            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium">
-                        ➕ 添加提示词
-                    </button>
-                </div>
+                <button onclick="showAddModal()" 
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium">
+                    ➕ 添加提示词
+                </button>
             </div>
             
             <!-- 分类筛选 -->
@@ -264,20 +268,50 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
-                        <select id="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <!-- 动态加载分类选项 -->
-                        </select>
+                        <!-- 自定义下拉框 -->
+                        <div class="relative">
+                            <button type="button" id="categoryDropdownBtn" 
+                                    class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                                    onclick="toggleCategoryDropdown()">
+                                <span id="selectedCategoryText" class="text-gray-700">请选择分类</span>
+                                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" id="categoryDropdownIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <!-- 下拉选项列表 -->
+                            <div id="categoryDropdownList" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden">
+                                <!-- 动态生成分类选项 -->
+                            </div>
+                        </div>
+                        <!-- 隐藏的真实input，用于表单提交 -->
+                        <input type="hidden" id="category" name="category">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">标签</label>
-                        <div class="border border-gray-300 rounded-lg p-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
-                            <!-- 已添加的标签 -->
+                        
+                        <!-- 已选择的标签 -->
+                        <div class="border border-gray-300 rounded-lg p-2 mb-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
                             <div id="selectedTags" class="flex flex-wrap gap-2 mb-2 min-h-[1rem]">
                                 <!-- 动态添加的标签 -->
                             </div>
                             <!-- 输入框 -->
-                            <input type="text" id="tagInput" placeholder="输入标签后按回车添加..." class="w-full border-none outline-none text-sm">
+                            <input type="text" id="tagInput" placeholder="输入新标签后按空格添加..." class="w-full border-none outline-none text-sm">
                         </div>
+                        
+                        <!-- 现有标签选择区域 -->
+                        <div id="existingTagsArea" class="mb-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-600">选择现有标签：</span>
+                                <input type="text" id="tagFilterInput" 
+                                       placeholder="🔍 搜索标签..." 
+                                       class="px-2 py-1 text-xs border border-gray-200 rounded-full focus:ring-1 focus:ring-purple-500 focus:border-transparent w-24"
+                                       oninput="filterExistingTags()">
+                            </div>
+                            <div id="existingTagsList" class="max-h-24 overflow-y-auto bg-gray-50 rounded-lg p-2 flex flex-wrap gap-1">
+                                <!-- 动态生成现有标签 -->
+                            </div>
+                        </div>
+                        
                         <input type="hidden" id="tags" name="tags">
                     </div>
                     <div class="flex gap-3 pt-6">
@@ -696,16 +730,85 @@
         }
 
         function renderCategoryOptions() {
-            const categorySelect = document.getElementById('category');
-            categorySelect.innerHTML = categories.map(category => 
-                `<option value="${category.name}">${category.name}</option>`
-            ).join('');
+            const categoryList = document.getElementById('categoryDropdownList');
+            if (!categoryList) return;
             
-            // 添加默认的"其他"选项如果不存在
-            if (!categories.find(c => c.name === '其他')) {
-                categorySelect.innerHTML += '<option value="其他">其他</option>';
+            categoryList.innerHTML = '';
+            
+            // 确保有"其他"分类
+            const allCategories = [...categories];
+            if (!allCategories.find(c => c.name === '其他')) {
+                allCategories.push({name: '其他'});
+            }
+            
+            allCategories.forEach(category => {
+                const option = document.createElement('div');
+                option.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2';
+                option.innerHTML = `
+                    <span class="text-2xl">${getCategoryIcon(category.name)}</span>
+                    <span class="text-gray-700">${category.name}</span>
+                `;
+                option.onclick = () => selectCategory(category.name);
+                categoryList.appendChild(option);
+            });
+        }
+
+        function getCategoryIcon(categoryName) {
+            const icons = {
+                '编程': '💻',
+                '写作': '✍️',
+                '分析': '📊',
+                '创意': '💡',
+                '商业': '💼',
+                '教育': '📚',
+                '其他': '📋'
+            };
+            return icons[categoryName] || '📋';
+        }
+
+        function toggleCategoryDropdown() {
+            const dropdownList = document.getElementById('categoryDropdownList');
+            const dropdownIcon = document.getElementById('categoryDropdownIcon');
+            
+            if (dropdownList.classList.contains('hidden')) {
+                dropdownList.classList.remove('hidden');
+                dropdownIcon.style.transform = 'rotate(180deg)';
+            } else {
+                dropdownList.classList.add('hidden');
+                dropdownIcon.style.transform = 'rotate(0deg)';
             }
         }
+
+        function selectCategory(categoryName) {
+            const hiddenInput = document.getElementById('category');
+            const selectedText = document.getElementById('selectedCategoryText');
+            const dropdownList = document.getElementById('categoryDropdownList');
+            const dropdownIcon = document.getElementById('categoryDropdownIcon');
+            
+            // 更新值和显示文本
+            hiddenInput.value = categoryName;
+            selectedText.innerHTML = `
+                <span class="flex items-center gap-2">
+                    <span class="text-xl">${getCategoryIcon(categoryName)}</span>
+                    <span>${categoryName}</span>
+                </span>
+            `;
+            
+            // 关闭下拉框
+            dropdownList.classList.add('hidden');
+            dropdownIcon.style.transform = 'rotate(0deg)';
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('categoryDropdownBtn');
+            const dropdownList = document.getElementById('categoryDropdownList');
+            
+            if (dropdown && !dropdown.contains(event.target) && !dropdownList.contains(event.target)) {
+                dropdownList.classList.add('hidden');
+                document.getElementById('categoryDropdownIcon').style.transform = 'rotate(0deg)';
+            }
+        });
 
         function renderCategoryButtons() {
             const container = document.getElementById('categoryButtons');
@@ -1019,11 +1122,18 @@
             // 清空表单
             document.getElementById('promptForm').reset();
             
+            // 重置分类选择器
+            document.getElementById('category').value = '';
+            document.getElementById('selectedCategoryText').textContent = '请选择分类';
+            
             // 确保分类选项已加载
             renderCategoryOptions();
             
             // 清空并渲染标签
             renderSelectedTags();
+            
+            // 渲染现有标签供选择
+            renderExistingTags();
             
             // 显示模态框
             document.getElementById('modal').style.display = 'flex';
@@ -1045,7 +1155,9 @@
             document.getElementById('title').value = prompt.title;
             document.getElementById('content').value = prompt.content;
             document.getElementById('description').value = prompt.description || '';
-            document.getElementById('category').value = prompt.category;
+            
+            // 设置分类下拉框
+            selectCategory(prompt.category);
             
             // 自动检测内容格式
             const detectedFormat = detectContentFormat(prompt.content);
@@ -1054,6 +1166,9 @@
             
             // 渲染标签
             renderSelectedTags();
+            
+            // 渲染现有标签供选择
+            renderExistingTags();
             
             // 显示模态框
             document.getElementById('modal').style.display = 'flex';
@@ -1265,6 +1380,57 @@ code block
             
             // 更新隐藏的input值
             document.getElementById('tags').value = selectedTags.join(',');
+            
+            // 更新现有标签列表（排除已选择的）
+            renderExistingTags();
+        }
+
+        function renderExistingTags() {
+            const container = document.getElementById('existingTagsList');
+            if (!container) return;
+            
+            const filterInput = document.getElementById('tagFilterInput');
+            const filterText = filterInput ? filterInput.value.toLowerCase() : '';
+            
+            // 获取未选择的标签
+            const availableTags = allTags.filter(tag => 
+                !selectedTags.includes(tag) && 
+                tag.toLowerCase().includes(filterText)
+            );
+            
+            // 按使用频率排序
+            availableTags.sort((a, b) => {
+                const countA = prompts.filter(p => p.tags && p.tags.includes(a)).length;
+                const countB = prompts.filter(p => p.tags && p.tags.includes(b)).length;
+                return countB - countA;
+            });
+            
+            if (availableTags.length === 0) {
+                container.innerHTML = '<span class="text-xs text-gray-400">没有可选择的标签</span>';
+                return;
+            }
+            
+            container.innerHTML = availableTags.map(tag => {
+                const count = prompts.filter(p => p.tags && p.tags.includes(tag)).length;
+                return `
+                    <button type="button" onclick="selectExistingTag('${tag}')" 
+                            class="inline-flex items-center px-2 py-1 bg-white border border-gray-200 text-gray-700 text-xs rounded-full hover:bg-purple-50 hover:border-purple-300 transition-colors duration-200">
+                        ${escapeHtml(tag)}
+                        <span class="ml-1 text-gray-400">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectExistingTag(tag) {
+            if (!selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                renderSelectedTags();
+            }
+        }
+
+        function filterExistingTags() {
+            renderExistingTags();
         }
 
         function addTag(tagText) {
@@ -1431,11 +1597,17 @@ code block
             renderPrompts();
         }
 
-        function exportPrompts() {
+        async function exportPrompts() {
             const filteredPrompts = getFilteredPrompts();
             
             if (filteredPrompts.length === 0) {
                 showToast('没有可导出的提示词', 'error');
+                return;
+            }
+            
+            // 请求管理员口令确认
+            const passwordHash = await requestAdminPassword("导出提示词");
+            if (!passwordHash) {
                 return;
             }
             
