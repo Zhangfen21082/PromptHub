@@ -1,0 +1,54 @@
+{
+  "prompts": [],
+  "metadata": {
+    "categories": [
+      {
+        "id": "1",
+        "name": "编程",
+        "color": "#3B82F6",
+        "description": "编程相关提示词"
+      },
+      {
+        "id": "2",
+        "name": "写作",
+        "color": "#10B981",
+        "description": "写作相关提示词"
+      },
+      {
+        "id": "3",
+        "name": "分析",
+        "color": "#F59E0B",
+        "description": "分析相关提示词"
+      },
+      {
+        "id": "4",
+        "name": "创意",
+        "color": "#8B5CF6",
+        "description": "创意相关提示词"
+      },
+      {
+        "id": "5",
+        "name": "商业",
+        "color": "#EF4444",
+        "description": "商业相关提示词"
+      },
+      {
+        "id": "6",
+        "name": "教育",
+        "color": "#06B6D4",
+        "description": "教育相关提示词"
+      },
+      {
+        "id": "7",
+        "name": "其他",
+        "color": "#6B7280",
+        "description": "其他类型提示词"
+      }
+    ],
+    "tags": [],
+    "settings": {
+      "last_updated": "2025-08-17T01:39:39.954314",
+      "version": "2.0"
+    }
+  }
+}
