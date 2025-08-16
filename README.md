@@ -2,7 +2,7 @@
 
 一个现代化的AI提示词管理平台，帮助您高效收集、分类和管理各种AI提示词，提升AI使用体验。
 
-![PromptHub](https://img.shields.io/badge/Version-1.0.0-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Python](https://img.shields.io/badge/Python-3.7+-orange)
+![PromptHub](https://img.shields.io/badge/Version-2.0.0-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Python](https://img.shields.io/badge/Python-3.7+-orange)
 
 ## ✨ 核心特性
 
@@ -40,7 +40,7 @@
 
 ### 🔧 开发者工具
 - **隐藏式设计**：页面底部低调的"⚙️ Dev"按钮
-- **一键测试数据**：快速加载100条示例数据进行功能演示
+- **一键测试数据**：快速加载10条精选示例数据进行功能演示
 - **一键清空数据**：重置到空环境状态
 - **自动备份**：所有操作前自动备份原数据
 - **权限保护**：开发者功能需要管理员口令验证
@@ -253,47 +253,80 @@ docker rmi prompthub:latest
 
 ### 数据存储结构
 
-应用数据存储在 `data/` 目录：
+应用采用v2.0统一数据架构，所有数据存储在单一JSON文件中：
 
 ```
 data/
-├── prompts.json          # 提示词数据（生产环境初始为空）
-├── categories.json       # 分类数据（生产环境初始为空）
-├── tags.json            # 标签数据（生产环境初始为空）
+├── prompts.json          # 统一数据文件（包含提示词、分类、标签、设置）
+├── backup/              # 自动备份目录
+│   └── pre-*-{timestamp}/  # 按操作和时间戳分类的备份
 └── examples/            # 示例数据目录
     ├── README.md            # 示例数据使用说明
-    ├── sample_prompts.json  # 示例提示词（100条测试数据）
-    ├── sample_categories.json # 示例分类数据
-    └── sample_tags.json     # 示例标签数据
+    └── prompts.json         # 示例数据（10条精选提示词）
+```
+
+#### 统一数据结构 (v2.0)
+```json
+{
+  "prompts": [
+    {
+      "id": "uuid",
+      "title": "提示词标题",
+      "content": "提示词内容",
+      "description": "描述",
+      "category": "分类名称",
+      "tags": ["标签1", "标签2"],
+      "usage_count": 0,
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "metadata": {
+    "categories": [
+      {"id": "uuid", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词"}
+    ],
+    "tags": [
+      {"id": "uuid", "name": "设计", "color": "#8B5CF6"}
+    ],
+    "settings": {
+      "last_updated": "2024-01-01T00:00:00Z",
+      "version": "2.0"
+    }
+  }
+}
 ```
 
 ### 🧪 使用示例数据
 
 为了便于测试和演示，我们提供了完整的示例数据：
 
-#### 快速导入示例数据
+#### 方式一：使用管理界面（推荐）
+1. 访问应用主页 `http://localhost:5001`
+2. 滚动到页面底部，点击"⚙️ Dev"按钮
+3. 点击"🚀 加载测试数据"按钮
+4. 输入管理员密码确认
+5. 系统自动加载示例数据并刷新页面
+
+#### 方式二：手动复制文件
 ```bash
-# 复制示例数据到工作目录（会覆盖现有数据）
-cp data/examples/sample_prompts.json data/prompts.json
-cp data/examples/sample_categories.json data/categories.json  
-cp data/examples/sample_tags.json data/tags.json
+# 备份当前数据
+cp data/prompts.json data/prompts_backup.json
+
+# 复制示例数据（会覆盖现有数据）
+cp data/examples/prompts.json data/prompts.json
 
 # 重启应用查看效果
 python app.py
 ```
 
 #### 示例数据包含
-- **59条精选提示词**: 覆盖编程、写作、分析、创意等场景
-- **6个主要分类**: 编程、写作、分析、创意、商业、教育
-- **30+个标签**: Python、React、文案、策划、数据分析等
+- **10条精选提示词**: 覆盖编程、写作、分析、创意等场景
+- **7个主要分类**: 编程、写作、分析、创意、商业、教育、其他
+- **15个标签**: Python、React、文案、AI、机器学习等
 
 #### 恢复空数据环境
-```bash
-# 清空所有数据，恢复初始状态
-echo '[]' > data/prompts.json
-echo '[]' > data/categories.json
-echo '[]' > data/tags.json
-```
+- **方式一**: 使用管理界面的"🗑️ 清空所有数据"功能
+- **方式二**: 手动删除数据文件，应用会自动重建空文件
 
 ## 🎯 功能使用指南
 
@@ -378,13 +411,13 @@ echo '[]' > data/tags.json
 1. 点击 "🚀 加载测试数据" 按钮
 2. 确认操作（会覆盖当前数据）
 3. 输入管理员口令验证
-4. 系统自动加载59条示例数据
+4. 系统自动加载10条示例数据
 5. 页面自动刷新显示新数据
 
 **包含内容：**
-- 59条精选提示词（涵盖编程、写作、分析等场景）
-- 6个主要分类（编程、写作、分析、创意、商业、教育）
-- 30+个实用标签
+- 10条精选提示词（涵盖编程、写作、创意、商业等场景）
+- 7个主要分类（编程、写作、分析、创意、商业、教育、其他）
+- 15个实用标签（Python、React、AI、机器学习、设计等）
 
 #### 清空所有数据
 1. 点击 "🗑️ 清空所有数据" 按钮
@@ -542,7 +575,16 @@ cp backup/data/* data/
 
 ## 📋 版本更新日志
 
-### v1.0.0 (Current) - 2025年08月
+### v2.0.0 (Current) - 2025年08月
+- ✅ **重大架构升级**: 统一数据存储结构，单文件管理所有数据
+- ✅ **数据迁移机制**: 自动从v1.0旧格式迁移到v2.0新格式
+- ✅ **改进的标签系统**: 动态标签同步，确保数据一致性
+- ✅ **优化的备份机制**: 按操作类型和时间戳分类备份
+- ✅ **精简的示例数据**: 10条精选提示词，更便于演示
+- ✅ **完整的代码审查**: 移除调试代码，优化性能
+- ✅ **功能测试覆盖**: 全面测试所有CRUD、搜索、管理功能
+
+### v1.0.0 - 2025年08月
 - ✅ 完整的提示词CRUD功能
 - ✅ 分类和标签管理系统
 - ✅ 全文搜索和多维度筛选

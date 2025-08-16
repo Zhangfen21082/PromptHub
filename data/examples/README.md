@@ -1,58 +1,54 @@
-# 📋 示例数据说明
+# PromptHub 示例数据
 
-这个目录包含了PromptHub的示例数据，可用于测试和演示。
+这个目录包含了 PromptHub 的示例数据，用于演示和测试。
 
-## 📁 文件说明
+## 文件说明
 
-- **`sample_prompts.json`**: 包含59条示例提示词数据
-- **`sample_categories.json`**: 示例分类数据（编程、写作、分析、创意、商业、教育等）
-- **`sample_tags.json`**: 示例标签数据（Python、React、文案、策划等）
+### `prompts.json`
+包含10个精选的高质量提示词示例，涵盖以下领域：
 
-## 🚀 如何使用示例数据
+- **📱 编程开发**：Python优化、React组件、技术架构、机器学习等
+- **✍️ 内容创作**：小说创作、广告文案等  
+- **💼 商业管理**：商业计划书、产品需求文档等
+- **🎨 创意设计**：UI/UX设计、视频创意等
 
-### 方式一：复制覆盖（推荐用于测试）
+## 数据特点
+
+- **真实场景**：基于实际工作中的常见需求
+- **结构完整**：包含标题、内容、描述、分类、标签等完整信息
+- **统一格式**：遵循 PromptHub v2.0 数据结构规范
+- **即用性强**：可直接导入使用或作为模板参考
+
+## 使用方法
+
+### 在管理界面加载
+1. 访问 PromptHub 主页
+2. 滚动到页面底部
+3. 点击"一键加载测试数据"按钮
+4. 输入管理员密码确认
+
+### 手动导入
 ```bash
-# 进入项目根目录
-cd /path/to/PromptHub
+# 备份当前数据
+cp data/prompts.json data/prompts_backup.json
 
-# 复制示例数据到data目录
-cp data/examples/sample_prompts.json data/prompts.json
-cp data/examples/sample_categories.json data/categories.json  
-cp data/examples/sample_tags.json data/tags.json
-
-# 重启应用
-python app.py
+# 导入示例数据
+cp data/examples/prompts.json data/prompts.json
 ```
 
-### 方式二：手动导入
-1. 启动PromptHub应用
-2. 手动添加分类和标签
-3. 逐个添加提示词内容
+## 注意事项
 
-## ⚠️ 注意事项
+⚠️ **加载示例数据会覆盖现有数据**，请确保已备份重要内容
 
-- 使用示例数据前请备份您现有的数据
-- 示例数据将覆盖当前所有内容
-- 生产环境建议使用空数据开始
+✅ **系统会自动备份原数据**到 `data/backup/` 目录
 
-## 🔄 恢复空数据
+🔄 **可使用"一键清空数据"功能**恢复到初始状态
 
-如果需要清空数据重新开始：
-```bash
-echo '[]' > data/prompts.json
-echo '[]' > data/categories.json
-echo '[]' > data/tags.json
-```
+## 数据统计
 
-## 📊 示例数据统计
+- **提示词数量**：10个
+- **分类覆盖**：编程、写作、创意、商业等7个分类
+- **标签数量**：15个常用标签
+- **平均使用量**：15-35次（模拟真实使用情况）
 
-- **提示词总数**: 59条
-- **分类数量**: 6个主要分类
-- **标签数量**: 30+个常用标签
-- **覆盖场景**: 编程开发、内容创作、数据分析、商业策划等
-
-这些示例数据展示了PromptHub的完整功能特性，适合用于：
-- 功能演示
-- 性能测试  
-- 界面预览
-- 功能验证
+这些示例数据展示了 PromptHub 的完整功能和最佳实践，是了解系统能力的最佳起点。

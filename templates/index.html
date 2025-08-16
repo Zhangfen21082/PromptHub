@@ -322,7 +322,7 @@
                                 <!-- 动态添加的标签 -->
                             </div>
                             <!-- 输入框 -->
-                            <input type="text" id="tagInput" placeholder="输入新标签后按空格添加..." class="w-full border-none outline-none text-sm">
+                            <input type="text" id="tagInput" placeholder="输入新标签后按回车添加..." class="w-full border-none outline-none text-sm">
                         </div>
                         
                         <!-- 现有标签选择区域 -->
@@ -565,7 +565,7 @@
     </div>
 
     <!-- Toast 通知 -->
-    <div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+    <div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50" style="display: none;">
         <span id="toastMessage"></span>
     </div>
 
@@ -637,10 +637,7 @@
         document.getElementById('passwordForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            console.log('密码表单提交事件触发');
-            
             const password = document.getElementById('passwordInput').value;
-            console.log('输入的密码长度:', password.length);
             
             if (!password) {
                 showToast('请输入口令', 'error');
@@ -649,12 +646,9 @@
             
             try {
                 const hash = await sha256(password);
-                console.log('生成的哈希值:', hash);
                 
                 // 先测试口令是否正确
-                console.log('开始验证密码...');
                 const testResult = await testPassword(hash);
-                console.log('密码验证结果:', testResult);
                 
                 if (!testResult) {
                     showToast('管理员口令错误，请重新输入', 'error');
@@ -663,10 +657,8 @@
                     return;
                 }
                 
-                console.log('密码验证成功，关闭模态框');
                 hidePasswordModal();
                 if (passwordResolve) {
-                    console.log('调用passwordResolve，返回哈希值');
                     passwordResolve(hash);
                     passwordResolve = null;
                 } else {
@@ -681,7 +673,6 @@
         // 测试密码是否正确
         async function testPassword(passwordHash) {
             try {
-                console.log('发送密码验证请求，哈希值:', passwordHash);
                 const response = await fetch('/api/auth/test', {
                     method: 'POST',
                     headers: {
@@ -690,12 +681,10 @@
                     body: JSON.stringify({ password_hash: passwordHash })
                 });
                 
-                console.log('密码验证响应状态:', response.status);
                 const result = response.ok;
-                console.log('返回验证结果:', result);
                 return result;
             } catch (error) {
-                console.error('测试密码失败:', error);
+                console.error('密码验证失败:', error);
                 return false;
             }
         }
@@ -723,15 +712,24 @@
             
             // 设置不同类型的颜色
             if (type === 'error') {
-                toast.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-0 transition-transform duration-300 z-50';
+                toast.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
             } else {
-                toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-0 transition-transform duration-300 z-50';
+                toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
             }
+            
+            // 显示Toast
+            toast.style.display = 'block';
             
             // 3秒后自动隐藏
             setTimeout(() => {
-                toast.className = toast.className.replace('translate-x-0', 'translate-x-full');
+                hideToast();
             }, 3000);
+        }
+        
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            // 隐藏Toast
+            toast.style.display = 'none';
         }
 
         async function loadData() {
@@ -1044,9 +1042,7 @@
                 return searchMatch && categoryMatch && tagsMatch;
             });
             
-            // 调试信息
-            console.log('筛选条件:', currentFilters);
-            console.log('筛选结果数量:', filtered.length);
+            // 筛选结果
             
             return filtered;
         }
@@ -1396,19 +1392,30 @@ code block
         // 标签管理相关函数
         function renderSelectedTags() {
             const container = document.getElementById('selectedTags');
-            container.innerHTML = selectedTags.map(tag => `
-                <span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                    🏷️ ${escapeHtml(tag)}
-                    <button type="button" onclick="removeTag('${tag}')" class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full p-1 transition-colors" title="删除标签">
-                        ✕
-                    </button>
-                </span>
-            `).join('');
+            if (!container) {
+                return;
+            }
             
-            // 更新隐藏的input值
-            document.getElementById('tags').value = selectedTags.join(',');
+            if (selectedTags.length === 0) {
+                container.innerHTML = '';
+            } else {
+                const tagElements = selectedTags.map((tag, index) => {
+                    return `<span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                        🏷️ ${escapeHtml(tag)}
+                        <button type="button" onclick="removeTagByIndex(${index})" class="text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full p-1 transition-colors" title="删除标签">
+                            ✕
+                        </button>
+                    </span>`;
+                });
+                
+                container.innerHTML = tagElements.join(' ');
+            }
             
-            // 更新现有标签列表（排除已选择的）
+            const hiddenInput = document.getElementById('tags');
+            if (hiddenInput) {
+                hiddenInput.value = selectedTags.join(',');
+            }
+            
             renderExistingTags();
         }
 
@@ -1460,9 +1467,12 @@ code block
             renderExistingTags();
         }
 
-        function addTag(tagText) {
+        function addTagToInput(tagText) {
             const tag = tagText.trim();
-            if (!tag) return false;
+            
+            if (!tag) {
+                return false;
+            }
             
             // 检查是否已存在
             if (selectedTags.includes(tag)) {
@@ -1480,17 +1490,51 @@ code block
             selectedTags = selectedTags.filter(t => t !== tag);
             renderSelectedTags();
         }
+        
+        function removeTagByIndex(index) {
+            if (index >= 0 && index < selectedTags.length) {
+                selectedTags.splice(index, 1);
+                renderSelectedTags();
+            }
+        }
 
         // 标签输入框事件处理
+        let tagInputInitialized = false;
+        let justProcessedEnter = false; // 标记是否刚刚处理了回车键
+        
         function initTagInput() {
             const tagInput = document.getElementById('tagInput');
+            if (!tagInput) {
+                return;
+            }
+            
+            // 避免重复绑定事件监听器
+            if (tagInputInitialized) {
+                return;
+            }
+            
+            tagInputInitialized = true;
             
             tagInput.addEventListener('keydown', function(e) {
-                if (e.key === ' ' || e.key === 'Enter') {
-                    e.preventDefault();
+                // 只监听回车键，避免与中文输入法冲突
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // 防止表单提交
+                    
+                    // 如果正在输入中文，不处理
+                    if (e.isComposing) {
+                        return;
+                    }
+                    
                     const tag = this.value.trim();
-                    if (tag && addTag(tag)) {
+                    
+                    if (tag && addTagToInput(tag)) {
                         this.value = '';
+                        justProcessedEnter = true; // 标记刚刚处理了回车
+                        
+                        // 100ms后重置标记，避免影响正常的blur事件
+                        setTimeout(() => {
+                            justProcessedEnter = false;
+                        }, 100);
                     }
                 } else if (e.key === 'Backspace' && this.value === '' && selectedTags.length > 0) {
                     // 当输入框为空且按退格键时，删除最后一个标签
@@ -1502,8 +1546,13 @@ code block
             
             // 失去焦点时也尝试添加标签
             tagInput.addEventListener('blur', function() {
+                // 如果刚刚处理了回车键，跳过blur处理
+                if (justProcessedEnter) {
+                    return;
+                }
+                
                 const tag = this.value.trim();
-                if (tag && addTag(tag)) {
+                if (tag && addTagToInput(tag)) {
                     this.value = '';
                 }
             });
@@ -1811,16 +1860,11 @@ code block
         });
 
         async function createPrompt() {
-            console.log('开始添加提示词...');
-            
             // 请求管理员口令
             const passwordHash = await requestAdminPassword("添加提示词");
             if (!passwordHash) {
-                console.log('密码验证失败或取消');
                 return;
             }
-            
-            console.log('密码验证成功，准备提交数据...');
             
             const formData = {
                 title: document.getElementById('title').value,
@@ -1831,8 +1875,6 @@ code block
                 password_hash: passwordHash
             };
             
-            console.log('表单数据:', formData);
-            
             try {
                 const response = await fetch('/api/prompts', {
                     method: 'POST',
@@ -1842,11 +1884,8 @@ code block
                     body: JSON.stringify(formData)
                 });
                 
-                console.log('响应状态:', response.status);
-                
                 if (response.ok) {
                     const newPrompt = await response.json();
-                    console.log('新提示词:', newPrompt);
                     prompts.push(newPrompt);
                     
                     // 刷新所有数据
@@ -1929,9 +1968,9 @@ code block
         }
 
         // 标签管理相关函数
-        function showTagModal() {
+        async function showTagModal() {
             document.getElementById('tagModal').style.display = 'flex';
-            loadTags();
+            await loadTags();
             renderTagList();
         }
 
@@ -1952,6 +1991,7 @@ code block
 
         function renderTagList() {
             const container = document.getElementById('tagList');
+            
             if (!window.allTagsData) {
                 container.innerHTML = '<p class="text-gray-500">正在加载标签...</p>';
                 return;
@@ -2009,6 +2049,7 @@ code block
                 if (response.ok) {
                     await loadTags();
                     renderTagList();
+                    await loadData(); // 重新加载所有数据，更新首页标签显示
                     document.getElementById('tagForm').reset();
                     showToast('标签添加成功');
                 } else {
@@ -2334,7 +2375,7 @@ code block
             try {
                 const confirmed = await customConfirm(
                     '确认加载测试数据？',
-                    '这将覆盖当前所有数据，原数据会自动备份到 data/backup/ 目录。\n\n包含59条示例提示词和相关分类标签。'
+                    '这将覆盖当前所有数据，原数据会自动备份到 data/backup/ 目录。\n\n包含10条精选示例提示词，涵盖7个分类和15个标签。'
                 );
                 
                 if (!confirmed) return;
@@ -2344,7 +2385,7 @@ code block
                 
                 showToast('正在加载测试数据...', 'info');
                 
-                const response = await fetch('/api/admin/load-sample-data', {
+                const response = await fetch('/api/admin/load-test-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2366,7 +2407,7 @@ code block
                     showToast(result.error || '加载测试数据失败', 'error');
                 }
             } catch (error) {
-                console.error('加载测试数据失败:', error);
+                console.error('加载数据失败:', error);
                 showToast('加载测试数据失败', 'error');
             }
         }
@@ -2413,6 +2454,9 @@ code block
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // 立即隐藏Toast
+            hideToast();
+            
             loadData();
             initTagInput();
             initContentEditor();
