@@ -15,10 +15,8 @@
 ### 环境要求
 
 - Python 3.11+
-- Node.js 18+
-- npm 或 yarn
 
-### 开发环境启动
+### 启动应用
 
 1. **克隆项目**
 ```bash
@@ -26,116 +24,74 @@ git clone <repository-url>
 cd PromptHub
 ```
 
-2. **启动后端服务**
+2. **创建虚拟环境并安装依赖**
 ```bash
-cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-python run.py
 ```
 
-3. **启动前端服务**
+3. **启动应用**
 ```bash
-cd frontend
-npm install
-npm run dev
+python app.py
 ```
 
 4. **访问应用**
-- 前端: http://localhost:3000
-- 后端API: http://localhost:8000
-- API文档: http://localhost:8000/docs
-
-### 使用Docker启动
-
-```bash
-docker-compose up -d
-```
+- 应用地址: http://localhost:5001
 
 ## 🏗️ 项目结构
 
 ```
 PromptHub/
-├── backend/                 # FastAPI后端
-│   ├── app/
-│   │   ├── main.py         # FastAPI应用
-│   │   ├── models.py       # 数据模型
-│   │   ├── storage.py      # 文件存储逻辑
-│   │   └── api.py          # API路由
-│   ├── data/               # JSON数据文件
-│   ├── requirements.txt    # Python依赖
-│   └── run.py             # 启动脚本
-├── frontend/               # Next.js前端
-│   ├── app/
-│   │   ├── layout.tsx     # 根布局
-│   │   ├── page.tsx       # 主页面
-│   │   └── globals.css    # 全局样式
-│   ├── package.json       # Node.js依赖
-│   └── tailwind.config.js # Tailwind配置
-└── docker-compose.yml     # Docker配置
+├── app.py                  # Flask主应用
+├── requirements.txt        # Python依赖
+├── templates/             # HTML模板
+│   └── index.html         # 主页面
+├── data/                  # JSON数据存储
+│   ├── prompts.json       # 提示词数据
+│   ├── categories.json    # 分类数据
+│   └── tags.json         # 标签数据
+└── README.md             # 项目文档
 ```
 
 ## 📚 API文档
 
 ### 提示词管理
 
-- `GET /api/v1/prompts` - 获取所有提示词
-- `GET /api/v1/prompts/{id}` - 获取单个提示词
-- `POST /api/v1/prompts` - 创建提示词
-- `PUT /api/v1/prompts/{id}` - 更新提示词
-- `DELETE /api/v1/prompts/{id}` - 删除提示词
-- `POST /api/v1/prompts/{id}/use` - 使用提示词（增加使用次数）
+- `GET /api/prompts` - 获取所有提示词
+- `POST /api/prompts` - 创建提示词
+- `PUT /api/prompts/<id>` - 更新提示词
+- `DELETE /api/prompts/<id>` - 删除提示词
+- `POST /api/prompts/<id>/use` - 使用提示词（增加使用次数）
 
 ### 分类管理
 
-- `GET /api/v1/categories` - 获取所有分类
-- `POST /api/v1/categories` - 创建分类
-- `PUT /api/v1/categories/{id}` - 更新分类
-- `DELETE /api/v1/categories/{id}` - 删除分类
-
-### 标签管理
-
-- `GET /api/v1/tags` - 获取所有标签
-- `POST /api/v1/tags` - 创建标签
-- `PUT /api/v1/tags/{id}` - 更新标签
-- `DELETE /api/v1/tags/{id}` - 删除标签
+- `GET /api/categories` - 获取所有分类
 
 ### 搜索和统计
 
-- `GET /api/v1/search` - 搜索提示词
-- `GET /api/v1/stats` - 获取统计信息
+- `GET /api/search` - 搜索提示词
+- `GET /api/stats` - 获取统计信息
 
 ## 🛠️ 技术栈
 
-### 后端
-- **FastAPI** - 高性能Python Web框架
-- **Pydantic** - 数据验证和序列化
-- **JSON文件存储** - 轻量级数据存储
+- **Flask** - 轻量级Python Web框架
+- **JSON文件存储** - 简单可靠的数据存储
+- **Tailwind CSS** - 现代化CSS框架
+- **Vanilla JavaScript** - 原生JavaScript实现
 
-### 前端
-- **Next.js 14** - React全栈框架
-- **TypeScript** - 类型安全
-- **Tailwind CSS** - 实用优先的CSS框架
-- **Lucide React** - 图标库
-
-## 🔧 开发指南
-
-### 添加新功能
-
-1. 在 `backend/app/models.py` 中定义数据模型
-2. 在 `backend/app/storage.py` 中实现存储逻辑
-3. 在 `backend/app/api.py` 中添加API端点
-4. 在前端组件中实现UI交互
-
-### 数据存储
+## 💾 数据存储
 
 项目使用JSON文件存储数据，文件位置：
-- `backend/data/prompts.json` - 提示词数据
-- `backend/data/categories.json` - 分类数据
-- `backend/data/tags.json` - 标签数据
+- `data/prompts.json` - 提示词数据
+- `data/categories.json` - 分类数据
+- `data/tags.json` - 标签数据
 
-### 样式定制
+## 🔧 添加新功能
 
-项目使用Tailwind CSS，可以在 `frontend/tailwind.config.js` 中自定义主题。
+1. 在 `app.py` 中添加新的API路由
+2. 在 `templates/index.html` 中添加前端交互
+3. 根据需要扩展数据模型
 
 ## 🤝 贡献指南
 

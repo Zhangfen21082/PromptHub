@@ -1,0 +1,7 @@
+{
+  "admin_password": "lkn@qxmy",
+  "app_name": "PromptHub",
+  "app_description": "智能提示词管理平台",
+  "port": 5001,
+  "debug": true
+}
