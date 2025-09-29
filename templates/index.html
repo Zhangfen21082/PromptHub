@@ -208,9 +208,9 @@
             
             <!-- 隐藏的管理员功能区域 -->
             <div class="mt-6 border-t border-gray-700 pt-4">
-                <button onclick="toggleAdminPanel()" 
+                <button onclick="toggleAdminPanel()"
                         class="text-gray-500 hover:text-gray-300 transition-colors text-xs opacity-50 hover:opacity-100"
-                        title="开发者管理面板">
+                        title="开发者管理面板" id="devButton" style="display: none;">
                     ⚙️ Dev
                 </button>
                 
@@ -1060,6 +1060,7 @@
         let confirmResolve = null;
         let promptResolve = null;
         let currentContentFormat = 'text';
+        let isDebugMode = false; // 添加debug模式变量
 
         // 自定义确认对话框
         function customConfirm(title, message) {
@@ -2371,32 +2372,55 @@ code block
             panel.classList.toggle('hidden');
         }
 
+        // 检查是否为debug模式，如果是则显示Dev按钮
+        async function checkDebugMode() {
+            try {
+                // 发送请求到后端检查是否为debug模式
+                const response = await fetch('/api/debug-mode');
+                if (response.ok) {
+                    const result = await response.json();
+                    isDebugMode = result.debug;
+
+                    // 如果是debug模式，则显示Dev按钮
+                    const devButton = document.getElementById('devButton');
+                    if (isDebugMode) {
+                        devButton.style.display = 'inline-block';
+                    }
+                }
+            } catch (error) {
+                console.error('检查debug模式时出错:', error);
+            }
+        }
+
         async function loadSampleData() {
             try {
                 const confirmed = await customConfirm(
                     '确认加载测试数据？',
                     '这将覆盖当前所有数据，原数据会自动备份到 data/backup/ 目录。\n\n包含10条精选示例提示词，涵盖7个分类和15个标签。'
                 );
-                
+
                 if (!confirmed) return;
-                
-                const passwordHash = await requestAdminPassword();
-                if (!passwordHash) return;
-                
+
+                // 在debug模式下不需要密码
+                let requestData = {};
+                if (!isDebugMode) {
+                    const passwordHash = await requestAdminPassword();
+                    if (!passwordHash) return;
+                    requestData.password_hash = passwordHash;
+                }
+
                 showToast('正在加载测试数据...', 'info');
-                
+
                 const response = await fetch('/api/admin/load-test-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        password_hash: passwordHash
-                    })
+                    body: JSON.stringify(requestData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     showToast(result.message, 'success');
                     // 重新加载页面数据
@@ -2418,26 +2442,29 @@ code block
                     '确认清空所有数据？',
                     '这将删除所有提示词、分类和标签，原数据会自动备份到 data/backup/ 目录。\n\n此操作不可撤销！'
                 );
-                
+
                 if (!confirmed) return;
-                
-                const passwordHash = await requestAdminPassword();
-                if (!passwordHash) return;
-                
+
+                // 在debug模式下不需要密码
+                let requestData = {};
+                if (!isDebugMode) {
+                    const passwordHash = await requestAdminPassword();
+                    if (!passwordHash) return;
+                    requestData.password_hash = passwordHash;
+                }
+
                 showToast('正在清空数据...', 'info');
-                
+
                 const response = await fetch('/api/admin/clear-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        password_hash: passwordHash
-                    })
+                    body: JSON.stringify(requestData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     showToast(result.message, 'success');
                     // 重新加载页面数据
@@ -2456,10 +2483,11 @@ code block
         document.addEventListener('DOMContentLoaded', function() {
             // 立即隐藏Toast
             hideToast();
-            
+
             loadData();
             initTagInput();
             initContentEditor();
+            checkDebugMode(); // 检查debug模式并显示Dev按钮
         });
     </script>
 </body>

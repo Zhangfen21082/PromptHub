@@ -37,6 +37,11 @@ def verify_password(password_hash):
     """验证口令"""
     return password_hash == get_admin_password_hash()
 
+def is_debug_mode():
+    """检查是否为debug模式"""
+    config = load_config()
+    return config.get('debug', False)
+
 # 重构后的统一存储逻辑
 class FileStorage:
     def __init__(self, data_dir: str = "data"):
@@ -701,11 +706,11 @@ def get_stats():
     prompts = storage.get_all_prompts()
     categories = storage.get_all_categories()
     tags = storage.get_all_tags()
-    
+
     most_used_prompt = None
     if prompts:
         most_used_prompt = max(prompts, key=lambda p: p.get('usage_count', 0))
-    
+
     category_distribution = []
     for category in categories:
         count = len([p for p in prompts if p['category'] == category['name']])
@@ -714,7 +719,7 @@ def get_stats():
             "count": count,
             "color": category['color']
         })
-    
+
     return jsonify({
         "total_prompts": len(prompts),
         "total_categories": len(categories),
@@ -722,6 +727,13 @@ def get_stats():
         "most_used_prompt": most_used_prompt,
         "category_distribution": category_distribution
     })
+
+@app.route('/api/debug-mode', methods=['GET'])
+def get_debug_mode():
+    """获取debug模式状态"""
+    config = load_config()
+    is_debug = config.get('debug', False)
+    return jsonify({"debug": is_debug})
 
 @app.route('/api/auth/test', methods=['POST'])
 def test_auth():
@@ -782,9 +794,11 @@ def export_data():
 @app.route('/api/admin/load-test-data', methods=['POST'])
 def load_test_data():
     """加载测试数据"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
+    # 在debug模式下不需要密码
+    if not is_debug_mode():
+        if not verify_password(request.json.get('password_hash')):
+            return jsonify({"error": "无效的管理员口令"}), 401
+
     try:
         backup_file = storage.load_test_data()
         prompts = storage.get_all_prompts()
@@ -798,9 +812,11 @@ def load_test_data():
 @app.route('/api/admin/clear-data', methods=['POST'])
 def clear_all_data():
     """清空所有数据"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
+    # 在debug模式下不需要密码
+    if not is_debug_mode():
+        if not verify_password(request.json.get('password_hash')):
+            return jsonify({"error": "无效的管理员口令"}), 401
+
     try:
         backup_file = storage.clear_all_data()
         return jsonify({
