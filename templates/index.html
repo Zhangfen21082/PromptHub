@@ -85,6 +85,49 @@
         .category-level-3 .category-level-indicator { opacity: 0.6; }
         .category-level-4 .category-level-indicator { opacity: 0.4; }
         .category-level-5 .category-level-indicator { opacity: 0.2; }
+
+        /* 拖拽相关样式 */
+        .category-item {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .category-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+            z-index: 1000;
+        }
+
+        .category-item.drag-over {
+            background-color: #f0f9ff;
+            border-color: #3b82f6;
+            transform: scale(1.02);
+        }
+
+        .category-item.drag-over::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            opacity: 0.4;
+            transition: opacity 0.2s ease;
+        }
+
+        .category-item:hover .drag-handle {
+            opacity: 1;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -479,18 +522,20 @@
                                 ➕ 添加
                             </button>
                         </div>
-                        <div class="flex gap-3">
-                            <select id="categoryParent" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">作为顶级分类</option>
-                                <!-- 动态填充父分类选项 -->
-                            </select>
-                            <div class="text-sm text-gray-500 px-3 py-2 whitespace-nowrap">
-                                父分类（可选）
-                            </div>
+                        <div id="selectedParentInfo" class="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg hidden">
+                            <span class="font-medium">将添加到：</span>
+                            <span id="selectedParentName" class="text-blue-600"></span>
+                            <button type="button" onclick="clearSelectedParent()" class="ml-2 text-red-500 hover:text-red-700">✕</button>
                         </div>
                     </div>
+                    <input type="hidden" id="selectedParentId" value="">
                 </form>
                 
+                <!-- 拖放到根级的区域 -->
+                <div id="rootDropZone" class="hidden mb-4 p-4 border-2 border-dashed border-blue-300 bg-blue-50 text-center text-blue-600 rounded-lg">
+                    <span class="text-sm font-medium">拖放到此处设为顶级分类</span>
+                </div>
+
                 <!-- 现有分类列表 -->
                 <div id="categoryList" class="space-y-2 mb-6">
                     <!-- 动态加载 -->
@@ -684,14 +729,15 @@
             function renderCategoryTree(cats, level = 0) {
                 cats.forEach(category => {
                     const option = document.createElement('div');
-                    const indent = '    '.repeat(level);
                     const levelClass = level > 0 ? `category-level-${Math.min(level + 1, 5)}` : '';
 
                     option.className = `px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2 ${levelClass}`;
+                    option.style.paddingLeft = `${12 + level * 20}px`; // 动态设置左边距，每级缩进20px
+
                     option.innerHTML = `
                         ${level > 0 ? `<span class="category-level-indicator"></span>` : ''}
                         <span class="text-2xl">${getCategoryIcon(category.name)}</span>
-                        <span class="text-gray-700">${indent}${category.name}</span>
+                        <span class="text-gray-700">${category.name}</span>
                         ${category.path && category.path !== category.name ?
                             `<span class="text-xs text-gray-400 ml-auto">/${category.path}</span>` : ''}
                     `;
@@ -2040,34 +2086,24 @@ code block
         // 分类管理相关函数
         function showCategoryModal() {
             renderCategoryList();
-            renderCategoryParentOptions();
+            clearSelectedParent();
+            initRootDropZone(); // 初始化拖放功能
             document.getElementById('categoryModal').style.display = 'flex';
         }
 
-        function renderCategoryParentOptions() {
-            const parentSelect = document.getElementById('categoryParent');
-            if (!parentSelect) return;
+        function selectParentCategory(parentId, parentName) {
+            document.getElementById('selectedParentId').value = parentId;
+            document.getElementById('selectedParentName').textContent = parentName;
+            document.getElementById('selectedParentInfo').classList.remove('hidden');
 
-            parentSelect.innerHTML = '<option value="">作为顶级分类</option>';
+            // 聚焦到分类名称输入框
+            document.getElementById('categoryName').focus();
+        }
 
-            // 递归渲染可选的父分类（不能超过4级，因为最多支持5级）
-            function addCategoryOptions(cats, level = 0, prefix = '') {
-                if (level >= 4) return; // 防止创建第6级分类
-
-                cats.forEach(category => {
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = `${prefix}${category.name}`;
-                    parentSelect.appendChild(option);
-
-                    // 递归添加子分类
-                    if (category.children && category.children.length > 0) {
-                        addCategoryOptions(category.children, level + 1, prefix + category.name + ' / ');
-                    }
-                });
-            }
-
-            addCategoryOptions(categoriesTree);
+        function clearSelectedParent() {
+            document.getElementById('selectedParentId').value = '';
+            document.getElementById('selectedParentName').textContent = '';
+            document.getElementById('selectedParentInfo').classList.add('hidden');
         }
 
         function hideCategoryModal() {
@@ -2203,15 +2239,15 @@ code block
             // 先计算会影响的提示词数量
             const tagToDelete = window.allTagsData.find(t => t.id === id);
             if (!tagToDelete) return;
-            
+
             const affectedPrompts = prompts.filter(p => p.tags && p.tags.includes(tagToDelete.name));
             const affectedCount = affectedPrompts.length;
-            
+
             let confirmMessage = `确定要删除标签"${tagToDelete.name}"吗？`;
             if (affectedCount > 0) {
                 confirmMessage += `\n\n⚠️ 注意：有 ${affectedCount} 个提示词使用了这个标签，该标签将从这些提示词中移除。`;
             }
-            
+
             const confirmed = await customConfirm('删除标签', confirmMessage);
             if (!confirmed) {
                 return;
@@ -2241,6 +2277,188 @@ code block
             }
         }
 
+        // 拖拽功能相关变量
+        let draggedCategory = null;
+        let draggedElement = null;
+
+        // 添加拖拽事件监听器
+        function addDragListeners(categoryDiv, category) {
+            categoryDiv.addEventListener('dragstart', function(e) {
+                draggedCategory = category;
+                draggedElement = categoryDiv;
+                categoryDiv.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', categoryDiv.outerHTML);
+
+                // 显示根级拖放区域
+                const rootDropZone = document.getElementById('rootDropZone');
+                if (category.parent_id) { // 只有非顶级分类才能拖到根级
+                    rootDropZone.classList.remove('hidden');
+                }
+            });
+
+            categoryDiv.addEventListener('dragend', function(e) {
+                categoryDiv.classList.remove('dragging');
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.classList.remove('drag-over');
+                });
+                // 隐藏根级拖放区域
+                document.getElementById('rootDropZone').classList.add('hidden');
+                draggedCategory = null;
+                draggedElement = null;
+            });
+
+            categoryDiv.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+
+            categoryDiv.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                if (categoryDiv !== draggedElement && canDropOn(draggedCategory, category)) {
+                    categoryDiv.classList.add('drag-over');
+                }
+            });
+
+            categoryDiv.addEventListener('dragleave', function(e) {
+                // 只有当鼠标完全离开元素时才移除样式
+                const rect = categoryDiv.getBoundingClientRect();
+                if (e.clientX < rect.left || e.clientX > rect.right ||
+                    e.clientY < rect.top || e.clientY > rect.bottom) {
+                    categoryDiv.classList.remove('drag-over');
+                }
+            });
+
+            categoryDiv.addEventListener('drop', function(e) {
+                e.preventDefault();
+                categoryDiv.classList.remove('drag-over');
+
+                if (categoryDiv !== draggedElement && canDropOn(draggedCategory, category)) {
+                    handleCategoryDrop(draggedCategory, category);
+                }
+            });
+        }
+
+        // 检查是否可以拖放到目标分类
+        function canDropOn(sourceCategory, targetCategory) {
+            if (!sourceCategory || !targetCategory) return false;
+
+            // 不能拖放到自己
+            if (sourceCategory.id === targetCategory.id) return false;
+
+            // 不能拖放到自己的子分类
+            if (isDescendant(targetCategory.id, sourceCategory.id)) return false;
+
+            // 检查目标分类层级，确保不会超过5级
+            if ((targetCategory.level || 1) >= 5) return false;
+
+            return true;
+        }
+
+        // 检查是否为后代分类
+        function isDescendant(categoryId, ancestorId) {
+            const category = categories.find(c => c.id === categoryId);
+            if (!category) return false;
+
+            if (category.parent_id === ancestorId) return true;
+            if (category.parent_id) {
+                return isDescendant(category.parent_id, ancestorId);
+            }
+
+            return false;
+        }
+
+        // 处理分类拖放
+        async function handleCategoryDrop(sourceCategory, targetCategory) {
+            const confirmMessage = `确定要将分类"${sourceCategory.name}"移动到"${targetCategory.name}"下面吗？`;
+            const confirmed = await customConfirm('调整分类层级', confirmMessage);
+
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/categories/${sourceCategory.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        parent_id: targetCategory.id
+                    })
+                });
+
+                if (response.ok) {
+                    await loadData();
+                    renderCategoryList();
+                    showToast('分类层级调整成功');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '调整失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating category:', error);
+                showToast('调整失败', 'error');
+            }
+        }
+
+        // 初始化根级拖放区域
+        function initRootDropZone() {
+            const rootDropZone = document.getElementById('rootDropZone');
+
+            rootDropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                rootDropZone.style.backgroundColor = '#dbeafe';
+                rootDropZone.style.borderColor = '#3b82f6';
+            });
+
+            rootDropZone.addEventListener('dragleave', function(e) {
+                rootDropZone.style.backgroundColor = '#eff6ff';
+                rootDropZone.style.borderColor = '#93c5fd';
+            });
+
+            rootDropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                rootDropZone.style.backgroundColor = '#eff6ff';
+                rootDropZone.style.borderColor = '#93c5fd';
+
+                if (draggedCategory && draggedCategory.parent_id) {
+                    handleCategoryDropToRoot(draggedCategory);
+                }
+            });
+        }
+
+        // 处理拖拽到根级
+        async function handleCategoryDropToRoot(category) {
+            const confirmMessage = `确定要将分类"${category.name}"设为顶级分类吗？`;
+            const confirmed = await customConfirm('调整分类层级', confirmMessage);
+
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/categories/${category.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        parent_id: null
+                    })
+                });
+
+                if (response.ok) {
+                    await loadData();
+                    renderCategoryList();
+                    showToast('分类已设为顶级分类');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '调整失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating category:', error);
+                showToast('调整失败', 'error');
+            }
+        }
+
         function renderCategoryList() {
             const container = document.getElementById('categoryList');
             container.innerHTML = '';
@@ -2258,11 +2476,15 @@ code block
                     const levelIndicator = level > 0 ? '<span class="category-level-indicator"></span>' : '';
 
                     const categoryDiv = document.createElement('div');
-                    categoryDiv.className = `flex items-center justify-between p-3 bg-white rounded-lg border ${levelClass}`;
+                    categoryDiv.className = `category-item flex items-center justify-between p-3 bg-white rounded-lg border ${levelClass}`;
                     categoryDiv.style.marginLeft = `${level * 20}px`;
+                    categoryDiv.setAttribute('draggable', 'true');
+                    categoryDiv.setAttribute('data-category-id', category.id);
+                    categoryDiv.setAttribute('data-category-level', category.level || 1);
 
                     categoryDiv.innerHTML = `
                         <div class="flex items-center gap-3">
+                            <span class="drag-handle text-gray-400" style="cursor: grab;">⋮⋮</span>
                             ${levelIndicator}
                             <div class="w-4 h-4 rounded-full" style="background-color: ${category.color}"></div>
                             <span class="font-medium">${escapeHtml(category.name)}</span>
@@ -2271,6 +2493,12 @@ code block
                             <span class="text-xs text-gray-400">Level ${category.level || 1}</span>
                         </div>
                         <div class="flex gap-2">
+                            ${(category.level || 1) < 5 ? `
+                                <button onclick="selectParentCategory('${category.id}', '${escapeHtml(category.name)}')"
+                                        class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm">
+                                    ➕ 添加子分类
+                                </button>
+                            ` : ''}
                             <button onclick="editCategory('${category.id}', '${escapeHtml(category.name)}', '${category.color}', '${category.parent_id || ''}')"
                                     class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
                                 ✏️ 编辑
@@ -2281,6 +2509,9 @@ code block
                             </button>
                         </div>
                     `;
+
+                    // 添加拖拽事件监听器
+                    addDragListeners(categoryDiv, category);
                     container.appendChild(categoryDiv);
 
                     // 递归渲染子分类
@@ -2296,7 +2527,7 @@ code block
         async function addCategory() {
             const name = document.getElementById('categoryName').value.trim();
             const color = document.getElementById('categoryColor').value;
-            const parentId = document.getElementById('categoryParent').value || null;
+            const parentId = document.getElementById('selectedParentId').value || null;
 
             if (!name) {
                 showToast('请输入分类名称', 'error');
@@ -2317,8 +2548,8 @@ code block
                     // 重新加载数据以获取最新的树结构
                     await loadData();
                     renderCategoryList();
-                    renderCategoryParentOptions();
                     document.getElementById('categoryForm').reset();
+                    clearSelectedParent();
                     showToast('分类添加成功');
                 } else {
                     const error = await response.json();
