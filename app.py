@@ -58,13 +58,13 @@ class FileStorage:
                 "prompts": [],
                 "metadata": {
                     "categories": [
-                        {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词"},
-                        {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词"},
-                        {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词"},
-                        {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词"},
-                        {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词"},
-                        {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词"},
-                        {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词"}
+                        {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词", "parent_id": None, "level": 1, "path": "编程"},
+                        {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词", "parent_id": None, "level": 1, "path": "写作"},
+                        {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词", "parent_id": None, "level": 1, "path": "分析"},
+                        {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词", "parent_id": None, "level": 1, "path": "创意"},
+                        {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词", "parent_id": None, "level": 1, "path": "商业"},
+                        {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词", "parent_id": None, "level": 1, "path": "教育"},
+                        {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词", "parent_id": None, "level": 1, "path": "其他"}
                     ],
                     "tags": [],
                     "settings": {
@@ -144,13 +144,13 @@ class FileStorage:
             "prompts": old_data.get("prompts", []),
             "metadata": {
                 "categories": old_categories if old_categories else [
-                    {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词"},
-                    {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词"},
-                    {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词"},
-                    {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词"},
-                    {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词"},
-                    {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词"},
-                    {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词"}
+                    {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词", "parent_id": None, "level": 1, "path": "编程"},
+                    {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词", "parent_id": None, "level": 1, "path": "写作"},
+                    {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词", "parent_id": None, "level": 1, "path": "分析"},
+                    {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词", "parent_id": None, "level": 1, "path": "创意"},
+                    {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词", "parent_id": None, "level": 1, "path": "商业"},
+                    {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词", "parent_id": None, "level": 1, "path": "教育"},
+                    {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词", "parent_id": None, "level": 1, "path": "其他"}
                 ],
                 "tags": old_tags,
                 "settings": {
@@ -187,30 +187,60 @@ class FileStorage:
 
     def create_prompt(self, prompt_data):
         data = self._load_data()
-        
+
+        # 获取分类信息
+        category_id = prompt_data.get("category_id")
+        category_name = prompt_data.get("category", "其他")
+        category_path = category_name
+
+        if category_id:
+            # 根据category_id查找分类信息
+            categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+            category = categories_dict.get(category_id)
+            if category:
+                category_name = category["name"]
+                category_path = category.get("path", category_name)
+
         new_prompt = {
             "id": str(uuid.uuid4()),
             "title": prompt_data["title"],
             "content": prompt_data["content"],
             "description": prompt_data.get("description", ""),
-            "category": prompt_data.get("category", "其他"),
+            "category": category_name,
+            "category_id": category_id,
+            "category_path": category_path,
             "tags": prompt_data.get("tags", []),
             "usage_count": 0,
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
-        
+
         data["prompts"].append(new_prompt)
         self._save_data(data)
         return new_prompt
 
     def update_prompt(self, prompt_id, update_data):
         data = self._load_data()
-        
+
         for prompt in data["prompts"]:
             if prompt["id"] == prompt_id:
+                # 处理分类信息更新
+                if "category_id" in update_data:
+                    category_id = update_data["category_id"]
+                    if category_id:
+                        categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+                        category = categories_dict.get(category_id)
+                        if category:
+                            update_data["category"] = category["name"]
+                            update_data["category_path"] = category.get("path", category["name"])
+
                 prompt.update(update_data)
                 prompt["updated_at"] = datetime.now().isoformat()
+
+                # 确保有分类路径信息
+                if "category_path" not in prompt and "category" in prompt:
+                    prompt["category_path"] = prompt["category"]
+
                 self._save_data(data)
                 return prompt
         return None
@@ -240,70 +270,279 @@ class FileStorage:
     # 分类相关方法
     def get_all_categories(self):
         data = self._load_data()
-        return data["metadata"]["categories"]
+        categories = data["metadata"]["categories"]
+
+        # 为旧分类添加层级信息
+        for category in categories:
+            if "parent_id" not in category:
+                category["parent_id"] = None
+            if "level" not in category:
+                category["level"] = 1
+            if "path" not in category:
+                category["path"] = category["name"]
+
+        return categories
+
+    def get_categories_tree(self):
+        """获取分类树结构"""
+        categories = self.get_all_categories()
+
+        # 构建分类字典，便于查找
+        category_dict = {cat["id"]: cat for cat in categories}
+
+        # 为每个分类添加children属性
+        for cat in categories:
+            cat["children"] = []
+
+        # 构建树结构
+        root_categories = []
+        for cat in categories:
+            if cat["parent_id"] is None:
+                root_categories.append(cat)
+            else:
+                parent = category_dict.get(cat["parent_id"])
+                if parent:
+                    parent["children"].append(cat)
+
+        return root_categories
+
+    def _build_category_path(self, category_id, categories_dict):
+        """构建分类的完整路径"""
+        if category_id not in categories_dict:
+            return ""
+
+        category = categories_dict[category_id]
+        if category["parent_id"] is None:
+            return category["name"]
+
+        parent_path = self._build_category_path(category["parent_id"], categories_dict)
+        return f"{parent_path}/{category['name']}" if parent_path else category["name"]
+
+    def _update_category_paths(self):
+        """更新所有分类的路径"""
+        data = self._load_data()
+        categories = data["metadata"]["categories"]
+        categories_dict = {cat["id"]: cat for cat in categories}
+
+        for category in categories:
+            category["path"] = self._build_category_path(category["id"], categories_dict)
+
+        self._save_data(data)
+
+    def _get_category_descendants(self, category_id):
+        """获取分类的所有后代分类ID"""
+        data = self._load_data()
+        categories = data["metadata"]["categories"]
+
+        descendants = []
+
+        def find_children(parent_id):
+            for cat in categories:
+                if cat["parent_id"] == parent_id:
+                    descendants.append(cat["id"])
+                    find_children(cat["id"])  # 递归查找子分类
+
+        find_children(category_id)
+        return descendants
 
     def create_category(self, category_data):
         data = self._load_data()
-        
+
+        parent_id = category_data.get("parent_id")
+        level = 1
+
+        # 计算层级
+        if parent_id:
+            categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+            parent = categories_dict.get(parent_id)
+            if parent:
+                level = parent.get("level", 1) + 1
+                if level > 5:  # 最多支持5级
+                    raise ValueError("分类层级不能超过5级")
+
         new_category = {
             "id": str(uuid.uuid4()),
             "name": category_data["name"],
             "color": category_data.get("color", "#6B7280"),
-            "description": category_data.get("description", "")
+            "description": category_data.get("description", ""),
+            "parent_id": parent_id,
+            "level": level,
+            "path": ""  # 稍后计算
         }
-        
+
         data["metadata"]["categories"].append(new_category)
+
+        # 重新计算所有分类的路径
+        categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+        for category in data["metadata"]["categories"]:
+            category["path"] = self._build_category_path(category["id"], categories_dict)
+
         self._save_data(data)
         return new_category
 
     def update_category(self, category_id, update_data):
         data = self._load_data()
-        
+
+        target_category = None
         for category in data["metadata"]["categories"]:
             if category["id"] == category_id:
-                old_name = category["name"]
-                category.update(update_data)
-                
-                # 如果分类名称发生变化，更新所有使用该分类的提示词
-                if "name" in update_data and update_data["name"] != old_name:
-                    for prompt in data["prompts"]:
-                        if prompt["category"] == old_name:
-                            prompt["category"] = update_data["name"]
-                            prompt["updated_at"] = datetime.now().isoformat()
-                
-                self._save_data(data)
-                return category
-        return None
+                target_category = category
+                break
+
+        if not target_category:
+            return None
+
+        old_name = target_category["name"]
+        old_path = target_category.get("path", old_name)
+
+        # 检查父分类变更
+        if "parent_id" in update_data:
+            new_parent_id = update_data["parent_id"]
+
+            # 检查是否会造成循环引用
+            if new_parent_id and self._would_create_cycle(category_id, new_parent_id, data["metadata"]["categories"]):
+                raise ValueError("不能将分类移动到其子分类下，这会造成循环引用")
+
+            # 计算新的层级
+            if new_parent_id:
+                categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+                parent = categories_dict.get(new_parent_id)
+                if parent:
+                    new_level = parent.get("level", 1) + 1
+                    if new_level > 5:
+                        raise ValueError("移动后的分类层级不能超过5级")
+                    target_category["level"] = new_level
+            else:
+                target_category["level"] = 1
+
+        # 更新分类信息
+        target_category.update(update_data)
+
+        # 重新计算所有分类的路径（因为路径可能受到影响）
+        categories_dict = {cat["id"]: cat for cat in data["metadata"]["categories"]}
+        for category in data["metadata"]["categories"]:
+            category["path"] = self._build_category_path(category["id"], categories_dict)
+
+        # 更新提示词中的分类信息
+        new_path = target_category["path"]
+        if old_path != new_path:
+            for prompt in data["prompts"]:
+                if prompt.get("category_path") == old_path or prompt.get("category") == old_name:
+                    prompt["category"] = target_category["name"]
+                    prompt["category_id"] = category_id
+                    prompt["category_path"] = new_path
+                    prompt["updated_at"] = datetime.now().isoformat()
+
+        self._save_data(data)
+        return target_category
+
+    def _would_create_cycle(self, category_id, new_parent_id, categories):
+        """检查是否会造成循环引用"""
+        if category_id == new_parent_id:
+            return True
+
+        # 获取所有后代分类
+        descendants = self._get_category_descendants_from_list(category_id, categories)
+        return new_parent_id in descendants
+
+    def _get_category_descendants_from_list(self, category_id, categories):
+        """从分类列表中获取指定分类的所有后代分类ID"""
+        descendants = []
+
+        def find_children(parent_id):
+            for cat in categories:
+                if cat["parent_id"] == parent_id:
+                    descendants.append(cat["id"])
+                    find_children(cat["id"])
+
+        find_children(category_id)
+        return descendants
 
     def delete_category(self, category_id):
         data = self._load_data()
-        
+
         # 找到要删除的分类
         category_to_delete = None
         for category in data["metadata"]["categories"]:
             if category["id"] == category_id:
-                category_to_delete = category["name"]
+                category_to_delete = category
                 break
-        
+
         if not category_to_delete:
-            return False
-        
-        # 处理关联的提示词：移动到"其他"分类
-        affected_count = 0
+            return {"success": False, "error": "分类不存在"}
+
+        # 检查是否有子分类
+        child_categories = [cat for cat in data["metadata"]["categories"] if cat["parent_id"] == category_id]
+
+        # 检查关联的提示词
+        affected_prompts = [p for p in data["prompts"]
+                          if p.get("category_id") == category_id or p.get("category") == category_to_delete["name"]]
+
+        # 返回删除影响信息，让前端决定是否继续
+        return {
+            "success": False,
+            "requires_confirmation": True,
+            "category_name": category_to_delete["name"],
+            "child_categories_count": len(child_categories),
+            "affected_prompts_count": len(affected_prompts),
+            "child_categories": [cat["name"] for cat in child_categories]
+        }
+
+    def force_delete_category(self, category_id):
+        """强制删除分类（已确认）"""
+        data = self._load_data()
+
+        # 找到要删除的分类
+        category_to_delete = None
+        for category in data["metadata"]["categories"]:
+            if category["id"] == category_id:
+                category_to_delete = category
+                break
+
+        if not category_to_delete:
+            return {"success": False, "error": "分类不存在"}
+
+        # 获取所有子分类（包括递归的）
+        all_descendants = self._get_category_descendants(category_id)
+        categories_to_delete = [category_id] + all_descendants
+
+        # 移动关联的提示词到"其他"分类
+        other_category = None
+        for cat in data["metadata"]["categories"]:
+            if cat["name"] == "其他":
+                other_category = cat
+                break
+
+        affected_prompts_count = 0
         for prompt in data["prompts"]:
-            if prompt["category"] == category_to_delete:
-                prompt["category"] = "其他"
+            if (prompt.get("category_id") in categories_to_delete or
+                prompt.get("category") == category_to_delete["name"]):
+                if other_category:
+                    prompt["category"] = other_category["name"]
+                    prompt["category_id"] = other_category["id"]
+                    prompt["category_path"] = other_category["path"]
+                else:
+                    prompt["category"] = "其他"
+                    prompt["category_id"] = None
+                    prompt["category_path"] = "其他"
                 prompt["updated_at"] = datetime.now().isoformat()
-                affected_count += 1
-        
-        # 删除分类
+                affected_prompts_count += 1
+
+        # 删除分类及其所有子分类
         original_length = len(data["metadata"]["categories"])
-        data["metadata"]["categories"] = [c for c in data["metadata"]["categories"] if c["id"] != category_id]
-        
-        if len(data["metadata"]["categories"]) < original_length:
+        data["metadata"]["categories"] = [c for c in data["metadata"]["categories"]
+                                        if c["id"] not in categories_to_delete]
+
+        deleted_count = original_length - len(data["metadata"]["categories"])
+
+        if deleted_count > 0:
             self._save_data(data)
-            return {"success": True, "affected_prompts": affected_count}
-        return False
+            return {
+                "success": True,
+                "deleted_categories_count": deleted_count,
+                "affected_prompts_count": affected_prompts_count
+            }
+        return {"success": False, "error": "删除失败"}
 
     # 标签相关方法
     def get_all_tags(self):
@@ -404,19 +643,25 @@ class FileStorage:
             return {"success": True, "affected_prompts": affected_count}
         return False
 
-    def search_prompts(self, query: str = "", category: str = ""):
+    def search_prompts(self, query: str = "", category: str = "", category_id: str = ""):
         prompts = self.get_all_prompts()
-        
+
         if query:
             query = query.lower()
-            prompts = [p for p in prompts if 
-                      query in p['title'].lower() or 
-                      query in p['content'].lower() or 
+            prompts = [p for p in prompts if
+                      query in p['title'].lower() or
+                      query in p['content'].lower() or
                       query in p.get('description', '').lower()]
-        
-        if category:
+
+        if category_id:
+            # 按分类ID搜索，包括其子分类
+            descendants = self._get_category_descendants(category_id)
+            target_category_ids = [category_id] + descendants
+            prompts = [p for p in prompts if p.get('category_id') in target_category_ids]
+        elif category:
+            # 按分类名称搜索（向后兼容）
             prompts = [p for p in prompts if p['category'] == category]
-        
+
         return prompts
 
     # 数据管理方法
@@ -439,13 +684,13 @@ class FileStorage:
             "prompts": [],
             "metadata": {
                 "categories": [
-                    {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词"},
-                    {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词"},
-                    {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词"},
-                    {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词"},
-                    {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词"},
-                    {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词"},
-                    {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词"}
+                    {"id": "1", "name": "编程", "color": "#3B82F6", "description": "编程相关提示词", "parent_id": None, "level": 1, "path": "编程"},
+                    {"id": "2", "name": "写作", "color": "#10B981", "description": "写作相关提示词", "parent_id": None, "level": 1, "path": "写作"},
+                    {"id": "3", "name": "分析", "color": "#F59E0B", "description": "分析相关提示词", "parent_id": None, "level": 1, "path": "分析"},
+                    {"id": "4", "name": "创意", "color": "#8B5CF6", "description": "创意相关提示词", "parent_id": None, "level": 1, "path": "创意"},
+                    {"id": "5", "name": "商业", "color": "#EF4444", "description": "商业相关提示词", "parent_id": None, "level": 1, "path": "商业"},
+                    {"id": "6", "name": "教育", "color": "#06B6D4", "description": "教育相关提示词", "parent_id": None, "level": 1, "path": "教育"},
+                    {"id": "7", "name": "其他", "color": "#6B7280", "description": "其他类型提示词", "parent_id": None, "level": 1, "path": "其他"}
                 ],
                 "tags": [],
                 "settings": {
@@ -514,18 +759,16 @@ def get_prompts():
 @app.route('/api/prompts', methods=['POST'])
 def create_prompt():
     """创建提示词"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
         prompt_data = {
             "title": request.json.get('title'),
             "content": request.json.get('content'),
             "description": request.json.get('description', ''),
             "category": request.json.get('category', '其他'),
+            "category_id": request.json.get('category_id'),
             "tags": request.json.get('tags', [])
         }
-        
+
         new_prompt = storage.create_prompt(prompt_data)
         return jsonify(new_prompt), 201
     except Exception as e:
@@ -534,18 +777,21 @@ def create_prompt():
 @app.route('/api/prompts/<prompt_id>', methods=['PUT'])
 def update_prompt(prompt_id):
     """更新提示词"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
-        update_data = {
-            "title": request.json.get('title'),
-            "content": request.json.get('content'),
-            "description": request.json.get('description', ''),
-            "category": request.json.get('category', '其他'),
-            "tags": request.json.get('tags', [])
-        }
-        
+        update_data = {}
+        if request.json.get('title') is not None:
+            update_data["title"] = request.json.get('title')
+        if request.json.get('content') is not None:
+            update_data["content"] = request.json.get('content')
+        if request.json.get('description') is not None:
+            update_data["description"] = request.json.get('description')
+        if request.json.get('category') is not None:
+            update_data["category"] = request.json.get('category')
+        if 'category_id' in request.json:
+            update_data["category_id"] = request.json.get('category_id')
+        if request.json.get('tags') is not None:
+            update_data["tags"] = request.json.get('tags')
+
         updated_prompt = storage.update_prompt(prompt_id, update_data)
         if updated_prompt:
             return jsonify(updated_prompt)
@@ -557,9 +803,6 @@ def update_prompt(prompt_id):
 @app.route('/api/prompts/<prompt_id>', methods=['DELETE'])
 def delete_prompt(prompt_id):
     """删除提示词"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     if storage.delete_prompt(prompt_id):
         return jsonify({"message": "提示词删除成功"})
     else:
@@ -576,58 +819,76 @@ def use_prompt(prompt_id):
 def get_categories():
     return jsonify(storage.get_all_categories())
 
+@app.route('/api/categories/tree', methods=['GET'])
+def get_categories_tree():
+    """获取分类树结构"""
+    return jsonify(storage.get_categories_tree())
+
 @app.route('/api/categories', methods=['POST'])
 def create_category():
     """创建分类"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
         category_data = {
             "name": request.json.get('name'),
             "color": request.json.get('color', '#6B7280'),
-            "description": request.json.get('description', '')
+            "description": request.json.get('description', ''),
+            "parent_id": request.json.get('parent_id')
         }
-        
+
         new_category = storage.create_category(category_data)
         return jsonify(new_category), 201
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/categories/<category_id>', methods=['PUT'])
 def update_category(category_id):
     """更新分类"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
-        update_data = {
-            "name": request.json.get('name'),
-            "color": request.json.get('color'),
-            "description": request.json.get('description', '')
-        }
-        
+        update_data = {}
+        if request.json.get('name') is not None:
+            update_data["name"] = request.json.get('name')
+        if request.json.get('color') is not None:
+            update_data["color"] = request.json.get('color')
+        if request.json.get('description') is not None:
+            update_data["description"] = request.json.get('description')
+        if 'parent_id' in request.json:
+            update_data["parent_id"] = request.json.get('parent_id')
+
         updated_category = storage.update_category(category_id, update_data)
         if updated_category:
             return jsonify(updated_category)
         else:
             return jsonify({"error": "分类不存在"}), 404
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/categories/<category_id>', methods=['DELETE'])
 def delete_category(category_id):
     """删除分类"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     result = storage.delete_category(category_id)
-    if result:
+    if result.get("success"):
         return jsonify({
             "message": f"分类删除成功，{result['affected_prompts']} 个提示词已移动到'其他'分类"
         })
+    elif result.get("requires_confirmation"):
+        return jsonify(result), 409  # Conflict - 需要确认
     else:
-        return jsonify({"error": "分类不存在"}), 404
+        return jsonify({"error": result.get("error", "分类不存在")}), 404
+
+@app.route('/api/categories/<category_id>/force-delete', methods=['DELETE'])
+def force_delete_category(category_id):
+    """强制删除分类（已确认）"""
+    result = storage.force_delete_category(category_id)
+    if result.get("success"):
+        return jsonify({
+            "message": f"分类删除成功，共删除 {result['deleted_categories_count']} 个分类，{result['affected_prompts_count']} 个提示词已移动到'其他'分类"
+        })
+    else:
+        return jsonify({"error": result.get("error", "删除失败")}), 404
 
 # 标签管理API
 @app.route('/api/tags', methods=['GET'])
@@ -637,9 +898,6 @@ def get_tags():
 @app.route('/api/tags', methods=['POST'])
 def create_tag():
     """创建标签"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
         tag_data = {
             "name": request.json.get('name'),
@@ -654,9 +912,6 @@ def create_tag():
 @app.route('/api/tags/<tag_id>', methods=['PUT'])
 def update_tag(tag_id):
     """更新标签"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     try:
         update_data = {
             "name": request.json.get('name'),
@@ -674,9 +929,6 @@ def update_tag(tag_id):
 @app.route('/api/tags/<tag_id>', methods=['DELETE'])
 def delete_tag(tag_id):
     """删除标签"""
-    if not verify_password(request.json.get('password_hash')):
-        return jsonify({"error": "无效的管理员口令"}), 401
-    
     result = storage.delete_tag(tag_id)
     if result:
         return jsonify({
@@ -689,15 +941,18 @@ def delete_tag(tag_id):
 def search_prompts():
     query = request.args.get('q', '')
     category = request.args.get('category', '')
-    
-    prompts = storage.search_prompts(query, category)
+    category_id = request.args.get('category_id', '')
+
+    prompts = storage.search_prompts(query, category, category_id)
     categories = storage.get_all_categories()
+    categories_tree = storage.get_categories_tree()
     tags = storage.get_all_tags()
-    
+
     return jsonify({
         "prompts": prompts,
         "total": len(prompts),
         "categories": categories,
+        "categories_tree": categories_tree,
         "tags": tags
     })
 
@@ -711,13 +966,33 @@ def get_stats():
     if prompts:
         most_used_prompt = max(prompts, key=lambda p: p.get('usage_count', 0))
 
+    # 分层统计分类
+    level_stats = {}
     category_distribution = []
+
     for category in categories:
-        count = len([p for p in prompts if p['category'] == category['name']])
+        level = category.get('level', 1)
+        if level not in level_stats:
+            level_stats[level] = 0
+        level_stats[level] += 1
+
+        # 统计该分类下的提示词数量（包括子分类）
+        category_id = category['id']
+        descendants = storage._get_category_descendants(category_id)
+        target_category_ids = [category_id] + descendants
+
+        count = len([p for p in prompts
+                    if p.get('category_id') in target_category_ids or
+                       p.get('category') == category['name']])
+
         category_distribution.append({
+            "id": category['id'],
             "name": category['name'],
+            "path": category.get('path', category['name']),
+            "level": level,
             "count": count,
-            "color": category['color']
+            "color": category['color'],
+            "parent_id": category.get('parent_id')
         })
 
     return jsonify({
@@ -725,7 +1000,8 @@ def get_stats():
         "total_categories": len(categories),
         "total_tags": len(tags),
         "most_used_prompt": most_used_prompt,
-        "category_distribution": category_distribution
+        "category_distribution": category_distribution,
+        "level_stats": level_stats  # 新增：各层级分类统计
     })
 
 @app.route('/api/debug-mode', methods=['GET'])
@@ -735,29 +1011,10 @@ def get_debug_mode():
     is_debug = config.get('debug', False)
     return jsonify({"debug": is_debug})
 
-@app.route('/api/auth/test', methods=['POST'])
-def test_auth():
-    """测试管理员口令是否正确"""
-    password_hash = request.json.get('password_hash')
-    
-    if verify_password(password_hash):
-        return jsonify({"valid": True, "message": "口令验证成功"})
-    else:
-        return jsonify({"valid": False, "message": "口令错误"}), 401
 
 @app.route('/api/export', methods=['GET'])
 def export_data():
     """导出数据"""
-    # 在debug模式下不需要密码
-    if not is_debug_mode():
-        # 从请求头获取密码哈希（用于API调用）
-        password_hash = request.headers.get('X-Password-Hash')
-        if not password_hash:
-            # 从查询参数获取密码哈希（用于前端调用）
-            password_hash = request.args.get('password_hash')
-
-        if not verify_password(password_hash):
-            return jsonify({"error": "无效的管理员口令"}), 401
 
     data = storage._load_data()
 
@@ -785,11 +1042,14 @@ def export_data():
     # 导出格式
     export_data = []
     for prompt in prompts:
+        # 使用分类路径（斜杠分隔），如果没有则使用分类名
+        category_display = prompt.get("category_path", prompt.get("category", ""))
+
         export_data.append({
             "标题": prompt["title"],
             "描述": prompt.get("description", ""),
             "内容": prompt["content"],
-            "分类": prompt["category"],
+            "分类": category_display,  # 使用完整路径
             "标签": ", ".join(prompt.get("tags", [])),
             "创建时间": prompt.get("created_at", ""),
             "更新时间": prompt.get("updated_at", "")
@@ -805,11 +1065,6 @@ def export_data():
 @app.route('/api/admin/load-test-data', methods=['POST'])
 def load_test_data():
     """加载测试数据"""
-    # 在debug模式下不需要密码
-    if not is_debug_mode():
-        if not verify_password(request.json.get('password_hash')):
-            return jsonify({"error": "无效的管理员口令"}), 401
-
     try:
         backup_file = storage.load_test_data()
         prompts = storage.get_all_prompts()
@@ -823,11 +1078,6 @@ def load_test_data():
 @app.route('/api/admin/clear-data', methods=['POST'])
 def clear_all_data():
     """清空所有数据"""
-    # 在debug模式下不需要密码
-    if not is_debug_mode():
-        if not verify_password(request.json.get('password_hash')):
-            return jsonify({"error": "无效的管理员口令"}), 401
-
     try:
         backup_file = storage.clear_all_data()
         return jsonify({

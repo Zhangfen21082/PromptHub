@@ -27,6 +27,64 @@
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        /* 分层分类样式 */
+        .category-tree {
+            position: relative;
+        }
+
+        .category-item {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .category-submenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 200px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            padding: 0.5rem;
+        }
+
+        .category-item:hover .category-submenu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .category-submenu .category-btn {
+            width: 100%;
+            margin-bottom: 0.25rem;
+            justify-content: flex-start;
+        }
+
+        .category-submenu .category-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 分类层级指示器 */
+        .category-level-indicator {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .category-level-2 .category-level-indicator { opacity: 0.8; }
+        .category-level-3 .category-level-indicator { opacity: 0.6; }
+        .category-level-4 .category-level-indicator { opacity: 0.4; }
+        .category-level-5 .category-level-indicator { opacity: 0.2; }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -411,14 +469,25 @@
                 <!-- 添加新分类 -->
                 <form id="categoryForm" class="mb-6 p-4 bg-gray-50 rounded-xl">
                     <h4 class="text-lg font-semibold mb-3">添加新分类</h4>
-                    <div class="flex gap-3">
-                        <input type="text" id="categoryName" placeholder="分类名称" required 
-                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <input type="color" id="categoryColor" value="#3B82F6" 
-                               class="w-12 h-10 border border-gray-300 rounded-lg">
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            ➕ 添加
-                        </button>
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
+                            <input type="text" id="categoryName" placeholder="分类名称" required
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <input type="color" id="categoryColor" value="#3B82F6"
+                                   class="w-12 h-10 border border-gray-300 rounded-lg">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                ➕ 添加
+                            </button>
+                        </div>
+                        <div class="flex gap-3">
+                            <select id="categoryParent" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">作为顶级分类</option>
+                                <!-- 动态填充父分类选项 -->
+                            </select>
+                            <div class="text-sm text-gray-500 px-3 py-2 whitespace-nowrap">
+                                父分类（可选）
+                            </div>
+                        </div>
                     </div>
                 </form>
                 
@@ -473,44 +542,6 @@
         </div>
     </div>
 
-    <!-- 密码输入模态框 -->
-    <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-gray-200">
-            <div class="p-6">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">🔐</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900">管理员验证</h3>
-                    <p id="passwordModalDescription" class="text-gray-600 mt-2">请输入管理员口令以继续操作</p>
-                </div>
-                
-                <form id="passwordForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">管理员口令</label>
-                        <div class="relative">
-                            <input type="password" id="passwordInput" required 
-                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="请输入口令">
-                            <button type="button" id="togglePassword" 
-                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                👁️
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-3 pt-4">
-                        <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg font-medium">
-                            🔓 确认
-                        </button>
-                        <button type="button" onclick="cancelPasswordModal()" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium">
-                            ❌ 取消
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <!-- 确认对话框 -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
@@ -572,10 +603,12 @@
     <script>
         let prompts = [];
         let categories = [];
+        let categoriesTree = [];
         let allTags = [];
         let currentFilters = {
             search: '',
             category: '',
+            category_id: '',
             tags: []
         };
         
@@ -587,121 +620,6 @@
         let tagsExpanded = false;
         let filteredTags = [];
 
-        // SHA-256加密函数
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
-
-        // 密码模态框相关变量
-        let passwordResolve = null;
-        
-        // 请求管理员口令
-        async function requestAdminPassword(action = "操作") {
-            return new Promise((resolve) => {
-                passwordResolve = resolve;
-                
-                // 设置描述文本
-                document.getElementById('passwordModalDescription').textContent = `请输入管理员口令以执行${action}`;
-                
-                // 清空输入框
-                document.getElementById('passwordInput').value = '';
-                
-                // 显示模态框
-                document.getElementById('passwordModal').style.display = 'flex';
-                
-                // 聚焦到输入框
-                setTimeout(() => {
-                    document.getElementById('passwordInput').focus();
-                }, 100);
-            });
-        }
-
-        function hidePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            // 这个函数只负责隐藏模态框，不处理回调
-        }
-
-        function cancelPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            if (passwordResolve) {
-                passwordResolve(null);
-                passwordResolve = null;
-            }
-        }
-
-        // 处理密码表单提交
-        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('passwordInput').value;
-            
-            if (!password) {
-                showToast('请输入口令', 'error');
-                return;
-            }
-            
-            try {
-                const hash = await sha256(password);
-                
-                // 先测试口令是否正确
-                const testResult = await testPassword(hash);
-                
-                if (!testResult) {
-                    showToast('管理员口令错误，请重新输入', 'error');
-                    document.getElementById('passwordInput').value = '';
-                    document.getElementById('passwordInput').focus();
-                    return;
-                }
-                
-                hidePasswordModal();
-                if (passwordResolve) {
-                    passwordResolve(hash);
-                    passwordResolve = null;
-                } else {
-                    console.error('passwordResolve为null！这不应该发生');
-                }
-            } catch (error) {
-                console.error('加密失败:', error);
-                showToast('加密失败', 'error');
-            }
-        });
-
-        // 测试密码是否正确
-        async function testPassword(passwordHash) {
-            try {
-                const response = await fetch('/api/auth/test', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password_hash: passwordHash })
-                });
-                
-                const result = response.ok;
-                return result;
-            } catch (error) {
-                console.error('密码验证失败:', error);
-                return false;
-            }
-        }
-
-        // 切换密码显示/隐藏
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('passwordInput');
-            const toggleBtn = document.getElementById('togglePassword');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = '🙈';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = '👁️';
-            }
-        });
 
         // Toast 通知函数
         function showToast(message, type = 'success') {
@@ -734,17 +652,19 @@
 
         async function loadData() {
             try {
-                const [promptsRes, categoriesRes] = await Promise.all([
+                const [promptsRes, categoriesRes, categoriesTreeRes] = await Promise.all([
                     fetch('/api/prompts'),
-                    fetch('/api/categories')
+                    fetch('/api/categories'),
+                    fetch('/api/categories/tree')
                 ]);
-                
+
                 prompts = await promptsRes.json();
                 categories = await categoriesRes.json();
-                
+                categoriesTree = await categoriesTreeRes.json();
+
                 // 提取所有唯一标签
                 allTags = [...new Set(prompts.flatMap(p => p.tags || []))];
-                
+
                 renderPrompts();
                 renderCategoryButtons();
                 renderTagButtons();
@@ -757,25 +677,48 @@
         function renderCategoryOptions() {
             const categoryList = document.getElementById('categoryDropdownList');
             if (!categoryList) return;
-            
+
             categoryList.innerHTML = '';
-            
-            // 确保有"其他"分类
-            const allCategories = [...categories];
-            if (!allCategories.find(c => c.name === '其他')) {
-                allCategories.push({name: '其他'});
+
+            // 递归渲染分类树
+            function renderCategoryTree(cats, level = 0) {
+                cats.forEach(category => {
+                    const option = document.createElement('div');
+                    const indent = '    '.repeat(level);
+                    const levelClass = level > 0 ? `category-level-${Math.min(level + 1, 5)}` : '';
+
+                    option.className = `px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2 ${levelClass}`;
+                    option.innerHTML = `
+                        ${level > 0 ? `<span class="category-level-indicator"></span>` : ''}
+                        <span class="text-2xl">${getCategoryIcon(category.name)}</span>
+                        <span class="text-gray-700">${indent}${category.name}</span>
+                        ${category.path && category.path !== category.name ?
+                            `<span class="text-xs text-gray-400 ml-auto">/${category.path}</span>` : ''}
+                    `;
+                    option.onclick = () => selectCategory(category.name, category.id);
+                    categoryList.appendChild(option);
+
+                    // 递归渲染子分类
+                    if (category.children && category.children.length > 0) {
+                        renderCategoryTree(category.children, level + 1);
+                    }
+                });
             }
-            
-            allCategories.forEach(category => {
-                const option = document.createElement('div');
-                option.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2';
-                option.innerHTML = `
-                    <span class="text-2xl">${getCategoryIcon(category.name)}</span>
-                    <span class="text-gray-700">${category.name}</span>
+
+            // 从根分类开始渲染
+            renderCategoryTree(categoriesTree);
+
+            // 确保有"其他"分类
+            if (!categories.find(c => c.name === '其他')) {
+                const otherOption = document.createElement('div');
+                otherOption.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2';
+                otherOption.innerHTML = `
+                    <span class="text-2xl">${getCategoryIcon('其他')}</span>
+                    <span class="text-gray-700">其他</span>
                 `;
-                option.onclick = () => selectCategory(category.name);
-                categoryList.appendChild(option);
-            });
+                otherOption.onclick = () => selectCategory('其他', null);
+                categoryList.appendChild(otherOption);
+            }
         }
 
         function getCategoryIcon(categoryName) {
@@ -804,24 +747,44 @@
             }
         }
 
-        function selectCategory(categoryName) {
+        function selectCategory(categoryName, categoryId = null) {
             const hiddenInput = document.getElementById('category');
+            const hiddenCategoryIdInput = document.getElementById('category_id') || createHiddenInput('category_id');
             const selectedText = document.getElementById('selectedCategoryText');
             const dropdownList = document.getElementById('categoryDropdownList');
             const dropdownIcon = document.getElementById('categoryDropdownIcon');
-            
+
+            // 查找分类路径
+            let categoryPath = categoryName;
+            if (categoryId) {
+                const category = categories.find(c => c.id === categoryId);
+                if (category && category.path) {
+                    categoryPath = category.path;
+                }
+            }
+
             // 更新值和显示文本
             hiddenInput.value = categoryName;
+            hiddenCategoryIdInput.value = categoryId || '';
             selectedText.innerHTML = `
                 <span class="flex items-center gap-2">
                     <span class="text-xl">${getCategoryIcon(categoryName)}</span>
-                    <span>${categoryName}</span>
+                    <span>${categoryPath}</span>
                 </span>
             `;
-            
+
             // 关闭下拉框
             dropdownList.classList.add('hidden');
             dropdownIcon.style.transform = 'rotate(0deg)';
+        }
+
+        function createHiddenInput(name) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.id = name;
+            input.name = name;
+            document.getElementById('promptForm').appendChild(input);
+            return input;
         }
 
         // 点击外部关闭下拉框
@@ -837,18 +800,88 @@
 
         function renderCategoryButtons() {
             const container = document.getElementById('categoryButtons');
-            container.innerHTML = categories.map(category => {
-                const count = prompts.filter(p => p.category === category.name).length;
-                return `
-                    <button onclick="filterByCategory('${category.name}')" 
-                            class="category-btn filter-button px-4 py-2 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm" 
-                            data-category="${category.name}">
-                        <div class="w-3 h-3 rounded-full" style="background-color: ${category.color}"></div>
-                        <span class="font-medium">${category.name}</span>
-                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${count}</span>
-                    </button>
-                `;
-            }).join('');
+            container.innerHTML = '';
+
+            // 递归渲染分类树
+            function renderCategoryTree(cats, level = 0) {
+                return cats.map(category => {
+                    // 统计该分类下的提示词数量（包括子分类）
+                    const categoryIds = [category.id, ...getAllDescendantIds(category)];
+                    const count = prompts.filter(p =>
+                        categoryIds.includes(p.category_id) || p.category === category.name
+                    ).length;
+
+                    let html = '';
+
+                    if (level === 0) {
+                        // 顶级分类
+                        html = `
+                            <div class="category-item category-tree">
+                                <button onclick="filterByCategory('${category.name}', '${category.id}')"
+                                        class="category-btn filter-button px-4 py-2 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm"
+                                        data-category="${category.name}" data-category-id="${category.id}">
+                                    <div class="w-3 h-3 rounded-full" style="background-color: ${category.color}"></div>
+                                    <span class="font-medium">${category.name}</span>
+                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${count}</span>
+                                    ${category.children && category.children.length > 0 ? '<span class="text-xs text-gray-400">▼</span>' : ''}
+                                </button>
+                        `;
+
+                        // 如果有子分类，添加悬停菜单
+                        if (category.children && category.children.length > 0) {
+                            html += `
+                                <div class="category-submenu">
+                                    ${renderSubmenu(category.children)}
+                                </div>
+                            `;
+                        }
+
+                        html += `</div>`;
+                    }
+
+                    return html;
+                }).join('');
+            }
+
+            function renderSubmenu(subcategories) {
+                return subcategories.map(subcat => {
+                    const subcatIds = [subcat.id, ...getAllDescendantIds(subcat)];
+                    const subCount = prompts.filter(p =>
+                        subcatIds.includes(p.category_id) || p.category === subcat.name
+                    ).length;
+
+                    let html = `
+                        <button onclick="filterByCategory('${subcat.name}', '${subcat.id}')"
+                                class="category-btn filter-button px-3 py-2 rounded-lg text-sm bg-gray-50 border border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2"
+                                data-category="${subcat.name}" data-category-id="${subcat.id}">
+                            <div class="w-2 h-2 rounded-full" style="background-color: ${subcat.color}"></div>
+                            <span class="font-medium">${subcat.name}</span>
+                            <span class="bg-white text-gray-600 px-1 py-0.5 rounded text-xs ml-auto">${subCount}</span>
+                        </button>
+                    `;
+
+                    // 如果有更深层的子分类，递归添加
+                    if (subcat.children && subcat.children.length > 0) {
+                        html += renderSubmenu(subcat.children);
+                    }
+
+                    return html;
+                }).join('');
+            }
+
+            // 渲染顶级分类
+            container.innerHTML = renderCategoryTree(categoriesTree);
+        }
+
+        function getAllDescendantIds(category) {
+            let descendants = [];
+            if (category.children) {
+                category.children.forEach(child => {
+                    descendants.push(child.id);
+                    descendants.push(...getAllDescendantIds(child));
+                });
+            }
+            return descendants;
         }
 
         function renderTagButtons() {
@@ -930,7 +963,23 @@
         function updateStatistics() {
             // 更新统计数据
             document.getElementById('totalPromptsCount').textContent = prompts.length;
-            document.getElementById('totalCategoriesCount').textContent = categories.length;
+
+            // 分层统计分类数量
+            const levelStats = {};
+            categories.forEach(cat => {
+                const level = cat.level || 1;
+                levelStats[level] = (levelStats[level] || 0) + 1;
+            });
+
+            // 显示总分类数和层级信息
+            const levelInfo = Object.keys(levelStats).sort().map(level =>
+                `L${level}: ${levelStats[level]}`
+            ).join(' | ');
+
+            const categoryCountElement = document.getElementById('totalCategoriesCount');
+            categoryCountElement.textContent = categories.length;
+            categoryCountElement.title = `分类层级分布: ${levelInfo}`;
+
             document.getElementById('totalTagsCount').textContent = allTags.length;
             document.getElementById('filteredPromptsCount').textContent = getFilteredPrompts().length;
         }
@@ -988,9 +1037,9 @@
                     </div>
                     
                     <div class="mb-4">
-                        <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200" 
-                              onclick="filterByCategory('${prompt.category}')">
-                            📁 ${escapeHtml(prompt.category)}
+                        <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200"
+                              onclick="filterByCategory('${prompt.category}', '${prompt.category_id || ''}')">
+                            📁 ${escapeHtml(prompt.category_path || prompt.category)}
                         </span>
                     </div>
                     
@@ -1027,24 +1076,54 @@
         function getFilteredPrompts() {
             const filtered = prompts.filter(prompt => {
                 // 搜索过滤
-                const searchMatch = !currentFilters.search || 
+                const searchMatch = !currentFilters.search ||
                     prompt.title.toLowerCase().includes(currentFilters.search.toLowerCase()) ||
                     prompt.content.toLowerCase().includes(currentFilters.search.toLowerCase()) ||
                     (prompt.description && prompt.description.toLowerCase().includes(currentFilters.search.toLowerCase()));
-                
-                // 分类过滤
-                const categoryMatch = !currentFilters.category || prompt.category === currentFilters.category;
-                
-                // 标签过滤 - 修改为OR逻辑：只要包含任一选中标签就显示
-                const tagsMatch = currentFilters.tags.length === 0 || 
+
+                // 分类过滤 - 支持分层分类
+                let categoryMatch = true;
+                if (currentFilters.category_id) {
+                    // 如果有分类ID，使用分层筛选
+                    const targetCategoryIds = [currentFilters.category_id];
+                    // 获取当前分类的所有子分类ID
+                    const targetCategory = categories.find(c => c.id === currentFilters.category_id);
+                    if (targetCategory) {
+                        targetCategoryIds.push(...getAllDescendantIdsFlat(targetCategory));
+                    }
+                    categoryMatch = !currentFilters.category_id ||
+                        targetCategoryIds.includes(prompt.category_id) ||
+                        prompt.category === currentFilters.category;
+                } else if (currentFilters.category) {
+                    // 向后兼容：按分类名称筛选
+                    categoryMatch = prompt.category === currentFilters.category;
+                }
+
+                // 标签过滤 - OR逻辑：只要包含任一选中标签就显示
+                const tagsMatch = currentFilters.tags.length === 0 ||
                     currentFilters.tags.some(tag => prompt.tags && prompt.tags.includes(tag));
-                
+
                 return searchMatch && categoryMatch && tagsMatch;
             });
-            
-            // 筛选结果
-            
+
             return filtered;
+        }
+
+        function getAllDescendantIdsFlat(category) {
+            let descendants = [];
+            const allCategories = categories;
+
+            function findChildren(parentId) {
+                allCategories.forEach(cat => {
+                    if (cat.parent_id === parentId) {
+                        descendants.push(cat.id);
+                        findChildren(cat.id);
+                    }
+                });
+            }
+
+            findChildren(category.id);
+            return descendants;
         }
 
         function escapeHtml(text) {
@@ -1611,19 +1690,20 @@ code block
             document.getElementById('detailModal').style.display = 'none';
         }
 
-        function filterByCategory(category) {
+        function filterByCategory(category, categoryId = '') {
             currentFilters.category = category;
+            currentFilters.category_id = categoryId;
             currentPage = 1; // 重置到第一页
-            
+
             // 更新按钮状态
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if (btn.dataset.category === category) {
+                if (btn.dataset.category === category || (categoryId && btn.dataset.categoryId === categoryId)) {
                     btn.className = 'category-btn filter-button px-4 py-2 rounded-full text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center gap-2 shadow-md';
                 } else {
                     btn.className = 'category-btn filter-button px-4 py-2 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm';
                 }
             });
-            
+
             renderPrompts();
         }
 
@@ -1824,15 +1904,10 @@ code block
 
         async function deletePrompt(promptId) {
             const confirmed = await customConfirm(
-                '删除提示词', 
+                '删除提示词',
                 '确定要删除这个提示词吗？此操作不可撤销！'
             );
             if (!confirmed) {
-                return;
-            }
-
-            const passwordHash = await requestAdminPassword("删除提示词");
-            if (!passwordHash) {
                 return;
             }
 
@@ -1841,8 +1916,7 @@ code block
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password_hash: passwordHash })
+                    }
                 });
 
                 if (response.ok) {
@@ -1876,19 +1950,14 @@ code block
         });
 
         async function createPrompt() {
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("添加提示词");
-            if (!passwordHash) {
-                return;
-            }
-            
+            const categoryIdInput = document.getElementById('category_id');
             const formData = {
                 title: document.getElementById('title').value,
                 content: document.getElementById('content').value,
                 description: document.getElementById('description').value,
                 category: document.getElementById('category').value,
-                tags: selectedTags,
-                password_hash: passwordHash
+                category_id: categoryIdInput ? categoryIdInput.value : null,
+                tags: selectedTags
             };
             
             try {
@@ -1922,19 +1991,14 @@ code block
         }
 
         async function updatePrompt() {
-            // 编辑也需要管理员口令
-            const passwordHash = await requestAdminPassword("修改提示词");
-            if (!passwordHash) {
-                return;
-            }
-            
+            const categoryIdInput = document.getElementById('category_id');
             const formData = {
                 title: document.getElementById('title').value,
                 content: document.getElementById('content').value,
                 description: document.getElementById('description').value,
                 category: document.getElementById('category').value,
-                tags: selectedTags,
-                password_hash: passwordHash
+                category_id: categoryIdInput ? categoryIdInput.value : null,
+                tags: selectedTags
             };
             
             try {
@@ -1976,7 +2040,34 @@ code block
         // 分类管理相关函数
         function showCategoryModal() {
             renderCategoryList();
+            renderCategoryParentOptions();
             document.getElementById('categoryModal').style.display = 'flex';
+        }
+
+        function renderCategoryParentOptions() {
+            const parentSelect = document.getElementById('categoryParent');
+            if (!parentSelect) return;
+
+            parentSelect.innerHTML = '<option value="">作为顶级分类</option>';
+
+            // 递归渲染可选的父分类（不能超过4级，因为最多支持5级）
+            function addCategoryOptions(cats, level = 0, prefix = '') {
+                if (level >= 4) return; // 防止创建第6级分类
+
+                cats.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = `${prefix}${category.name}`;
+                    parentSelect.appendChild(option);
+
+                    // 递归添加子分类
+                    if (category.children && category.children.length > 0) {
+                        addCategoryOptions(category.children, level + 1, prefix + category.name + ' / ');
+                    }
+                });
+            }
+
+            addCategoryOptions(categoriesTree);
         }
 
         function hideCategoryModal() {
@@ -2041,15 +2132,9 @@ code block
         async function addTag() {
             const name = document.getElementById('tagName').value.trim();
             const color = document.getElementById('tagColor').value;
-            
+
             if (!name) {
                 showToast('请输入标签名称', 'error');
-                return;
-            }
-
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("添加标签");
-            if (!passwordHash) {
                 return;
             }
 
@@ -2059,7 +2144,7 @@ code block
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, color, password_hash: passwordHash })
+                    body: JSON.stringify({ name, color })
                 });
 
                 if (response.ok) {
@@ -2090,19 +2175,13 @@ code block
         }
 
         async function updateTagName(id, name, color) {
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("修改标签");
-            if (!passwordHash) {
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/tags/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, color, password_hash: passwordHash })
+                    body: JSON.stringify({ name, color })
                 });
 
                 if (response.ok) {
@@ -2138,19 +2217,12 @@ code block
                 return;
             }
 
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("删除标签");
-            if (!passwordHash) {
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/tags/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password_hash: passwordHash })
+                    }
                 });
 
                 if (response.ok) {
@@ -2171,39 +2243,63 @@ code block
 
         function renderCategoryList() {
             const container = document.getElementById('categoryList');
-            container.innerHTML = categories.map(category => `
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg border">
-                    <div class="flex items-center gap-3">
-                        <div class="w-4 h-4 rounded-full" style="background-color: ${category.color}"></div>
-                        <span class="font-medium">${escapeHtml(category.name)}</span>
-                        <span class="text-sm text-gray-500">(${prompts.filter(p => p.category === category.name).length} 个提示词)</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editCategory('${category.id}', '${escapeHtml(category.name)}', '${category.color}')" 
-                                class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
-                            ✏️ 编辑
-                        </button>
-                        <button onclick="deleteCategory('${category.id}')" 
-                                class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm">
-                            🗑️ 删除
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = '';
+
+            // 递归渲染分类列表
+            function renderCategoryItems(cats, level = 0) {
+                cats.forEach(category => {
+                    const indent = '  '.repeat(level);
+                    const categoryIds = [category.id, ...getAllDescendantIdsFlat(category)];
+                    const promptCount = prompts.filter(p =>
+                        categoryIds.includes(p.category_id) || p.category === category.name
+                    ).length;
+
+                    const levelClass = level > 0 ? `category-level-${Math.min(level + 1, 5)}` : '';
+                    const levelIndicator = level > 0 ? '<span class="category-level-indicator"></span>' : '';
+
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = `flex items-center justify-between p-3 bg-white rounded-lg border ${levelClass}`;
+                    categoryDiv.style.marginLeft = `${level * 20}px`;
+
+                    categoryDiv.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${levelIndicator}
+                            <div class="w-4 h-4 rounded-full" style="background-color: ${category.color}"></div>
+                            <span class="font-medium">${escapeHtml(category.name)}</span>
+                            <span class="text-xs text-gray-400">${category.path}</span>
+                            <span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>
+                            <span class="text-xs text-gray-400">Level ${category.level || 1}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editCategory('${category.id}', '${escapeHtml(category.name)}', '${category.color}', '${category.parent_id || ''}')"
+                                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
+                                ✏️ 编辑
+                            </button>
+                            <button onclick="deleteCategory('${category.id}')"
+                                    class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm">
+                                🗑️ 删除
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(categoryDiv);
+
+                    // 递归渲染子分类
+                    if (category.children && category.children.length > 0) {
+                        renderCategoryItems(category.children, level + 1);
+                    }
+                });
+            }
+
+            renderCategoryItems(categoriesTree);
         }
 
         async function addCategory() {
             const name = document.getElementById('categoryName').value.trim();
             const color = document.getElementById('categoryColor').value;
-            
+            const parentId = document.getElementById('categoryParent').value || null;
+
             if (!name) {
                 showToast('请输入分类名称', 'error');
-                return;
-            }
-
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("添加分类");
-            if (!passwordHash) {
                 return;
             }
 
@@ -2213,16 +2309,16 @@ code block
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, color, password_hash: passwordHash })
+                    body: JSON.stringify({ name, color, parent_id: parentId })
                 });
 
                 if (response.ok) {
                     const newCategory = await response.json();
-                    categories.push(newCategory);
+                    // 重新加载数据以获取最新的树结构
+                    await loadData();
                     renderCategoryList();
-                    renderCategoryButtons();
+                    renderCategoryParentOptions();
                     document.getElementById('categoryForm').reset();
-                    updateStatistics(); // 更新统计
                     showToast('分类添加成功');
                 } else {
                     const error = await response.json();
@@ -2246,19 +2342,13 @@ code block
         }
 
         async function updateCategoryName(id, name, color) {
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("修改分类");
-            if (!passwordHash) {
-                return;
-            }
-
             try {
                 const response = await fetch(`/api/categories/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, color, password_hash: passwordHash })
+                    body: JSON.stringify({ name, color })
                 });
 
                 if (response.ok) {
@@ -2283,49 +2373,69 @@ code block
         }
 
         async function deleteCategory(id) {
-            // 先计算会影响的提示词数量
-            const categoryToDelete = categories.find(c => c.id === id);
-            if (!categoryToDelete) return;
-            
-            const affectedPrompts = prompts.filter(p => p.category === categoryToDelete.name);
-            const affectedCount = affectedPrompts.length;
-            
-            let confirmMessage = `确定要删除分类"${categoryToDelete.name}"吗？`;
-            if (affectedCount > 0) {
-                confirmMessage += `\n\n⚠️ 注意：有 ${affectedCount} 个提示词使用了这个分类，它们将被移动到"其他"分类。`;
-            }
-            
-            const confirmed = await customConfirm('删除分类', confirmMessage);
-            if (!confirmed) {
-                return;
-            }
-
-            // 请求管理员口令
-            const passwordHash = await requestAdminPassword("删除分类");
-            if (!passwordHash) {
-                return;
-            }
-
             try {
+                // 先调用删除API获取影响信息
                 const response = await fetch(`/api/categories/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password_hash: passwordHash })
+                    }
                 });
 
-                if (response.ok) {
-                    categories = categories.filter(c => c.id !== id);
+                if (response.status === 409) {
+                    // 需要确认删除
+                    const result = await response.json();
+
+                    let confirmMessage = `确定要删除分类"${result.category_name}"吗？\n\n`;
+
+                    if (result.child_categories_count > 0) {
+                        confirmMessage += `⚠️ 该分类包含 ${result.child_categories_count} 个子分类：\n`;
+                        confirmMessage += result.child_categories.map(name => `  • ${name}`).join('\n') + '\n\n';
+                    }
+
+                    if (result.affected_prompts_count > 0) {
+                        confirmMessage += `⚠️ 有 ${result.affected_prompts_count} 个提示词将被移动到"其他"分类。\n\n`;
+                    }
+
+                    confirmMessage += '所有子分类也将被删除。此操作不可撤销。';
+
+                    const confirmed = await customConfirm('确认删除分类', confirmMessage);
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    // 确认删除，调用强制删除接口
+                    const forceResponse = await fetch(`/api/categories/${id}/force-delete`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (forceResponse.ok) {
+                        const deleteResult = await forceResponse.json();
+                        // 重新加载数据
+                        await loadData();
+                        renderCategoryList();
+                        renderCategoryParentOptions();
+                        showToast(deleteResult.message || '分类删除成功');
+                    } else {
+                        const error = await forceResponse.json();
+                        showToast(error.error || '删除失败', 'error');
+                    }
+
+                } else if (response.ok) {
+                    // 直接删除成功（空分类）
+                    const result = await response.json();
+                    await loadData();
                     renderCategoryList();
-                    renderCategoryButtons();
-                    renderPrompts();
-                    updateStatistics(); // 更新统计
-                    showToast('分类删除成功');
+                    renderCategoryParentOptions();
+                    showToast(result.message || '分类删除成功');
                 } else {
                     const error = await response.json();
                     showToast(error.error || '删除失败', 'error');
                 }
+
             } catch (error) {
                 console.error('Error deleting category:', error);
                 showToast('删除失败', 'error');
@@ -2416,22 +2526,13 @@ code block
 
                 if (!confirmed) return;
 
-                // 在debug模式下不需要密码
-                let requestData = {};
-                if (!isDebugMode) {
-                    const passwordHash = await requestAdminPassword();
-                    if (!passwordHash) return;
-                    requestData.password_hash = passwordHash;
-                }
-
                 showToast('正在加载测试数据...', 'info');
 
                 const response = await fetch('/api/admin/load-test-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
+                    }
                 });
 
                 const result = await response.json();
@@ -2460,22 +2561,13 @@ code block
 
                 if (!confirmed) return;
 
-                // 在debug模式下不需要密码
-                let requestData = {};
-                if (!isDebugMode) {
-                    const passwordHash = await requestAdminPassword();
-                    if (!passwordHash) return;
-                    requestData.password_hash = passwordHash;
-                }
-
                 showToast('正在清空数据...', 'info');
 
                 const response = await fetch('/api/admin/clear-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
+                    }
                 });
 
                 const result = await response.json();
