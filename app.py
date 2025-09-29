@@ -748,29 +748,40 @@ def test_auth():
 @app.route('/api/export', methods=['GET'])
 def export_data():
     """导出数据"""
+    # 在debug模式下不需要密码
+    if not is_debug_mode():
+        # 从请求头获取密码哈希（用于API调用）
+        password_hash = request.headers.get('X-Password-Hash')
+        if not password_hash:
+            # 从查询参数获取密码哈希（用于前端调用）
+            password_hash = request.args.get('password_hash')
+
+        if not verify_password(password_hash):
+            return jsonify({"error": "无效的管理员口令"}), 401
+
     data = storage._load_data()
-    
+
     # 根据参数过滤数据
     search = request.args.get('search', '')
     category = request.args.get('category', '')
     tags = request.args.get('tags', '').split(',') if request.args.get('tags') else []
-    
+
     prompts = data["prompts"]
-    
+
     if search:
         search = search.lower()
-        prompts = [p for p in prompts if 
-                  search in p['title'].lower() or 
-                  search in p['content'].lower() or 
+        prompts = [p for p in prompts if
+                  search in p['title'].lower() or
+                  search in p['content'].lower() or
                   search in p.get('description', '').lower()]
-    
+
     if category:
         prompts = [p for p in prompts if p['category'] == category]
-    
+
     if tags:
-        prompts = [p for p in prompts if 
+        prompts = [p for p in prompts if
                   p.get('tags') and any(tag in p['tags'] for tag in tags)]
-    
+
     # 导出格式
     export_data = []
     for prompt in prompts:
@@ -783,7 +794,7 @@ def export_data():
             "创建时间": prompt.get("created_at", ""),
             "更新时间": prompt.get("updated_at", "")
         })
-    
+
     return jsonify({
         "data": export_data,
         "total": len(export_data),

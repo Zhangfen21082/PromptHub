@@ -1676,35 +1676,50 @@ code block
 
         async function exportPrompts() {
             const filteredPrompts = getFilteredPrompts();
-            
+
             if (filteredPrompts.length === 0) {
                 showToast('没有可导出的提示词', 'error');
                 return;
             }
-            
-            // 请求管理员口令确认
-            const passwordHash = await requestAdminPassword("导出提示词");
-            if (!passwordHash) {
-                return;
+
+            // 在debug模式下不需要密码
+            let passwordHash = null;
+            if (!isDebugMode) {
+                // 请求管理员口令确认
+                passwordHash = await requestAdminPassword("导出提示词");
+                if (!passwordHash) {
+                    return;
+                }
             }
-            
-            // 创建导出数据
-            const exportData = filteredPrompts.map(prompt => ({
-                标题: prompt.title,
-                描述: prompt.description || '',
-                分类: prompt.category,
-                标签: prompt.tags ? prompt.tags.join(', ') : '',
-                内容: prompt.content,
-                创建时间: new Date(prompt.created_at).toLocaleString('zh-CN')
-            }));
-            
-            // 创建CSV内容
-            const csvContent = createCSV(exportData);
-            
-            // 下载文件
-            downloadFile(csvContent, `PromptHub导出_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8;');
-            
-            showToast(`成功导出 ${filteredPrompts.length} 个提示词`, 'success');
+
+            try {
+                // 调用导出API
+                let url = '/api/export';
+                if (passwordHash) {
+                    // 在非debug模式下，将密码哈希作为查询参数传递
+                    url += `?password_hash=${encodeURIComponent(passwordHash)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    showToast(errorData.error || '导出失败', 'error');
+                    return;
+                }
+
+                const result = await response.json();
+
+                // 创建CSV内容
+                const csvContent = createCSV(result.data);
+
+                // 下载文件
+                downloadFile(csvContent, `PromptHub导出_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8;');
+
+                showToast(`成功导出 ${result.total} 个提示词`, 'success');
+            } catch (error) {
+                console.error('导出失败:', error);
+                showToast('导出失败', 'error');
+            }
         }
 
         function createCSV(data) {
