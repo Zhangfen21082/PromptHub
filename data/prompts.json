@@ -273,6 +273,15 @@
         "parent_id": "b66c8c1d-70da-4fd3-8a07-328c2bb31312",
         "level": 3,
         "path": "教育/其巍峨其巍峨/SADSAD"
+      },
+      {
+        "id": "b2a340d9-1e8d-45ea-b30b-15be322557fe",
+        "name": "1",
+        "color": "#3b82f6",
+        "description": "",
+        "parent_id": "5d275b21-3482-466a-bbd7-9adf0c138c07",
+        "level": 4,
+        "path": "教育/其巍峨其巍峨/SADSAD/1"
       }
     ],
     "tags": [
@@ -433,7 +442,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-09-30T10:51:52.010336",
+      "last_updated": "2025-09-30T11:06:11.426438",
       "version": "2.0"
     }
   }
