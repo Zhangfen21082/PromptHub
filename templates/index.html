@@ -218,17 +218,35 @@
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-center flex-1">
-                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-md">
-                        <div class="text-xl md:text-2xl font-bold" id="totalPromptsCount">0</div>
-                        <div class="text-xs md:text-sm opacity-90">📝 提示词总数</div>
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8"></div>
+                        <div class="relative z-10">
+                            <div class="text-2xl md:text-3xl font-bold mb-1" id="totalPromptsCount">0</div>
+                            <div class="flex items-center justify-center gap-1 text-sm opacity-90">
+                                <!-- <span class="text-lg">📝</span> -->
+                                <span>提示词总数</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-3 rounded-xl shadow-md">
-                        <div class="text-xl md:text-2xl font-bold" id="totalCategoriesCount">0</div>
-                        <div class="text-xs md:text-sm opacity-90">📁 分类总数</div>
+                    <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8"></div>
+                        <div class="relative z-10">
+                            <div class="text-2xl md:text-3xl font-bold mb-1" id="totalCategoriesCount">0</div>
+                            <div class="flex items-center justify-center gap-1 text-sm opacity-90">
+                                <!-- <span class="text-lg">📁</span> -->
+                                <span>分类总数</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-3 rounded-xl shadow-md">
-                        <div class="text-xl md:text-2xl font-bold" id="totalTagsCount">0</div>
-                        <div class="text-xs md:text-sm opacity-90">🏷️ 标签总数</div>
+                    <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8"></div>
+                        <div class="relative z-10">
+                            <div class="text-2xl md:text-3xl font-bold mb-1" id="totalTagsCount">0</div>
+                            <div class="flex items-center justify-center gap-1 text-sm opacity-90">
+                                <!-- <span class="text-lg">🏷️</span> -->
+                                <span>标签总数</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
