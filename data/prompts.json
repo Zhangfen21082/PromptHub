@@ -165,6 +165,21 @@
       "usage_count": 0,
       "created_at": "2025-09-29T18:43:41.516454",
       "updated_at": "2025-09-30T08:41:05.681848"
+    },
+    {
+      "id": "2b037202-d061-43bb-87f1-a301497d2c95",
+      "title": "123",
+      "content": "123",
+      "description": "123",
+      "category": "瓦巍峨瓦巍峨",
+      "category_id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
+      "category_path": "教育/瓦巍峨瓦巍峨",
+      "tags": [
+        "123"
+      ],
+      "usage_count": 0,
+      "created_at": "2025-09-30T09:23:20.280420",
+      "updated_at": "2025-09-30T09:23:20.280431"
     }
   ],
   "metadata": {
@@ -401,10 +416,15 @@
         "id": "7a9722e9-1e59-4906-a708-d645ffb57b78",
         "name": "营销",
         "color": "#3B82F6"
+      },
+      {
+        "id": "auto-ab7aa120",
+        "name": "123",
+        "color": "#3B82F6"
       }
     ],
     "settings": {
-      "last_updated": "2025-09-30T08:41:09.880051",
+      "last_updated": "2025-09-30T09:23:53.463548",
       "version": "2.0"
     }
   }
