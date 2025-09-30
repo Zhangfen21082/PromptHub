@@ -29,9 +29,7 @@
       ],
       "usage_count": 28,
       "created_at": "2025-08-16T10:00:00.000000",
-      "updated_at": "2025-09-29T18:38:27.968058",
-      "category_id": "1",
-      "category_path": "分析/编程"
+      "updated_at": "2025-08-16T15:13:09.297637"
     },
     {
       "id": "2",
@@ -46,16 +44,14 @@
       ],
       "usage_count": 22,
       "created_at": "2025-08-16T10:01:00.000000",
-      "updated_at": "2025-09-29T18:38:27.968090",
-      "category_id": "1",
-      "category_path": "分析/编程"
+      "updated_at": "2025-08-16T10:01:00.000000"
     },
     {
       "id": "6",
       "title": "小说创作助手",
       "content": "你是一位经验丰富的小说作家。请帮我创作一个故事：\n\n主题：{故事主题}\n类型：{小说类型}\n背景：{故事背景}\n\n请提供：\n1. 故事大纲\n2. 主要人物设定\n3. 情节发展脉络\n4. 关键场景描述\n5. 对话样例\n6. 写作建议",
       "description": "小说创作的专业指导和灵感启发",
-      "category": "其他",
+      "category": "写作",
       "tags": [
         "小说",
         "创作",
@@ -63,9 +59,7 @@
       ],
       "usage_count": 35,
       "created_at": "2025-08-16T10:05:00.000000",
-      "updated_at": "2025-09-29T17:32:29.317562",
-      "category_id": "7",
-      "category_path": "其他"
+      "updated_at": "2025-08-16T10:05:00.000000"
     },
     {
       "id": "7",
@@ -87,7 +81,7 @@
       "title": "创意广告文案策划",
       "content": "你是一位资深广告创意总监。请为以下产品策划广告文案：\n\n产品：{产品名称}\n目标用户：{用户群体}\n核心卖点：{产品优势}\n传播渠道：{媒体渠道}\n\n请提供：\n1. 创意概念\n2. 主标题和副标题\n3. 正文内容\n4. 行动号召\n5. 视觉元素建议\n6. 传播策略",
       "description": "创意广告文案的专业策划",
-      "category": "其他",
+      "category": "创意",
       "tags": [
         "广告",
         "文案",
@@ -95,9 +89,7 @@
       ],
       "usage_count": 31,
       "created_at": "2025-08-16T10:09:00.000000",
-      "updated_at": "2025-09-29T17:36:50.519238",
-      "category_id": "7",
-      "category_path": "其他"
+      "updated_at": "2025-08-16T10:09:00.000000"
     },
     {
       "id": "12",
@@ -119,7 +111,7 @@
       "title": "UI/UX设计评审专家",
       "content": "你是UI/UX设计专家。请评审以下设计方案：\n\n设计类型：{设计类型}\n目标用户：{用户群体}\n使用场景：{场景描述}\n\n请从以下角度评审：\n1. 用户体验流程\n2. 界面视觉设计\n3. 交互设计合理性\n4. 可用性和可访问性\n5. 设计一致性\n6. 改进建议",
       "description": "UI/UX设计的专业评审和改进建议",
-      "category": "其他",
+      "category": "创意",
       "tags": [
         "UI",
         "UX",
@@ -127,9 +119,7 @@
       ],
       "usage_count": 19,
       "created_at": "2025-08-16T10:13:00.000000",
-      "updated_at": "2025-09-29T17:36:50.519276",
-      "category_id": "7",
-      "category_path": "其他"
+      "updated_at": "2025-08-16T10:13:00.000000"
     },
     {
       "id": "15",
@@ -144,9 +134,7 @@
       ],
       "usage_count": 33,
       "created_at": "2025-08-16T10:14:00.000000",
-      "updated_at": "2025-09-29T18:38:27.968094",
-      "category_id": "1",
-      "category_path": "分析/编程"
+      "updated_at": "2025-08-16T10:14:00.000000"
     },
     {
       "id": "26",
@@ -161,22 +149,22 @@
       ],
       "usage_count": 27,
       "created_at": "2025-08-16T10:25:00.000000",
-      "updated_at": "2025-09-29T18:38:27.968096",
-      "category_id": "1",
-      "category_path": "分析/编程"
+      "updated_at": "2025-08-16T10:25:00.000000"
     },
     {
-      "id": "c6fc93a2-9b1e-495d-b8c7-dfd1d4b8a9fc",
+      "id": "7aa570b9-16f9-4b22-aaed-0f13e112d301",
       "title": "123",
-      "content": "阿斯顿",
-      "description": "阿斯顿",
-      "category": "其他",
-      "category_id": "7",
-      "category_path": "其他",
-      "tags": [],
+      "content": "123",
+      "description": "123",
+      "category": "瓦巍峨瓦巍峨",
+      "category_id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
+      "category_path": "教育/其巍峨其巍峨/瓦巍峨瓦巍峨",
+      "tags": [
+        "创意"
+      ],
       "usage_count": 0,
-      "created_at": "2025-09-29T17:32:15.351468",
-      "updated_at": "2025-09-29T17:32:29.317576"
+      "created_at": "2025-09-29T18:43:41.516454",
+      "updated_at": "2025-09-29T18:43:41.516466"
     }
   ],
   "metadata": {
@@ -186,9 +174,18 @@
         "name": "编程",
         "color": "#3B82F6",
         "description": "编程相关提示词",
-        "parent_id": "3",
-        "level": 2,
-        "path": "分析/编程"
+        "parent_id": null,
+        "level": 1,
+        "path": "编程"
+      },
+      {
+        "id": "2",
+        "name": "写作",
+        "color": "#10B981",
+        "description": "写作相关提示词",
+        "parent_id": null,
+        "level": 1,
+        "path": "写作"
       },
       {
         "id": "3",
@@ -198,6 +195,15 @@
         "parent_id": null,
         "level": 1,
         "path": "分析"
+      },
+      {
+        "id": "4",
+        "name": "创意",
+        "color": "#8B5CF6",
+        "description": "创意相关提示词",
+        "parent_id": null,
+        "level": 1,
+        "path": "创意"
       },
       {
         "id": "5",
@@ -227,187 +233,187 @@
         "path": "其他"
       },
       {
-        "id": "cd007379-fd47-4c79-bd40-1cd03495680b",
-        "name": "什么",
+        "id": "5007b7b5-5f9e-4a69-9d21-881ee1e8794e",
+        "name": "1",
         "color": "#3b82f6",
         "description": "",
         "parent_id": null,
         "level": 1,
-        "path": "什么"
+        "path": "1"
       },
       {
-        "id": "eac368ba-2ed2-4d72-85fa-ac26722daaa1",
-        "name": "你好",
+        "id": "b66c8c1d-70da-4fd3-8a07-328c2bb31312",
+        "name": "其巍峨其巍峨",
         "color": "#3b82f6",
         "description": "",
-        "parent_id": "cd007379-fd47-4c79-bd40-1cd03495680b",
+        "parent_id": "6",
         "level": 2,
-        "path": "什么/你好"
+        "path": "教育/其巍峨其巍峨"
       },
       {
-        "id": "2012bd7f-648c-4d83-97ab-ed23da0ebfcb",
-        "name": "你好123",
+        "id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
+        "name": "瓦巍峨瓦巍峨",
         "color": "#3b82f6",
         "description": "",
-        "parent_id": "eac368ba-2ed2-4d72-85fa-ac26722daaa1",
+        "parent_id": "b66c8c1d-70da-4fd3-8a07-328c2bb31312",
         "level": 3,
-        "path": "什么/你好/你好123"
+        "path": "教育/其巍峨其巍峨/瓦巍峨瓦巍峨"
       }
     ],
     "tags": [
       {
-        "id": "852486a1-3b6d-40cc-b8c2-c86d5fcb1140",
-        "name": "架构",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "897e8005-5c81-4228-b01c-d3ec8e61012c",
-        "name": "广告",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "a5f3c8a7-33ff-4f56-8661-b59589e09150",
-        "name": "机器学习",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "f4e6d86f-e4ce-4fe6-9c69-383a3876c68f",
-        "name": "模型",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "20fa422a-e3e5-44f5-a71b-9dd6e583f5ea",
-        "name": "商业计划",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "b2b90f3c-4dd2-4e96-adff-3de9b9c1408a",
-        "name": "组件",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "fe8b50d5-6a10-4dfb-b7d4-fc2f7f1980a7",
-        "name": "小说",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "53ba8d08-8edd-46fe-a226-c0b21eb16820",
-        "name": "AI",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "790c2821-25de-44e8-aa57-63ef3e426187",
-        "name": "投资",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "33665d75-d690-4487-bc63-a370cd69fde8",
-        "name": "代码审查",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "eaaeac7a-6494-4cc3-9431-e9a6fc4656ea",
-        "name": "UI",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "f9ba2978-0e8b-43b1-8058-d9b5c95f4ed3",
-        "name": "视频",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "673bd561-b19d-41fc-8821-cdc8e2e131bb",
-        "name": "PRD",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "04cb6c5a-43cb-4c28-9d7e-9a63ae9ab4c6",
-        "name": "需求",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "dcb940bd-58c7-4692-95b6-35da0fbab9eb",
-        "name": "创意",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "fda38969-01ab-476f-afc4-c85af8ba9e4e",
-        "name": "品牌",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "bbaf7b9f-9cd7-4ee6-beff-4d18162c2db4",
-        "name": "react",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "11dd47c3-f82c-42ce-a063-442c8789f850",
-        "name": "产品",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "b82eb722-f063-4a5e-ab7b-1f233805bf71",
-        "name": "优化",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "6be4f2a8-43aa-4919-aea9-806d6c3692bd",
-        "name": "技术",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "4bdb9d15-93ba-47ec-905b-1ac12ee03a5d",
+        "id": "d3c4f12f-482a-4901-9eae-dd6b8d9f96ff",
         "name": "UX",
         "color": "#3B82F6"
       },
       {
-        "id": "501421a8-7733-46c7-9791-2c79086610d1",
-        "name": "python",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "346dde7c-c5eb-4435-b4c5-ba54479439ec",
-        "name": "typescript",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "ad6576d2-6ac7-44bb-8d48-38d557d801c6",
-        "name": "系统设计",
-        "color": "#3B82F6"
-      },
-      {
-        "id": "25c15f56-5cc2-41e0-851b-478b094acc9c",
+        "id": "1b021ba2-a5b0-46a8-bbfe-d3d2c312e3eb",
         "name": "文案",
         "color": "#3B82F6"
       },
       {
-        "id": "22a40b15-280c-4b0a-a801-fbb7d3ff6435",
-        "name": "故事",
+        "id": "a430d2ff-a0a5-4968-9486-c46d7b6fab49",
+        "name": "架构",
         "color": "#3B82F6"
       },
       {
-        "id": "32095595-0907-489b-bbb8-25ef5c047fd6",
-        "name": "营销",
+        "id": "1d6c78cc-4ab8-447e-9860-369e7561547f",
+        "name": "商业计划",
         "color": "#3B82F6"
       },
       {
-        "id": "1924243b-7cb4-4ebf-9373-889c590e8bb5",
+        "id": "2e597be0-5b7e-4c71-9d03-950d01700d6a",
+        "name": "PRD",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "5865a0e0-f815-4b51-99e0-4b250336b081",
+        "name": "python",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "a4f61a02-fe52-4b8c-83a6-67d38a8ee0f7",
+        "name": "组件",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "4a9c4d9d-e8a8-44a1-91b1-b82bca8f80a4",
         "name": "设计",
         "color": "#3B82F6"
       },
       {
-        "id": "1a47e83e-7a14-44cb-9cd7-96a1320ccab3",
+        "id": "a3d95284-28c9-47fb-84c5-09177239eb23",
+        "name": "react",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "0dfeb55d-1d30-45ca-ac98-a7678c680bf3",
+        "name": "创业",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "78b6bf69-8beb-4d9c-bba1-ab07131814cd",
+        "name": "视频",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "7ce255ff-3f5a-4c06-9e16-646bcaa0bfe2",
+        "name": "故事",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "b0834040-71eb-443c-98b8-490fb494817a",
+        "name": "创意",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "9340596c-dbc8-429b-9ec1-7125c835fc76",
+        "name": "代码审查",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "1e29cf45-6662-46cb-b20d-7292c7e22191",
+        "name": "产品",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "aa0e7769-1b29-439e-b9a9-e624b33df23b",
+        "name": "投资",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "3759da04-b3bd-43f5-bbe9-0fc7281db63f",
+        "name": "AI",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "c82c495b-6095-4091-8706-89fb8c87d8fb",
         "name": "创作",
         "color": "#3B82F6"
       },
       {
-        "id": "d32544ed-4c22-4280-8518-22559574a424",
-        "name": "创业",
+        "id": "db22d965-a0cc-4f9f-92ea-862ca1139394",
+        "name": "技术",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "9a76bf84-e3f0-46c9-85f0-808dbeba686c",
+        "name": "机器学习",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "0d410edd-588a-4c8d-80a2-91b958a941be",
+        "name": "模型",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "692de14b-9a9c-4a3c-a096-af0c8001ab0a",
+        "name": "小说",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "96d830ba-06f5-471d-bd2f-e2beb54dc443",
+        "name": "系统设计",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "1661e746-1f1f-4536-be5c-53c98521201e",
+        "name": "优化",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "f382b02b-6482-473e-9a0c-2382308a3908",
+        "name": "typescript",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "54fc3180-f5c5-4f75-ae92-c44f76915c5f",
+        "name": "广告",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "40f65d8c-d31e-4567-84f7-d6060c694328",
+        "name": "需求",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "8d29559a-c57a-4917-b12c-7b97170dad93",
+        "name": "UI",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "9c114b95-8c06-4299-ae78-ca894b2138eb",
+        "name": "品牌",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "7a9722e9-1e59-4906-a708-d645ffb57b78",
+        "name": "营销",
         "color": "#3B82F6"
       }
     ],
     "settings": {
-      "last_updated": "2025-09-29T18:38:27.968099",
+      "last_updated": "2025-09-29T18:43:41.516470",
       "version": "2.0"
     }
   }

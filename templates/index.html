@@ -71,20 +71,10 @@
             margin-bottom: 0;
         }
 
-        /* 分类层级指示器 */
+        /* 移除分类层级指示器，改为使用缩进来表示层级关系 */
         .category-level-indicator {
-            display: inline-block;
-            width: 4px;
-            height: 4px;
-            background-color: currentColor;
-            border-radius: 50%;
-            margin-right: 4px;
+            display: none;
         }
-
-        .category-level-2 .category-level-indicator { opacity: 0.8; }
-        .category-level-3 .category-level-indicator { opacity: 0.6; }
-        .category-level-4 .category-level-indicator { opacity: 0.4; }
-        .category-level-5 .category-level-indicator { opacity: 0.2; }
 
         /* 拖拽相关样式 */
         .category-item {
@@ -127,6 +117,65 @@
 
         .drag-handle:active {
             cursor: grabbing;
+        }
+
+        /* 分类名称文本省略和悬停提示 */
+        .category-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+            display: inline-block;
+        }
+
+        .category-btn .category-text {
+            max-width: 150px;
+        }
+
+        .category-submenu .category-btn .category-text {
+            max-width: 160px;
+        }
+
+        /* 提示框样式 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #1f2937;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1001;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            font-size: 14px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
@@ -737,7 +786,10 @@
                     option.innerHTML = `
                         ${level > 0 ? `<span class="category-level-indicator"></span>` : ''}
                         <span class="text-2xl">${getCategoryIcon(category.name)}</span>
-                        <span class="text-gray-700">${category.name}</span>
+                        <span class="tooltip text-gray-700">
+                            <span class="category-text">${category.name}</span>
+                            ${category.name.length > 20 ? `<span class="tooltip-text">${category.name}</span>` : ''}
+                        </span>
                         ${category.path && category.path !== category.name ?
                             `<span class="text-xs text-gray-400 ml-auto">/${category.path}</span>` : ''}
                     `;
@@ -867,7 +919,10 @@
                                         class="category-btn filter-button px-4 py-2 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm"
                                         data-category="${category.name}" data-category-id="${category.id}">
                                     <div class="w-3 h-3 rounded-full" style="background-color: ${category.color}"></div>
-                                    <span class="font-medium">${category.name}</span>
+                                    <span class="tooltip font-medium">
+                                        <span class="category-text">${category.name}</span>
+                                        ${category.name.length > 15 ? `<span class="tooltip-text">${category.name}</span>` : ''}
+                                    </span>
                                     <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${count}</span>
                                     ${category.children && category.children.length > 0 ? '<span class="text-xs text-gray-400">▼</span>' : ''}
                                 </button>
@@ -889,26 +944,35 @@
                 }).join('');
             }
 
-            function renderSubmenu(subcategories) {
+            function renderSubmenu(subcategories, level = 1) {
                 return subcategories.map(subcat => {
                     const subcatIds = [subcat.id, ...getAllDescendantIds(subcat)];
                     const subCount = prompts.filter(p =>
                         subcatIds.includes(p.category_id) || p.category === subcat.name
                     ).length;
 
+                    // 计算缩进
+                    const indentPadding = level * 12; // 每级12px缩进
+                    const levelIndicator = level > 1 ? '<span class="category-level-indicator"></span>' : '';
+
                     let html = `
                         <button onclick="filterByCategory('${subcat.name}', '${subcat.id}')"
-                                class="category-btn filter-button px-3 py-2 rounded-lg text-sm bg-gray-50 border border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2"
-                                data-category="${subcat.name}" data-category-id="${subcat.id}">
+                                class="category-btn filter-button px-3 py-2 rounded-lg text-sm bg-gray-50 border border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 category-level-${Math.min(level + 1, 5)}"
+                                data-category="${subcat.name}" data-category-id="${subcat.id}"
+                                style="padding-left: ${8 + indentPadding}px;">
+                            ${levelIndicator}
                             <div class="w-2 h-2 rounded-full" style="background-color: ${subcat.color}"></div>
-                            <span class="font-medium">${subcat.name}</span>
+                            <span class="tooltip font-medium">
+                                <span class="category-text">${subcat.name}</span>
+                                ${subcat.name.length > 12 ? `<span class="tooltip-text">${subcat.name}</span>` : ''}
+                            </span>
                             <span class="bg-white text-gray-600 px-1 py-0.5 rounded text-xs ml-auto">${subCount}</span>
                         </button>
                     `;
 
                     // 如果有更深层的子分类，递归添加
                     if (subcat.children && subcat.children.length > 0) {
-                        html += renderSubmenu(subcat.children);
+                        html += renderSubmenu(subcat.children, level + 1);
                     }
 
                     return html;
@@ -1085,7 +1149,10 @@
                     <div class="mb-4">
                         <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200"
                               onclick="filterByCategory('${prompt.category}', '${prompt.category_id || ''}')">
-                            📁 ${escapeHtml(prompt.category_path || prompt.category)}
+                            📁 <span class="tooltip">
+                                <span class="category-text">${escapeHtml(prompt.category_path || prompt.category)}</span>
+                                ${(prompt.category_path || prompt.category).length > 15 ? `<span class="tooltip-text">${escapeHtml(prompt.category_path || prompt.category)}</span>` : ''}
+                            </span>
                         </span>
                     </div>
                     
@@ -1701,7 +1768,11 @@ code block
             document.getElementById('detailTitle').textContent = prompt.title;
             document.getElementById('detailDescription').textContent = prompt.description || '无描述';
             document.getElementById('detailContent').textContent = prompt.content;
-            document.getElementById('detailCategory').textContent = '📁 ' + prompt.category;
+            const categoryText = prompt.category_path || prompt.category;
+            document.getElementById('detailCategory').innerHTML = `📁 <span class="tooltip">
+                <span class="category-text">${escapeHtml(categoryText)}</span>
+                ${categoryText.length > 15 ? `<span class="tooltip-text">${escapeHtml(categoryText)}</span>` : ''}
+            </span>`;
             document.getElementById('detailUsageCount').textContent = new Date(prompt.created_at).toLocaleDateString();
 
             // 显示标签
@@ -2487,7 +2558,10 @@ code block
                             <span class="drag-handle text-gray-400" style="cursor: grab;">⋮⋮</span>
                             ${levelIndicator}
                             <div class="w-4 h-4 rounded-full" style="background-color: ${category.color}"></div>
-                            <span class="font-medium">${escapeHtml(category.name)}</span>
+                            <span class="tooltip font-medium">
+                                <span class="category-text">${escapeHtml(category.name)}</span>
+                                ${category.name.length > 20 ? `<span class="tooltip-text">${escapeHtml(category.name)}</span>` : ''}
+                            </span>
                             <span class="text-xs text-gray-400">${category.path}</span>
                             <span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>
                             <span class="text-xs text-gray-400">Level ${category.level || 1}</span>
