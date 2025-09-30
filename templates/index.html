@@ -790,8 +790,7 @@
                             <span class="category-text">${category.name}</span>
                             ${category.name.length > 20 ? `<span class="tooltip-text">${category.name}</span>` : ''}
                         </span>
-                        ${category.path && category.path !== category.name ?
-                            `<span class="text-xs text-gray-400 ml-auto">/${category.path}</span>` : ''}
+                        <!-- 移除分类路径显示 -->
                     `;
                     option.onclick = () => selectCategory(category.name, category.id);
                     categoryList.appendChild(option);
@@ -852,14 +851,8 @@
             const dropdownList = document.getElementById('categoryDropdownList');
             const dropdownIcon = document.getElementById('categoryDropdownIcon');
 
-            // 查找分类路径
-            let categoryPath = categoryName;
-            if (categoryId) {
-                const category = categories.find(c => c.id === categoryId);
-                if (category && category.path) {
-                    categoryPath = category.path;
-                }
-            }
+            // 只使用分类名称，不使用路径
+            const displayName = categoryName;
 
             // 更新值和显示文本
             hiddenInput.value = categoryName;
@@ -867,7 +860,7 @@
             selectedText.innerHTML = `
                 <span class="flex items-center gap-2">
                     <span class="text-xl">${getCategoryIcon(categoryName)}</span>
-                    <span>${categoryPath}</span>
+                    <span>${displayName}</span>
                 </span>
             `;
 
@@ -1150,8 +1143,8 @@
                         <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200"
                               onclick="filterByCategory('${prompt.category}', '${prompt.category_id || ''}')">
                             📁 <span class="tooltip">
-                                <span class="category-text">${escapeHtml(prompt.category_path || prompt.category)}</span>
-                                ${(prompt.category_path || prompt.category).length > 15 ? `<span class="tooltip-text">${escapeHtml(prompt.category_path || prompt.category)}</span>` : ''}
+                                <span class="category-text">${escapeHtml(prompt.category)}</span>
+                                ${prompt.category.length > 15 ? `<span class="tooltip-text">${escapeHtml(prompt.category)}</span>` : ''}
                             </span>
                         </span>
                     </div>
@@ -1768,7 +1761,7 @@ code block
             document.getElementById('detailTitle').textContent = prompt.title;
             document.getElementById('detailDescription').textContent = prompt.description || '无描述';
             document.getElementById('detailContent').textContent = prompt.content;
-            const categoryText = prompt.category_path || prompt.category;
+            const categoryText = prompt.category;
             document.getElementById('detailCategory').innerHTML = `📁 <span class="tooltip">
                 <span class="category-text">${escapeHtml(categoryText)}</span>
                 ${categoryText.length > 15 ? `<span class="tooltip-text">${escapeHtml(categoryText)}</span>` : ''}
@@ -2562,9 +2555,9 @@ code block
                                 <span class="category-text">${escapeHtml(category.name)}</span>
                                 ${category.name.length > 20 ? `<span class="tooltip-text">${escapeHtml(category.name)}</span>` : ''}
                             </span>
-                            <span class="text-xs text-gray-400">${category.path}</span>
-                            <span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>
-                            <span class="text-xs text-gray-400">Level ${category.level || 1}</span>
+                            <!-- 移除分类路径显示 -->
+                            <!--<span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>-->
+                            <!--<span class="text-xs text-gray-400">Level ${category.level || 1}</span>-->
                         </div>
                         <div class="flex gap-2">
                             ${(category.level || 1) < 5 ? `

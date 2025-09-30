@@ -158,13 +158,13 @@
       "description": "123",
       "category": "瓦巍峨瓦巍峨",
       "category_id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
-      "category_path": "教育/其巍峨其巍峨/瓦巍峨瓦巍峨",
+      "category_path": "教育/瓦巍峨瓦巍峨",
       "tags": [
         "创意"
       ],
       "usage_count": 0,
       "created_at": "2025-09-29T18:43:41.516454",
-      "updated_at": "2025-09-29T18:43:41.516466"
+      "updated_at": "2025-09-30T08:41:05.681848"
     }
   ],
   "metadata": {
@@ -233,15 +233,6 @@
         "path": "其他"
       },
       {
-        "id": "5007b7b5-5f9e-4a69-9d21-881ee1e8794e",
-        "name": "1",
-        "color": "#3b82f6",
-        "description": "",
-        "parent_id": null,
-        "level": 1,
-        "path": "1"
-      },
-      {
         "id": "b66c8c1d-70da-4fd3-8a07-328c2bb31312",
         "name": "其巍峨其巍峨",
         "color": "#3b82f6",
@@ -255,9 +246,9 @@
         "name": "瓦巍峨瓦巍峨",
         "color": "#3b82f6",
         "description": "",
-        "parent_id": "b66c8c1d-70da-4fd3-8a07-328c2bb31312",
-        "level": 3,
-        "path": "教育/其巍峨其巍峨/瓦巍峨瓦巍峨"
+        "parent_id": "6",
+        "level": 2,
+        "path": "教育/瓦巍峨瓦巍峨"
       }
     ],
     "tags": [
@@ -413,7 +404,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-09-29T18:43:41.516470",
+      "last_updated": "2025-09-30T08:41:09.880051",
       "version": "2.0"
     }
   }
