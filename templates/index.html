@@ -1019,6 +1019,50 @@
             return descendants;
         }
 
+        function getCategoryPath(categoryId, categoryName) {
+            // 如果没有分类ID，直接返回分类名
+            if (!categoryId) {
+                return categoryName;
+            }
+
+            // 查找分类
+            const findCategory = (id, cats) => {
+                for (const cat of cats) {
+                    if (cat.id === id) {
+                        return cat;
+                    }
+                    if (cat.children) {
+                        const found = findCategory(id, cat.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const category = findCategory(categoryId, categoriesTree);
+            if (!category) {
+                return categoryName;
+            }
+
+            // 构建路径
+            const buildPath = (cat, path = []) => {
+                path.unshift(cat.name);
+                
+                // 查找父分类
+                if (cat.parent_id) {
+                    const parent = findCategory(cat.parent_id, categoriesTree);
+                    if (parent) {
+                        return buildPath(parent, path);
+                    }
+                }
+                
+                return path;
+            };
+
+            const pathArray = buildPath(category);
+            return pathArray.join(' / ');
+        }
+
         function renderTagButtons() {
             const container = document.getElementById('tagButtons');
             const toggleContainer = document.getElementById('tagToggleContainer');
@@ -1175,8 +1219,8 @@
                         <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200"
                               onclick="filterByCategory('${prompt.category}', '${prompt.category_id || ''}')">
                             📁 <span class="tooltip">
-                                <span class="category-text">${escapeHtml(prompt.category)}</span>
-                                ${prompt.category.length > 15 ? `<span class="tooltip-text">${escapeHtml(prompt.category)}</span>` : ''}
+                                <span class="category-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category))}</span>
+                                ${getCategoryPath(prompt.category_id, prompt.category).length > 15 ? `<span class="tooltip-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category))}</span>` : ''}
                             </span>
                         </span>
                     </div>
