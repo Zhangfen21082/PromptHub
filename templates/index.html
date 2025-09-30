@@ -27,6 +27,30 @@
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
+        /* 分类按钮对齐修复 */
+        .category-btn {
+            align-items: center;
+        }
+        .category-btn .w-3,
+        .category-btn .w-2 {
+            align-self: center;
+        }
+        .category-btn .tooltip {
+            align-self: center;
+            line-height: 1.2;
+        }
+        .category-btn .category-count {
+            align-self: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            line-height: 1;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
 
         /* 分层分类样式 */
         .category-tree {
@@ -911,13 +935,13 @@
                                 <button onclick="filterByCategory('${category.name}', '${category.id}')"
                                         class="category-btn filter-button px-4 py-2 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm"
                                         data-category="${category.name}" data-category-id="${category.id}">
-                                    <div class="w-3 h-3 rounded-full" style="background-color: ${category.color}"></div>
-                                    <span class="tooltip font-medium">
+                                    <div class="w-3 h-3 rounded-full flex-shrink-0 self-center" style="background-color: ${category.color}"></div>
+                                    <span class="tooltip font-medium flex-grow self-center">
                                         <span class="category-text">${category.name}</span>
                                         ${category.name.length > 15 ? `<span class="tooltip-text">${category.name}</span>` : ''}
                                     </span>
-                                    <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${count}</span>
-                                    ${category.children && category.children.length > 0 ? '<span class="text-xs text-gray-400">▼</span>' : ''}
+                                    <span class="category-count bg-gray-100 text-gray-600 rounded-full flex-shrink-0 self-center">${count}</span>
+                                    ${category.children && category.children.length > 0 ? '<span class="text-xs text-gray-400 flex-shrink-0 self-center">▼</span>' : ''}
                                 </button>
                         `;
 
@@ -954,12 +978,12 @@
                                 data-category="${subcat.name}" data-category-id="${subcat.id}"
                                 style="padding-left: ${8 + indentPadding}px;">
                             ${levelIndicator}
-                            <div class="w-2 h-2 rounded-full" style="background-color: ${subcat.color}"></div>
-                            <span class="tooltip font-medium">
+                            <div class="w-2 h-2 rounded-full flex-shrink-0 self-center" style="background-color: ${subcat.color}"></div>
+                            <span class="tooltip font-medium flex-grow self-center">
                                 <span class="category-text">${subcat.name}</span>
                                 ${subcat.name.length > 12 ? `<span class="tooltip-text">${subcat.name}</span>` : ''}
                             </span>
-                            <span class="bg-white text-gray-600 px-1 py-0.5 rounded text-xs ml-auto">${subCount}</span>
+                            <span class="category-count bg-white text-gray-600 rounded flex-shrink-0 self-center">${subCount}</span>
                         </button>
                     `;
 
