@@ -551,9 +551,12 @@
                         
                         <input type="hidden" id="tags" name="tags">
                     </div>
-                    <div class="flex justify-center pt-6">
+                    <div class="flex justify-center gap-3 pt-6">
                         <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg font-medium">
                             💾 保存提示词
+                        </button>
+                        <button type="button" id="saveAsVersionBtn" onclick="showSaveAsVersionModal()" style="display: none;" class="px-8 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-lg font-medium">
+                            📌 保存为新版本
                         </button>
                     </div>
                 </form>
@@ -757,6 +760,66 @@
         <span id="toastMessage"></span>
     </div>
 
+    <!-- 保存为新版本模态框 -->
+    <div id="saveAsVersionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-gray-200">
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">📌</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">保存为新版本</h3>
+                    <p class="text-gray-600 mt-2">为此提示词创建一个新版本</p>
+                </div>
+
+                <form id="versionForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">版本号</label>
+                        <input type="text" id="versionNumber" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="例如: 1.1, 2.0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">修改说明</label>
+                        <textarea id="changeNote" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="描述此版本的主要改动..."></textarea>
+                    </div>
+                </form>
+
+                <div class="flex gap-3 mt-6">
+                    <button onclick="hideSaveAsVersionModal()" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium">
+                        ❌ 取消
+                    </button>
+                    <button onclick="saveAsNewVersion()" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-200 shadow-lg font-medium">
+                        ✅ 保存版本
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版本查看窗口 -->
+    <div id="versionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 relative resize overflow-auto" style="resize: both; width: 800px; height: 600px; min-width: 500px; min-height: 400px; max-width: 95vw; max-height: 95vh;">
+            <button onclick="hideVersionModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 hover:from-gray-200 hover:to-gray-300 hover:text-gray-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md z-10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="p-8 h-full overflow-y-auto">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">📚 版本历史</h3>
+                    <p class="text-gray-600 mt-2">查看和管理提示词的所有版本</p>
+                    <div class="mt-2 text-sm text-blue-600">
+                        当前版本: <span id="currentVersionDisplay" class="font-semibold"></span>
+                    </div>
+                </div>
+
+                <!-- 版本列表 -->
+                <div id="versionList" class="space-y-3">
+                    <!-- 动态加载版本卡片 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let prompts = [];
         let categories = [];
@@ -821,6 +884,9 @@
 
                 // 提取所有唯一标签
                 allTags = [...new Set(prompts.flatMap(p => p.tags || []))];
+
+                // 清空版本下拉缓存，确保数据更新后重新加载
+                versionDropdownCache = {};
 
                 renderPrompts();
                 renderCategoryButtons();
@@ -1219,15 +1285,24 @@
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-xl font-bold text-gray-900 leading-tight">${escapeHtml(prompt.title)}</h3>
                         <div class="flex gap-2">
+                            <div class="relative version-dropdown-container">
+                                <button onmouseenter="loadVersionDropdown('${prompt.id}')" onclick="toggleVersionDropdown(event, '${prompt.id}')"
+                                        class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 flex items-center gap-1" title="版本管理">
+                                    📚 <span class="text-xs">${prompt.current_version || '1.0'}</span>
+                                </button>
+                                <div id="versionDropdown_${prompt.id}" class="hidden absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[180px] z-50" onmouseleave="hideVersionDropdownDelayed('${prompt.id}')">
+                                    <!-- 动态加载版本列表 -->
+                                </div>
+                            </div>
                             <button onclick="copyPromptContent('${prompt.id}')"
                                     class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200" title="复制内容">
                                 📋
                             </button>
-                            <button onclick="showEditModal('${prompt.id}')" 
+                            <button onclick="showEditModal('${prompt.id}')"
                                     class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200" title="编辑">
                                 ✏️
                             </button>
-                            <button onclick="deletePrompt('${prompt.id}')" 
+                            <button onclick="deletePrompt('${prompt.id}')"
                                     class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200" title="删除">
                                 🗑️
                             </button>
@@ -1457,34 +1532,38 @@
         function showEditModal(promptId) {
             const prompt = prompts.find(p => p.id === promptId);
             if (!prompt) return;
-            
+
             isEditing = true;
             currentEditingId = promptId;
+            currentEditingPromptId = promptId; // 设置当前编辑的提示词ID,用于版本控制
             selectedTags = prompt.tags ? [...prompt.tags] : [];
-            
+
             // 设置模态框标题和描述
             document.getElementById('modalTitle').textContent = '✏️ 编辑提示词';
             document.getElementById('modalDescription').textContent = '修改提示词的信息';
-            
+
             // 填充表单数据
             document.getElementById('title').value = prompt.title;
             document.getElementById('content').value = prompt.content;
             document.getElementById('description').value = prompt.description || '';
-            
+
             // 设置分类下拉框
             selectCategory(prompt.category);
-            
+
             // 自动检测内容格式
             const detectedFormat = detectContentFormat(prompt.content);
             setContentFormat(detectedFormat);
             updateCharCount();
-            
+
             // 渲染标签
             renderSelectedTags();
-            
+
             // 渲染现有标签供选择
             renderExistingTags();
-            
+
+            // 显示"保存为新版本"按钮
+            document.getElementById('saveAsVersionBtn').style.display = 'block';
+
             // 显示模态框
             document.getElementById('modal').style.display = 'flex';
         }
@@ -1493,8 +1572,11 @@
             document.getElementById('modal').style.display = 'none';
             isEditing = false;
             currentEditingId = null;
+            currentEditingPromptId = null; // 清空当前编辑的提示词ID
             selectedTags = [];
             currentContentFormat = 'text';
+            // 隐藏"保存为新版本"按钮
+            document.getElementById('saveAsVersionBtn').style.display = 'none';
         }
 
         // 内容格式处理功能
@@ -3029,6 +3111,301 @@ code block
             } catch (error) {
                 console.error('清空数据失败:', error);
                 showToast('清空数据失败', 'error');
+            }
+        }
+
+        // ============ 版本控制功能 ============
+        let currentEditingPromptId = null;
+        let versionDropdownCache = {}; // 缓存版本数据
+        let hideDropdownTimer = null;
+
+        // 加载版本下拉菜单
+        async function loadVersionDropdown(promptId) {
+            // 如果已经加载过，直接显示
+            if (versionDropdownCache[promptId]) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/prompts/${promptId}/versions`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+                const currentVersion = data.current_version;
+                const versions = data.versions;
+
+                // 按时间倒序排序，获取最近的5个版本
+                const sortedVersions = versions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                const recentVersions = sortedVersions.slice(0, 5);
+                const hasMore = versions.length > 5;
+
+                const dropdown = document.getElementById(`versionDropdown_${promptId}`);
+                dropdown.innerHTML = `
+                    ${recentVersions.map(version => `
+                        <button onclick="quickSwitchVersion('${promptId}', '${version.version}')"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors flex items-center justify-between ${version.version === currentVersion ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700'}">
+                            <span>版本 ${version.version}</span>
+                            ${version.version === currentVersion ? '<span class="text-xs">✓</span>' : ''}
+                        </button>
+                    `).join('')}
+                    <div class="border-t border-gray-200"></div>
+                    <button onclick="showVersionHistory('${promptId}')" class="w-full px-4 py-2 text-left text-sm text-purple-600 hover:bg-purple-50 rounded-b-lg transition-colors font-medium">
+                        📖 查看${hasMore ? '更多' : '所有'}版本
+                    </button>
+                `;
+
+                versionDropdownCache[promptId] = true;
+            } catch (error) {
+                console.error('加载版本列表失败:', error);
+            }
+        }
+
+        // 显示/隐藏版本下拉菜单
+        function toggleVersionDropdown(event, promptId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`versionDropdown_${promptId}`);
+            // 关闭其他所有下拉菜单
+            document.querySelectorAll('[id^="versionDropdown_"]').forEach(d => {
+                if (d.id !== `versionDropdown_${promptId}`) {
+                    d.classList.add('hidden');
+                }
+            });
+            dropdown.classList.toggle('hidden');
+        }
+
+        // 延迟隐藏下拉菜单
+        function hideVersionDropdownDelayed(promptId) {
+            hideDropdownTimer = setTimeout(() => {
+                const dropdown = document.getElementById(`versionDropdown_${promptId}`);
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
+                }
+            }, 200);
+        }
+
+        // 快速切换版本（不弹确认框）
+        async function quickSwitchVersion(promptId, version) {
+            try {
+                const response = await fetch(`/api/prompts/${promptId}/versions/${version}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showToast('版本切换成功！', 'success');
+                    // 清除缓存，重新加载
+                    versionDropdownCache[promptId] = false;
+                    await loadData();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '切换版本失败', 'error');
+                }
+            } catch (error) {
+                console.error('切换版本失败:', error);
+                showToast('切换版本失败', 'error');
+            }
+        }
+
+        // 点击页面其他地方关闭下拉菜单
+        document.addEventListener('click', function() {
+            document.querySelectorAll('[id^="versionDropdown_"]').forEach(d => {
+                d.classList.add('hidden');
+            });
+        });
+
+        // 显示保存为新版本弹窗
+        function showSaveAsVersionModal() {
+            document.getElementById('saveAsVersionModal').style.display = 'flex';
+            // 自动生成建议的版本号
+            const currentPrompt = prompts.find(p => p.id === currentEditingPromptId);
+            if (currentPrompt) {
+                const currentVersion = currentPrompt.current_version || '1.0';
+                const parts = currentVersion.split('.');
+                if (parts.length >= 2) {
+                    const nextVersion = `${parts[0]}.${parseInt(parts[1]) + 1}`;
+                    document.getElementById('versionNumber').value = nextVersion;
+                }
+            }
+        }
+
+        function hideSaveAsVersionModal() {
+            document.getElementById('saveAsVersionModal').style.display = 'none';
+            document.getElementById('versionNumber').value = '';
+            document.getElementById('changeNote').value = '';
+        }
+
+        // 保存为新版本
+        async function saveAsNewVersion() {
+            const versionNumber = document.getElementById('versionNumber').value.trim();
+            const changeNote = document.getElementById('changeNote').value.trim();
+
+            if (!versionNumber || !changeNote) {
+                showToast('请填写版本号和修改说明', 'error');
+                return;
+            }
+
+            if (!currentEditingPromptId) {
+                showToast('无法获取当前编辑的提示词', 'error');
+                return;
+            }
+
+            try {
+                const title = document.getElementById('title').value;
+                const content = document.getElementById('content').value;
+                const description = document.getElementById('description').value;
+
+                const response = await fetch(`/api/prompts/${currentEditingPromptId}/versions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        version: versionNumber,
+                        title: title,
+                        content: content,
+                        description: description,
+                        change_note: changeNote
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('新版本保存成功！', 'success');
+                    hideSaveAsVersionModal();
+                    hideModal();
+                    await loadData();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '保存版本失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存版本失败:', error);
+                showToast('保存版本失败', 'error');
+            }
+        }
+
+        // 显示版本历史窗口
+        async function showVersionHistory(promptId) {
+            currentEditingPromptId = promptId;
+            try {
+                const response = await fetch(`/api/prompts/${promptId}/versions`);
+                if (!response.ok) {
+                    throw new Error('获取版本信息失败');
+                }
+
+                const data = await response.json();
+                const currentVersion = data.current_version;
+                const versions = data.versions;
+
+                document.getElementById('currentVersionDisplay').textContent = currentVersion;
+
+                // 渲染版本列表
+                const versionList = document.getElementById('versionList');
+                versionList.innerHTML = versions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(version => `
+                    <div class="border border-gray-200 rounded-xl p-4 ${version.version === currentVersion ? 'bg-blue-50 border-blue-300' : 'bg-white'}">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold text-gray-900">版本 ${version.version}</span>
+                                ${version.version === currentVersion ? '<span class="px-2 py-1 bg-blue-500 text-white text-xs rounded-full">当前版本</span>' : ''}
+                            </div>
+                            <span class="text-xs text-gray-500">${new Date(version.created_at).toLocaleString()}</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-1">标题:</div>
+                            <div class="text-sm text-gray-800">${escapeHtml(version.title)}</div>
+                        </div>
+
+                        ${version.description ? `
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-1">描述:</div>
+                            <div class="text-sm text-gray-600 italic">${escapeHtml(version.description)}</div>
+                        </div>
+                        ` : ''}
+
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-1">内容预览:</div>
+                            <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-800 max-h-24 overflow-y-auto">
+                                ${escapeHtml(version.content.substring(0, 200))}${version.content.length > 200 ? '...' : ''}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-1">修改说明:</div>
+                            <div class="text-sm text-gray-600">${escapeHtml(version.change_note)}</div>
+                        </div>
+
+                        <div class="flex gap-2 mt-3">
+                            ${version.version !== currentVersion ? `
+                                <button onclick="switchToVersion('${promptId}', '${version.version}')"
+                                        class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                                    🔄 切换到此版本
+                                </button>
+                                <button onclick="deleteVersion('${promptId}', '${version.version}')"
+                                        class="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('versionModal').style.display = 'flex';
+            } catch (error) {
+                console.error('获取版本历史失败:', error);
+                showToast('获取版本历史失败', 'error');
+            }
+        }
+
+        function hideVersionModal() {
+            document.getElementById('versionModal').style.display = 'none';
+            currentEditingPromptId = null;
+        }
+
+        // 切换到指定版本（不弹确认框）
+        async function switchToVersion(promptId, version) {
+            try {
+                const response = await fetch(`/api/prompts/${promptId}/versions/${version}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showToast('版本切换成功！', 'success');
+                    hideVersionModal();
+                    await loadData();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '切换版本失败', 'error');
+                }
+            } catch (error) {
+                console.error('切换版本失败:', error);
+                showToast('切换版本失败', 'error');
+            }
+        }
+
+        // 删除指定版本
+        async function deleteVersion(promptId, version) {
+            try {
+                const confirmed = await customConfirm(
+                    '确认删除版本？',
+                    `删除版本 ${version} 后将无法恢复。`
+                );
+
+                if (!confirmed) return;
+
+                const response = await fetch(`/api/prompts/${promptId}/versions/${version}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showToast('版本删除成功！', 'success');
+                    // 重新加载版本历史
+                    await showVersionHistory(promptId);
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || '删除版本失败', 'error');
+                }
+            } catch (error) {
+                console.error('删除版本失败:', error);
+                showToast('删除版本失败', 'error');
             }
         }
 

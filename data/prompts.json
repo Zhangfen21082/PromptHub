@@ -29,7 +29,18 @@
       ],
       "usage_count": 28,
       "created_at": "2025-08-16T10:00:00.000000",
-      "updated_at": "2025-08-16T15:13:09.297637"
+      "updated_at": "2025-08-16T15:13:09.297637",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "Python代码优化专家",
+          "content": "你是一个Python代码优化专家。请分析以下代码并提供优化建议：\n1. 性能优化方面\n2. 代码可读性\n3. 最佳实践\n\n请提供详细的分析和改进后的代码示例。",
+          "description": "专门用于Python代码审查和优化的提示词",
+          "created_at": "2025-08-16T10:00:00.000000",
+          "change_note": "初始版本"
+        }
+      ],
+      "current_version": "1.0"
     },
     {
       "id": "2",
@@ -74,7 +85,18 @@
       ],
       "usage_count": 18,
       "created_at": "2025-08-16T10:06:00.000000",
-      "updated_at": "2025-08-16T14:36:32.879509"
+      "updated_at": "2025-08-16T14:36:32.879509",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "商业计划书撰写专家",
+          "content": "作为商业咨询专家，请帮我撰写商业计划书：\n\n项目名称：{项目名称}\n行业领域：{行业}\n目标市场：{市场}\n\n请包含：\n1. 执行摘要\n2. 市场分析\n3. 竞争分析\n4. 营销策略\n5. 财务预测\n6. 风险评估\n7. 实施计划",
+          "description": "专业的商业计划书撰写指导",
+          "created_at": "2025-08-16T10:06:00.000000",
+          "change_note": "初始版本"
+        }
+      ],
+      "current_version": "1.0"
     },
     {
       "id": "10",
@@ -119,7 +141,18 @@
       ],
       "usage_count": 19,
       "created_at": "2025-08-16T10:13:00.000000",
-      "updated_at": "2025-08-16T10:13:00.000000"
+      "updated_at": "2025-08-16T10:13:00.000000",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "UI/UX设计评审专家",
+          "content": "你是UI/UX设计专家。请评审以下设计方案：\n\n设计类型：{设计类型}\n目标用户：{用户群体}\n使用场景：{场景描述}\n\n请从以下角度评审：\n1. 用户体验流程\n2. 界面视觉设计\n3. 交互设计合理性\n4. 可用性和可访问性\n5. 设计一致性\n6. 改进建议",
+          "description": "UI/UX设计的专业评审和改进建议",
+          "created_at": "2025-08-16T10:13:00.000000",
+          "change_note": "初始版本"
+        }
+      ],
+      "current_version": "1.0"
     },
     {
       "id": "15",
@@ -157,14 +190,35 @@
       "content": "123",
       "description": "123",
       "category": "瓦巍峨瓦巍峨",
-      "category_id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
+      "category_id": "",
       "category_path": "教育/瓦巍峨瓦巍峨",
       "tags": [
         "123"
       ],
       "usage_count": 0,
       "created_at": "2025-09-30T09:23:20.280420",
-      "updated_at": "2025-09-30T09:23:20.280431"
+      "updated_at": "2025-09-30T16:07:44.552396",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "123",
+          "content": "123",
+          "description": "123",
+          "created_at": "2025-09-30T09:23:20.280420",
+          "change_note": "初始版本"
+        },
+        {
+          "version": "1.1",
+          "title": "12345",
+          "content": "12345",
+          "description": "12345",
+          "created_at": "2025-09-30T15:52:46.433035",
+          "change_note": "1234"
+        }
+      ],
+      "current_version": "1.0",
+      "has_unsaved_changes": false,
+      "unsaved_changes": null
     },
     {
       "id": "74febdf5-9c41-4e1c-9b3a-9b7b76c4ed77",
@@ -442,7 +496,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-09-30T11:06:11.426438",
+      "last_updated": "2025-09-30T16:07:44.552410",
       "version": "2.0"
     }
   }

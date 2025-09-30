@@ -212,7 +212,18 @@ class FileStorage:
             "tags": prompt_data.get("tags", []),
             "usage_count": 0,
             "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
+            "updated_at": datetime.now().isoformat(),
+            "current_version": "1.0",
+            "versions": [
+                {
+                    "version": "1.0",
+                    "title": prompt_data["title"],
+                    "content": prompt_data["content"],
+                    "description": prompt_data.get("description", ""),
+                    "created_at": datetime.now().isoformat(),
+                    "change_note": "初始版本"
+                }
+            ]
         }
 
         data["prompts"].append(new_prompt)
@@ -1085,6 +1096,136 @@ def clear_all_data():
         })
     except Exception as e:
         return jsonify({"error": f"清空数据失败: {str(e)}"}), 500
+
+# 版本控制API
+@app.route('/api/prompts/<prompt_id>/versions', methods=['GET'])
+def get_prompt_versions(prompt_id):
+    """获取提示词的所有版本"""
+    data = storage._load_data()
+    prompt = next((p for p in data["prompts"] if p["id"] == prompt_id), None)
+    if not prompt:
+        return jsonify({"error": "提示词不存在"}), 404
+
+    # 确保有版本信息
+    if "versions" not in prompt:
+        prompt["versions"] = [{
+            "version": "1.0",
+            "title": prompt["title"],
+            "content": prompt["content"],
+            "description": prompt.get("description", ""),
+            "created_at": prompt.get("created_at", datetime.now().isoformat()),
+            "change_note": "初始版本"
+        }]
+        prompt["current_version"] = "1.0"
+        storage._save_data(data)
+
+    return jsonify({
+        "current_version": prompt.get("current_version", "1.0"),
+        "versions": prompt.get("versions", [])
+    })
+
+@app.route('/api/prompts/<prompt_id>/versions', methods=['POST'])
+def create_prompt_version(prompt_id):
+    """创建新版本"""
+    try:
+        data = storage._load_data()
+        prompt = next((p for p in data["prompts"] if p["id"] == prompt_id), None)
+        if not prompt:
+            return jsonify({"error": "提示词不存在"}), 404
+
+        # 确保有版本列表
+        if "versions" not in prompt:
+            prompt["versions"] = [{
+                "version": "1.0",
+                "title": prompt["title"],
+                "content": prompt["content"],
+                "description": prompt.get("description", ""),
+                "created_at": prompt.get("created_at", datetime.now().isoformat()),
+                "change_note": "初始版本"
+            }]
+            prompt["current_version"] = "1.0"
+
+        version_data = request.json
+        new_version = {
+            "version": version_data.get("version"),
+            "title": version_data.get("title"),
+            "content": version_data.get("content"),
+            "description": version_data.get("description", ""),
+            "created_at": datetime.now().isoformat(),
+            "change_note": version_data.get("change_note", "")
+        }
+
+        # 添加新版本
+        prompt["versions"].append(new_version)
+        prompt["current_version"] = new_version["version"]
+
+        # 更新当前提示词内容
+        prompt["title"] = new_version["title"]
+        prompt["content"] = new_version["content"]
+        prompt["description"] = new_version["description"]
+        prompt["updated_at"] = datetime.now().isoformat()
+
+        storage._save_data(data)
+        return jsonify(new_version), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/prompts/<prompt_id>/versions/<version>', methods=['POST'])
+def switch_prompt_version(prompt_id, version):
+    """切换到指定版本"""
+    try:
+        data = storage._load_data()
+        prompt = next((p for p in data["prompts"] if p["id"] == prompt_id), None)
+        if not prompt:
+            return jsonify({"error": "提示词不存在"}), 404
+
+        if "versions" not in prompt:
+            return jsonify({"error": "无版本信息"}), 404
+
+        # 查找指定版本
+        target_version = next((v for v in prompt["versions"] if v["version"] == version), None)
+        if not target_version:
+            return jsonify({"error": "版本不存在"}), 404
+
+        # 切换到指定版本
+        prompt["current_version"] = version
+        prompt["title"] = target_version["title"]
+        prompt["content"] = target_version["content"]
+        prompt["description"] = target_version["description"]
+        prompt["updated_at"] = datetime.now().isoformat()
+
+        storage._save_data(data)
+        return jsonify(prompt)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/prompts/<prompt_id>/versions/<version>', methods=['DELETE'])
+def delete_prompt_version(prompt_id, version):
+    """删除指定版本"""
+    try:
+        data = storage._load_data()
+        prompt = next((p for p in data["prompts"] if p["id"] == prompt_id), None)
+        if not prompt:
+            return jsonify({"error": "提示词不存在"}), 404
+
+        if "versions" not in prompt or len(prompt["versions"]) <= 1:
+            return jsonify({"error": "不能删除唯一的版本"}), 400
+
+        # 不能删除当前版本
+        if prompt.get("current_version") == version:
+            return jsonify({"error": "不能删除当前版本，请先切换到其他版本"}), 400
+
+        # 删除版本
+        original_length = len(prompt["versions"])
+        prompt["versions"] = [v for v in prompt["versions"] if v["version"] != version]
+
+        if len(prompt["versions"]) < original_length:
+            storage._save_data(data)
+            return jsonify({"message": "版本删除成功"})
+
+        return jsonify({"error": "版本不存在"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     config = load_config()
