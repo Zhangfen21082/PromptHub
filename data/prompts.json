@@ -152,21 +152,6 @@
       "updated_at": "2025-08-16T10:25:00.000000"
     },
     {
-      "id": "7aa570b9-16f9-4b22-aaed-0f13e112d301",
-      "title": "123",
-      "content": "123",
-      "description": "123",
-      "category": "瓦巍峨瓦巍峨",
-      "category_id": "4ef6ba9f-8449-4a32-a3a0-91bedcec7491",
-      "category_path": "教育/瓦巍峨瓦巍峨",
-      "tags": [
-        "创意"
-      ],
-      "usage_count": 0,
-      "created_at": "2025-09-29T18:43:41.516454",
-      "updated_at": "2025-09-30T08:41:05.681848"
-    },
-    {
       "id": "2b037202-d061-43bb-87f1-a301497d2c95",
       "title": "123",
       "content": "123",
@@ -448,7 +433,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-09-30T09:56:39.339511",
+      "last_updated": "2025-09-30T10:51:52.010336",
       "version": "2.0"
     }
   }
