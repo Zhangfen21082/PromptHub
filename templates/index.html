@@ -361,29 +361,54 @@
         </div>
         
         <!-- 分页组件 -->
-        <div id="paginationContainer" class="flex flex-col md:flex-row justify-center items-center mt-8 mb-6 gap-6" style="display: none;">
-            <div class="flex items-center gap-1 bg-white rounded-full shadow-lg border border-gray-100 p-1">
-                <button id="prevPageBtn" onclick="changePage(currentPage - 1)" 
-                        class="px-3 md:px-4 py-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200 text-sm font-medium"
+        <div id="paginationContainer" class="flex flex-col md:flex-row justify-center items-center mt-8 mb-6 gap-4" style="display: none;">
+            <!-- 左侧：每页显示条数 -->
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
+                <span>每页显示</span>
+                <input type="number"
+                       id="itemsPerPageInput"
+                       value="20"
+                       min="1"
+                       max="500"
+                       class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       onchange="changeItemsPerPage()"
+                       onkeypress="if(event.key==='Enter') changeItemsPerPage()">
+                <span>条</span>
+            </div>
+
+            <!-- 中间：分页控件 -->
+            <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 px-3 py-2">
+                <button id="prevPageBtn" onclick="changePage(currentPage - 1)"
+                        class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
                         disabled>
-                    <span class="hidden sm:inline">← 上一页</span>
-                    <span class="sm:hidden">←</span>
+                    ←
                 </button>
-                
-                <div id="pageNumbers" class="flex gap-1 px-2">
+
+                <div id="pageNumbers" class="flex gap-1 items-center">
                     <!-- 动态生成页码 -->
                 </div>
-                
-                <button id="nextPageBtn" onclick="changePage(currentPage + 1)" 
-                        class="px-3 md:px-4 py-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200 text-sm font-medium"
+
+                <button id="nextPageBtn" onclick="changePage(currentPage + 1)"
+                        class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
                         disabled>
-                    <span class="hidden sm:inline">下一页 →</span>
-                    <span class="sm:hidden">→</span>
+                    →
                 </button>
             </div>
-            
-            <div class="text-sm text-gray-500 bg-gray-50 px-4 py-2 rounded-full border">
-                <span>第 <span id="currentPageNum" class="font-semibold text-blue-600">1</span> 页，共 <span id="totalPages" class="font-semibold text-blue-600">1</span> 页</span>
+
+            <!-- 右侧：跳转页码 -->
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
+                <span>跳转到</span>
+                <input type="number"
+                       id="jumpToPageInput"
+                       min="1"
+                       placeholder="页码"
+                       class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       onkeypress="if(event.key==='Enter') jumpToPage()">
+                <span>页</span>
+                <button onclick="jumpToPage()"
+                        class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm">
+                    GO
+                </button>
             </div>
         </div>
     </div>
@@ -834,7 +859,7 @@
         
         // 分页相关
         let currentPage = 1;
-        const itemsPerPage = 9;
+        let itemsPerPage = 20;
         
         // 标签展开状态
         let tagsExpanded = false;
@@ -1348,13 +1373,9 @@
                 </div>
             `).join('');
             
-            // 显示分页控件
-            if (totalPages > 1) {
-                document.getElementById('paginationContainer').style.display = 'flex';
-                renderPagination(totalPages);
-            } else {
-                document.getElementById('paginationContainer').style.display = 'none';
-            }
+            // 显示分页控件（总是显示，即使只有一页）
+            document.getElementById('paginationContainer').style.display = 'flex';
+            renderPagination(totalPages);
             
             // 更新统计信息
             updateStatistics();
@@ -2229,58 +2250,126 @@ code block
             const pageNumbers = document.getElementById('pageNumbers');
             const prevBtn = document.getElementById('prevPageBtn');
             const nextBtn = document.getElementById('nextPageBtn');
-            const currentPageNum = document.getElementById('currentPageNum');
-            const totalPagesSpan = document.getElementById('totalPages');
-            
+            const jumpToPageInput = document.getElementById('jumpToPageInput');
+
             // 更新按钮状态
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
-            
-            // 更新页码信息
-            currentPageNum.textContent = currentPage;
-            totalPagesSpan.textContent = totalPages;
-            
-            // 生成页码按钮
+
+            // 更新跳转输入框的最大值
+            jumpToPageInput.max = totalPages;
+            jumpToPageInput.value = '';
+
+            // 生成页码按钮（首页、当前页、尾页 + 省略号）
             let pageButtonsHTML = '';
-            const maxVisiblePages = window.innerWidth < 768 ? 3 : 5; // 移动端显示3个，桌面端显示5个
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
-            if (endPage - startPage + 1 < maxVisiblePages) {
-                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+            // 始终显示第一页
+            const isFirstActive = currentPage === 1;
+            pageButtonsHTML += `
+                <button onclick="changePage(1)"
+                        class="min-w-[36px] h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 ${
+                            isFirstActive
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                        }">
+                    1
+                </button>
+            `;
+
+            // 如果当前页不是第1、2页，显示省略号
+            if (currentPage > 2) {
+                pageButtonsHTML += '<span class="px-1 text-gray-400 text-sm">...</span>';
             }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                const isActive = i === currentPage;
+
+            // 显示当前页（如果不是首页也不是尾页）
+            if (currentPage > 1 && currentPage < totalPages) {
                 pageButtonsHTML += `
-                    <button onclick="changePage(${i})" 
-                            class="min-w-[40px] h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                                isActive 
-                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md transform scale-105' 
-                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                            }">
-                        ${i}
+                    <button onclick="changePage(${currentPage})"
+                            class="min-w-[36px] h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 bg-blue-600 text-white">
+                        ${currentPage}
                     </button>
                 `;
             }
-            
+
+            // 如果当前页不是倒数第1、2页，显示省略号
+            if (currentPage < totalPages - 1) {
+                pageButtonsHTML += '<span class="px-1 text-gray-400 text-sm">...</span>';
+            }
+
+            // 始终显示最后一页（如果总页数大于1）
+            if (totalPages > 1) {
+                const isLastActive = currentPage === totalPages;
+                pageButtonsHTML += `
+                    <button onclick="changePage(${totalPages})"
+                            class="min-w-[36px] h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 ${
+                                isLastActive
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                            }">
+                        ${totalPages}
+                    </button>
+                `;
+            }
+
             pageNumbers.innerHTML = pageButtonsHTML;
+        }
+
+        function changeItemsPerPage() {
+            const input = document.getElementById('itemsPerPageInput');
+            const newValue = parseInt(input.value);
+
+            if (isNaN(newValue) || newValue < 1) {
+                showNotification('请输入有效的条数（至少为1）', 'error');
+                input.value = itemsPerPage;
+                return;
+            }
+
+            if (newValue > 500) {
+                showNotification('每页最多显示500条', 'error');
+                input.value = itemsPerPage;
+                return;
+            }
+
+            itemsPerPage = newValue;
+            currentPage = 1; // 重置到第一页
+            renderPrompts();
+            showNotification(`已切换为每页显示 ${itemsPerPage} 条`, 'success');
         }
 
         function changePage(page) {
             const filteredPrompts = getFilteredPrompts();
             const totalPages = Math.ceil(filteredPrompts.length / itemsPerPage);
-            
+
             if (page < 1 || page > totalPages) return;
-            
+
             currentPage = page;
             renderPrompts();
-            
+
             // 滚动到顶部
-            document.getElementById('promptsList').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+            document.getElementById('promptsList').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
+        }
+
+        function jumpToPage() {
+            const jumpToPageInput = document.getElementById('jumpToPageInput');
+            const targetPage = parseInt(jumpToPageInput.value);
+
+            if (isNaN(targetPage)) {
+                showNotification('请输入有效的页码', 'error');
+                return;
+            }
+
+            const filteredPrompts = getFilteredPrompts();
+            const totalPages = Math.ceil(filteredPrompts.length / itemsPerPage);
+
+            if (targetPage < 1 || targetPage > totalPages) {
+                showNotification(`页码必须在 1 到 ${totalPages} 之间`, 'error');
+                return;
+            }
+
+            changePage(targetPage);
         }
 
         async function deletePrompt(promptId) {
