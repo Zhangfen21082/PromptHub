@@ -2089,8 +2089,65 @@ code block
         }
 
         function importPrompts() {
-            // 导入功能暂未实现
-            showToast('导入功能开发中...', 'info');
+            // 创建文件选择器
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    // 读取文件内容
+                    const text = await file.text();
+                    const importData = JSON.parse(text);
+
+                    // 验证数据格式
+                    if (!importData.prompts || !Array.isArray(importData.prompts)) {
+                        showToast('无效的JSON格式，必须包含prompts数组', 'error');
+                        return;
+                    }
+
+                    // 确认导入
+                    const confirmed = await customConfirm(
+                        '确认导入数据？',
+                        `将导入 ${importData.prompts.length} 个提示词。\n已存在的提示词将被更新，新提示词将被添加。`
+                    );
+
+                    if (!confirmed) return;
+
+                    showToast('正在导入数据...', 'info');
+
+                    // 调用导入API
+                    const response = await fetch('/api/import', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(importData)
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        showToast(error.error || '导入失败', 'error');
+                        return;
+                    }
+
+                    const result = await response.json();
+                    showToast(result.message, 'success');
+
+                    // 重新加载数据
+                    await loadData();
+                } catch (error) {
+                    console.error('导入失败:', error);
+                    if (error instanceof SyntaxError) {
+                        showToast('JSON格式错误，请检查文件内容', 'error');
+                    } else {
+                        showToast('导入失败: ' + error.message, 'error');
+                    }
+                }
+            };
+            input.click();
         }
 
         async function exportPrompts() {
@@ -2101,40 +2158,25 @@ code block
                 return;
             }
 
-            // 在debug模式下不需要密码
-            let passwordHash = null;
-            if (!isDebugMode) {
-                // 请求管理员口令确认
-                passwordHash = await requestAdminPassword("导出提示词");
-                if (!passwordHash) {
-                    return;
-                }
-            }
-
             try {
-                // 调用导出API
-                let url = '/api/export';
-                if (passwordHash) {
-                    // 在非debug模式下，将密码哈希作为查询参数传递
-                    url += `?password_hash=${encodeURIComponent(passwordHash)}`;
-                }
+                // 准备导出数据（包含完整的提示词信息，包括版本）
+                const exportData = {
+                    prompts: filteredPrompts,
+                    metadata: {
+                        exported_at: new Date().toISOString(),
+                        total_count: filteredPrompts.length,
+                        app_name: "PromptHub",
+                        version: "2.0"
+                    }
+                };
 
-                const response = await fetch(url);
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    showToast(errorData.error || '导出失败', 'error');
-                    return;
-                }
-
-                const result = await response.json();
-
-                // 创建CSV内容
-                const csvContent = createCSV(result.data);
+                // 创建JSON内容
+                const jsonContent = JSON.stringify(exportData, null, 2);
 
                 // 下载文件
-                downloadFile(csvContent, `PromptHub导出_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv;charset=utf-8;');
+                downloadFile(jsonContent, `PromptHub导出_${new Date().toISOString().split('T')[0]}.json`, 'application/json;charset=utf-8;');
 
-                showToast(`成功导出 ${result.total} 个提示词`, 'success');
+                showToast(`成功导出 ${filteredPrompts.length} 个提示词`, 'success');
             } catch (error) {
                 console.error('导出失败:', error);
                 showToast('导出失败', 'error');

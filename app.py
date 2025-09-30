@@ -1072,6 +1072,79 @@ def export_data():
         "exported_at": datetime.now().isoformat()
     })
 
+@app.route('/api/import', methods=['POST'])
+def import_data():
+    """导入数据"""
+    try:
+        import_data = request.json
+
+        if not import_data or 'prompts' not in import_data:
+            return jsonify({"error": "无效的导入数据格式"}), 400
+
+        data = storage._load_data()
+        imported_prompts = import_data['prompts']
+
+        # 统计
+        success_count = 0
+        skip_count = 0
+        update_count = 0
+
+        # 获取现有提示词的ID集合
+        existing_ids = {p['id'] for p in data["prompts"]}
+
+        for prompt in imported_prompts:
+            if 'id' not in prompt or 'title' not in prompt or 'content' not in prompt:
+                skip_count += 1
+                continue
+
+            # 检查是否已存在
+            if prompt['id'] in existing_ids:
+                # 更新现有提示词
+                for i, existing_prompt in enumerate(data["prompts"]):
+                    if existing_prompt['id'] == prompt['id']:
+                        # 保留原有的usage_count
+                        prompt['usage_count'] = existing_prompt.get('usage_count', 0)
+                        prompt['updated_at'] = datetime.now().isoformat()
+                        data["prompts"][i] = prompt
+                        update_count += 1
+                        break
+            else:
+                # 添加新提示词
+                # 确保有必要的字段
+                if 'created_at' not in prompt:
+                    prompt['created_at'] = datetime.now().isoformat()
+                if 'updated_at' not in prompt:
+                    prompt['updated_at'] = datetime.now().isoformat()
+                if 'usage_count' not in prompt:
+                    prompt['usage_count'] = 0
+
+                # 确保有版本信息
+                if 'versions' not in prompt:
+                    prompt['versions'] = [{
+                        "version": "1.0",
+                        "title": prompt["title"],
+                        "content": prompt["content"],
+                        "description": prompt.get("description", ""),
+                        "created_at": prompt.get("created_at", datetime.now().isoformat()),
+                        "change_note": "导入版本"
+                    }]
+                if 'current_version' not in prompt:
+                    prompt['current_version'] = "1.0"
+
+                data["prompts"].append(prompt)
+                success_count += 1
+
+        storage._save_data(data)
+
+        return jsonify({
+            "message": f"导入完成！新增 {success_count} 个，更新 {update_count} 个，跳过 {skip_count} 个",
+            "success_count": success_count,
+            "update_count": update_count,
+            "skip_count": skip_count
+        })
+    except Exception as e:
+        return jsonify({"error": f"导入失败: {str(e)}"}), 500
+
 # 管理员功能
 @app.route('/api/admin/load-test-data', methods=['POST'])
 def load_test_data():
