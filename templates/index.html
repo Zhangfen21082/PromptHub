@@ -217,7 +217,7 @@
         <!-- 统计信息 -->
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center flex-1">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-center flex-1">
                     <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-md">
                         <div class="text-xl md:text-2xl font-bold" id="totalPromptsCount">0</div>
                         <div class="text-xs md:text-sm opacity-90">📝 提示词总数</div>
@@ -230,15 +230,18 @@
                         <div class="text-xl md:text-2xl font-bold" id="totalTagsCount">0</div>
                         <div class="text-xs md:text-sm opacity-90">🏷️ 标签总数</div>
                     </div>
-                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl shadow-md">
-                        <div class="text-xl md:text-2xl font-bold" id="filteredPromptsCount">0</div>
-                        <div class="text-xs md:text-sm opacity-90">🔍 当前显示</div>
-                    </div>
                 </div>
                 
-                <!-- 导出按钮 -->
-                <div class="flex-shrink-0">
-                    <button onclick="exportPrompts()" 
+                <!-- 分割线 -->
+                <div class="hidden sm:block w-px h-16 bg-gradient-to-b from-transparent via-gray-300 to-transparent self-center"></div>
+                
+                <!-- 导入导出按钮组 -->
+                <div class="flex gap-2 flex-shrink-0">
+                    <button onclick="importPrompts()"
+                            class="h-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
+                        📤 导入数据
+                    </button>
+                    <button onclick="exportPrompts()"
                             class="h-full px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
                         📥 导出数据
                     </button>
@@ -1160,7 +1163,6 @@
             categoryCountElement.title = `分类层级分布: ${levelInfo}`;
 
             document.getElementById('totalTagsCount').textContent = allTags.length;
-            document.getElementById('filteredPromptsCount').textContent = getFilteredPrompts().length;
         }
 
         function renderPrompts() {
@@ -1974,6 +1976,11 @@ code block
             currentFilters.search = document.getElementById('searchInput').value;
             currentPage = 1; // 重置到第一页
             renderPrompts();
+        }
+
+        function importPrompts() {
+            // 导入功能暂未实现
+            showToast('导入功能开发中...', 'info');
         }
 
         async function exportPrompts() {
