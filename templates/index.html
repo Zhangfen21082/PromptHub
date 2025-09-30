@@ -1189,9 +1189,9 @@
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="text-xl font-bold text-gray-900 leading-tight">${escapeHtml(prompt.title)}</h3>
                         <div class="flex gap-2">
-                            <button onclick="showPromptDetail('${prompt.id}')" 
-                                    class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200" title="查看详情">
-                                👁️
+                            <button onclick="copyPromptContent('${prompt.id}')"
+                                    class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200" title="复制内容">
+                                📋
                             </button>
                             <button onclick="showEditModal('${prompt.id}')" 
                                     class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200" title="编辑">
@@ -1827,6 +1827,42 @@ code block
             } catch (error) {
                 console.error('复制失败:', error);
                 showToast('复制失败', 'error');
+            }
+        }
+
+        async function copyPromptContent(promptId) {
+            const prompt = prompts.find(p => p.id === promptId);
+            if (!prompt) return;
+
+            try {
+                // 尝试使用现代 Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(prompt.content);
+                    showToast('提示词内容已复制到剪贴板');
+                    return;
+                }
+                
+                // 备用方法：使用 document.execCommand
+                const textArea = document.createElement('textarea');
+                textArea.value = prompt.content;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showToast('提示词内容已复制到剪贴板');
+                } else {
+                    throw new Error('execCommand 复制失败');
+                }
+            } catch (error) {
+                console.error('复制失败:', error);
+                showToast('复制失败，请手动复制', 'error');
             }
         }
 
