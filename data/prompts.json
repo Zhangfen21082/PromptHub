@@ -390,9 +390,165 @@
         "path": "其他"
       }
     ],
-    "tags": [],
+    "tags": [
+      {
+        "id": "auto-5dad7195",
+        "name": "创作",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-399307ca",
+        "name": "优化",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-6482c052",
+        "name": "创意",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-b5e9b059",
+        "name": "AI",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-68760abe",
+        "name": "机器学习",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-18dd874d",
+        "name": "需求",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-661d3e78",
+        "name": "技术",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-1782a24a",
+        "name": "typescript",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-979b817c",
+        "name": "创业",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-32f7c600",
+        "name": "UI",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-dfb0ec77",
+        "name": "营销",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-db57ca9b",
+        "name": "UX",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-6916da24",
+        "name": "react",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-6e8d7e2c",
+        "name": "产品",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-cb69b2b5",
+        "name": "品牌",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-63764142",
+        "name": "组件",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-20dfb6a9",
+        "name": "系统设计",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-0c1b9246",
+        "name": "小说",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-0868c980",
+        "name": "PRD",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-f548fc38",
+        "name": "代码审查",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-4075f1d8",
+        "name": "商业计划",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-893fcfd8",
+        "name": "123",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-6bdf7b4b",
+        "name": "故事",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-bb220958",
+        "name": "设计",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-4509a424",
+        "name": "文案",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-d11d660e",
+        "name": "架构",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-4ad57f79",
+        "name": "模型",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-f0e7f0bb",
+        "name": "广告",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-9f79bb3c",
+        "name": "视频",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-97963c74",
+        "name": "python",
+        "color": "#3B82F6"
+      },
+      {
+        "id": "auto-f71e0dbd",
+        "name": "投资",
+        "color": "#3B82F6"
+      }
+    ],
     "settings": {
-      "last_updated": "2025-09-30T16:11:51.260061",
+      "last_updated": "2025-09-30T16:38:52.534677",
       "version": "2.0"
     }
   }

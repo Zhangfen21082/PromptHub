@@ -216,68 +216,68 @@
 
         <!-- 统计信息 -->
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-center flex-1">
-                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
-                        <div class="relative z-10">
-                            <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalPromptsCount">0</div>
-                            <div class="flex items-center justify-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
-                                <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">📝</span>
-                                <span>提示词总数</span>
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+                <!-- 左侧信息展示区域 -->
+                <div class="flex-1 w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
+                            <div class="flex justify-between items-center">
+                                <div class="relative z-10">
+                                    <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalPromptsCount">0</div>
+                                    <div class="flex items-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
+                                        <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">📝</span>
+                                        <span>提示词总数</span>
+                                    </div>
+                                </div>
+                                <button onclick="showAddModal()"
+                                        class="bg-white text-blue-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center gap-1 transform transition-transform duration-300 group-hover:scale-105">
+                                    <span>➕</span>
+                                    <span>添加</span>
+                                </button>
                             </div>
                         </div>
-                        <!-- 滑动出的添加提示词按钮 -->
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 z-20">
-                            <button onclick="showAddModal()"
-                                    class="bg-white text-blue-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center gap-1 transform translate-x-full transition-transform duration-300 group-hover:translate-x-0">
-                                <span>➕</span>
-                                <span>添加</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
-                        <div class="relative z-10">
-                            <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalCategoriesCount">0</div>
-                            <div class="flex items-center justify-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
-                                <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">📁</span>
-                                <span>分类总数</span>
+                        <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
+                            <div class="flex justify-between items-center">
+                                <div class="relative z-10">
+                                    <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalCategoriesCount">0</div>
+                                    <div class="flex items-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
+                                        <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">📁</span>
+                                        <span>分类总数</span>
+                                    </div>
+                                </div>
+                                <button onclick="showCategoryModal()"
+                                        class="bg-white text-green-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-green-50 transition-colors duration-200 flex items-center gap-1 transform transition-transform duration-300 group-hover:scale-105">
+                                    <span>⚙️</span>
+                                    <span>管理</span>
+                                </button>
                             </div>
                         </div>
-                        <!-- 滑动出的管理分类按钮 -->
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 z-20">
-                            <button onclick="showCategoryModal()"
-                                    class="bg-white text-green-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-green-50 transition-colors duration-200 flex items-center gap-1 transform translate-x-full transition-transform duration-300 group-hover:translate-x-0">
-                                <span>⚙️</span>
-                                <span>管理</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
-                        <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
-                        <div class="relative z-10">
-                            <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalTagsCount">0</div>
-                            <div class="flex items-center justify-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
-                                <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">🏷️</span>
-                                <span>标签总数</span>
+                        <div class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-4 rounded-xl shadow-md relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 group">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-white opacity-10 rounded-full -mr-8 -mt-8 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125"></div>
+                            <div class="flex justify-between items-center">
+                                <div class="relative z-10">
+                                    <div class="text-2xl md:text-3xl font-bold mb-1 transition-transform duration-300 group-hover:scale-110" id="totalTagsCount">0</div>
+                                    <div class="flex items-center gap-1 text-sm opacity-90 transition-all duration-300 group-hover:opacity-100">
+                                        <span class="text-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">🏷️</span>
+                                        <span>标签总数</span>
+                                    </div>
+                                </div>
+                                <button onclick="showTagModal()"
+                                        class="bg-white text-orange-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-orange-50 transition-colors duration-200 flex items-center gap-1 transform transition-transform duration-300 group-hover:scale-105">
+                                    <span>⚙️</span>
+                                    <span>管理</span>
+                                </button>
                             </div>
-                        </div>
-                        <!-- 滑动出的管理标签按钮 -->
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 z-20">
-                            <button onclick="showTagModal()"
-                                    class="bg-white text-orange-600 px-3 py-2 rounded-lg text-sm font-medium shadow-md hover:bg-orange-50 transition-colors duration-200 flex items-center gap-1 transform translate-x-full transition-transform duration-300 group-hover:translate-x-0">
-                                <span>⚙️</span>
-                                <span>管理</span>
-                            </button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 分割线 -->
-                <div class="hidden sm:block w-px h-16 bg-gradient-to-b from-transparent via-gray-300 to-transparent self-center"></div>
+                <div class="hidden lg:block w-px h-16 bg-gradient-to-b from-transparent via-gray-300 to-transparent self-center"></div>
                 
-                <!-- 导入导出按钮组 -->
+                <!-- 右侧导入导出按钮组 -->
                 <div class="flex gap-2 flex-shrink-0">
                     <button onclick="importPrompts()"
                             class="h-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
