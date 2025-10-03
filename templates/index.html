@@ -348,10 +348,10 @@
                         
                         <!-- 标签按钮区域 -->
                         <div class="relative">
-                            <div id="tagButtons" class="space-y-2 max-h-60 overflow-y-auto" style="transition: max-height 0.3s ease;">
+                            <div id="tagButtons" class="flex flex-wrap gap-2 max-h-60 overflow-y-auto" style="transition: max-height 0.3s ease;">
                                 <!-- 动态生成标签按钮 -->
                             </div>
-                            
+
                             <!-- 展开/收起按钮 -->
                             <div id="tagToggleContainer" class="mt-2 text-center" style="display: none;">
                                 <button id="tagToggleBtn" onclick="toggleTagsExpanded()"
@@ -1234,10 +1234,10 @@
                 const count = prompts.filter(p => p.tags && p.tags.includes(tag)).length;
                 return `
                     <button onclick="toggleTag('${tag}')"
-                            class="tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50 shadow-sm transition-all duration-200 flex items-center justify-between text-left"
+                            class="tag-btn filter-button px-3 py-1.5 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50 shadow-sm transition-all duration-200 inline-flex items-center gap-2"
                             data-tag="${tag}">
                         <span class="font-medium">${tag}</span>
-                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${count}</span>
+                        <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full text-xs">${count}</span>
                     </button>
                 `;
             }).join('');
@@ -2136,9 +2136,9 @@ code block
                 } else if (btn.dataset.tag) {
                     // 具体标签按钮的样式
                     if (currentFilters.tags.includes(btn.dataset.tag)) {
-                        btn.className = 'tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md flex items-center justify-between text-left';
+                        btn.className = 'tag-btn filter-button px-3 py-1.5 rounded-full text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md inline-flex items-center gap-2 transition-all duration-200';
                     } else {
-                        btn.className = 'tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50 shadow-sm flex items-center justify-between text-left';
+                        btn.className = 'tag-btn filter-button px-3 py-1.5 rounded-full text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50 shadow-sm transition-all duration-200 inline-flex items-center gap-2';
                     }
                 }
             });
