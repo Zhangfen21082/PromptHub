@@ -105,6 +105,25 @@
             margin-bottom: 0;
         }
 
+        /* 批量操作模式下的卡片样式 */
+        .prompt-card.batch-active {
+            padding-left: 2.5rem !important;
+        }
+
+        /* 复选框样式优化 */
+        .batch-checkbox-container label {
+            transition: all 0.2s ease;
+        }
+
+        .batch-checkbox-container label:has(input:checked) {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .batch-checkbox-container input:checked {
+            background-color: transparent;
+        }
+
         /* 移除分类层级指示器，改为使用缩进来表示层级关系 */
         .category-level-indicator {
             display: none;
@@ -301,11 +320,11 @@
             </div>
         </div>
 
-        <!-- 搜索区域和分页组件 -->
+        <!-- 搜索区域 -->
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
-            <div class="flex flex-col lg:flex-row gap-4 items-center">
+            <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
                 <!-- 搜索框 -->
-                <div class="relative flex-1 w-full">
+                <div class="relative flex-1">
                     <input type="text" id="searchInput"
                            placeholder="搜索标题、内容、描述..."
                            class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
@@ -314,53 +333,27 @@
                     </div>
                 </div>
 
-                <!-- 分页组件 -->
-                <div id="paginationContainer" class="flex flex-col md:flex-row justify-center items-center gap-4" style="display: none;">
-                    <!-- 左侧：每页显示条数 -->
-                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
-                        <span>每页显示</span>
-                        <input type="number"
-                               id="itemsPerPageInput"
-                               value="20"
-                               min="1"
-                               max="500"
-                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               onchange="changeItemsPerPage()"
-                               onkeypress="if(event.key==='Enter') changeItemsPerPage()">
-                        <span>条</span>
-                    </div>
-
-                    <!-- 中间：分页控件 -->
-                    <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 px-3 py-2">
-                        <button id="prevPageBtn" onclick="changePage(currentPage - 1)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
-                                disabled>
-                            ←
-                        </button>
-
-                        <div id="pageNumbers" class="flex gap-1 items-center">
-                            <!-- 动态生成页码 -->
+                <!-- 批量操作按钮组 -->
+                <div id="batchOperationArea" class="flex flex-wrap items-center gap-2">
+                    <button id="batchModeBtn" onclick="toggleBatchMode()"
+                            class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                        📋 批量操作
+                    </button>
+                    <div id="batchActionsContainer" class="flex flex-wrap items-center gap-2" style="display: none;">
+                        <div class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 whitespace-nowrap">
+                            已选 <span id="selectedCount" class="font-bold">0</span> 项
                         </div>
-
-                        <button id="nextPageBtn" onclick="changePage(currentPage + 1)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
-                                disabled>
-                            →
+                        <button onclick="batchDelete()"
+                                class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                            🗑️ 删除
                         </button>
-                    </div>
-
-                    <!-- 右侧：跳转页码 -->
-                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
-                        <span>跳转到</span>
-                        <input type="number"
-                               id="jumpToPageInput"
-                               min="1"
-                               placeholder="页码"
-                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               onkeypress="if(event.key==='Enter') jumpToPage()">
-                        <button onclick="jumpToPage()"
-                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium">
-                            GO
+                        <button onclick="batchMove()"
+                                class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                            📦 移动
+                        </button>
+                        <button onclick="cancelBatchMode()"
+                                class="px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg hover:from-gray-500 hover:to-gray-600 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                            ❌ 取消
                         </button>
                     </div>
                 </div>
@@ -422,6 +415,57 @@
             <div class="lg:w-3/4">
                 <div id="promptsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <!-- 动态加载 -->
+                </div>
+
+                <!-- 分页组件 -->
+                <div id="paginationContainer" class="flex flex-wrap justify-center items-center gap-3 mt-8" style="display: none;">
+                    <!-- 左侧：每页显示条数 -->
+                    <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm text-sm text-gray-600">
+                        <span class="whitespace-nowrap">每页</span>
+                        <input type="number"
+                               id="itemsPerPageInput"
+                               value="20"
+                               min="1"
+                               max="500"
+                               class="w-14 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onchange="changeItemsPerPage()"
+                               onkeypress="if(event.key==='Enter') changeItemsPerPage()">
+                        <span class="whitespace-nowrap">条</span>
+                    </div>
+
+                    <!-- 中间：分页控件 -->
+                    <div class="flex items-center gap-1 bg-white rounded-lg shadow-sm border border-gray-200 px-2 py-2">
+                        <button id="prevPageBtn" onclick="changePage(currentPage - 1)"
+                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
+                                disabled>
+                            ←
+                        </button>
+
+                        <div id="pageNumbers" class="flex gap-1 items-center">
+                            <!-- 动态生成页码 -->
+                        </div>
+
+                        <button id="nextPageBtn" onclick="changePage(currentPage + 1)"
+                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
+                                disabled>
+                            →
+                        </button>
+                    </div>
+
+                    <!-- 右侧：跳转页码 -->
+                    <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm text-sm text-gray-600">
+                        <span class="whitespace-nowrap">跳至</span>
+                        <input type="number"
+                               id="jumpToPageInput"
+                               min="1"
+                               placeholder="页"
+                               class="w-12 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onkeypress="if(event.key==='Enter') jumpToPage()">
+                        <button onclick="jumpToPage()"
+                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium">
+                            GO
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -834,6 +878,48 @@
         </div>
     </div>
 
+    <!-- 批量移动模态框 -->
+    <div id="batchMoveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 relative" style="width: 500px; max-width: 95vw;">
+            <button onclick="hideBatchMoveModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 hover:from-gray-200 hover:to-gray-300 hover:text-gray-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">📦 批量移动提示词</h3>
+                    <p class="text-gray-600 mt-2">将选中的 <span id="batchMoveCount" class="font-semibold text-blue-600">0</span> 个提示词移动到新分类</p>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">选择目标分类</label>
+                    <div class="relative">
+                        <button type="button" id="batchMoveCategoryBtn"
+                                class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                                onclick="toggleBatchMoveCategoryDropdown()">
+                            <span id="batchMoveSelectedCategoryText" class="text-gray-700">请选择分类</span>
+                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" id="batchMoveCategoryIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="batchMoveCategoryList" class="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto hidden">
+                            <!-- 动态生成分类选项 -->
+                        </div>
+                    </div>
+                    <input type="hidden" id="batchMoveTargetCategory" name="category">
+                </div>
+                <div class="flex justify-center gap-3 pt-4">
+                    <button type="button" onclick="hideBatchMoveModal()" class="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all duration-200 shadow-lg font-medium">
+                        ❌ 取消
+                    </button>
+                    <button type="button" onclick="confirmBatchMove()" class="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-lg font-medium">
+                        ✅ 确认移动
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 版本查看窗口 -->
     <div id="versionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
         <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 relative resize overflow-auto" style="resize: both; width: 800px; height: 600px; min-width: 500px; min-height: 400px; max-width: 95vw; max-height: 95vh;">
@@ -874,10 +960,14 @@
         // 分页相关
         let currentPage = 1;
         let itemsPerPage = 20;
-        
+
         // 标签展开状态
         let tagsExpanded = false;
         let filteredTags = [];
+
+        // 批量操作相关
+        let batchMode = false;
+        let selectedPrompts = new Set();
 
 
         // Toast 通知函数
@@ -1320,8 +1410,15 @@
             }
             
             container.innerHTML = currentPagePrompts.map(prompt => `
-                <div class="bg-white rounded-2xl shadow-lg card-hover p-6 border border-gray-100">
-                    <div class="flex justify-between items-start mb-4">
+                <div class="bg-white rounded-2xl shadow-lg card-hover p-6 border border-gray-100 relative prompt-card" data-prompt-id="${prompt.id}">
+                    <!-- 批量选择复选框 -->
+                    <div class="batch-checkbox-container absolute top-3 left-3 z-10" style="display: none;">
+                        <label class="flex items-center justify-center w-6 h-6 bg-white border-2 border-gray-300 rounded-md shadow-sm hover:border-blue-500 transition-all cursor-pointer">
+                            <input type="checkbox" class="batch-checkbox w-4 h-4 text-blue-600 border-0 rounded focus:ring-0 focus:ring-offset-0"
+                                   data-prompt-id="${prompt.id}" onchange="updateSelectedCount()">
+                        </label>
+                    </div>
+                    <div class="flex justify-between items-start mb-4 batch-mode-padding">
                         <h3 class="text-xl font-bold text-gray-900 leading-tight">${escapeHtml(prompt.title)}</h3>
                         <div class="flex gap-2">
                             <div class="relative version-dropdown-container">
@@ -2406,6 +2503,246 @@ code block
             }
 
             changePage(targetPage);
+        }
+
+        // 批量操作函数
+        function toggleBatchMode() {
+            batchMode = !batchMode;
+            const checkboxes = document.querySelectorAll('.batch-checkbox-container');
+            const promptCards = document.querySelectorAll('.prompt-card');
+            const batchActionsContainer = document.getElementById('batchActionsContainer');
+            const batchModeBtn = document.getElementById('batchModeBtn');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.style.display = batchMode ? 'block' : 'none';
+            });
+
+            promptCards.forEach(card => {
+                if (batchMode) {
+                    card.classList.add('batch-active');
+                } else {
+                    card.classList.remove('batch-active');
+                }
+            });
+
+            if (batchMode) {
+                batchActionsContainer.style.display = 'flex';
+                batchModeBtn.style.display = 'none';
+            } else {
+                batchActionsContainer.style.display = 'none';
+                batchModeBtn.style.display = 'block';
+                // 清除所有选中
+                selectedPrompts.clear();
+                document.querySelectorAll('.batch-checkbox').forEach(cb => cb.checked = false);
+                updateSelectedCount();
+            }
+        }
+
+        function cancelBatchMode() {
+            toggleBatchMode();
+        }
+
+        function updateSelectedCount() {
+            selectedPrompts.clear();
+            document.querySelectorAll('.batch-checkbox:checked').forEach(cb => {
+                selectedPrompts.add(cb.dataset.promptId);
+            });
+
+            const countSpan = document.querySelector('#selectedCount span');
+            if (countSpan) {
+                countSpan.textContent = selectedPrompts.size;
+            }
+        }
+
+        async function batchDelete() {
+            if (selectedPrompts.size === 0) {
+                showToast('请至少选择一个提示词', 'error');
+                return;
+            }
+
+            const confirmed = await customConfirm(
+                '批量删除提示词',
+                `确定要删除选中的 ${selectedPrompts.size} 个提示词吗？此操作不可撤销！`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const promptId of selectedPrompts) {
+                    try {
+                        const response = await fetch(`/api/prompts/${promptId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (error) {
+                        failCount++;
+                    }
+                }
+
+                if (successCount > 0) {
+                    showToast(`成功删除 ${successCount} 个提示词${failCount > 0 ? `，${failCount} 个失败` : ''}`, successCount === selectedPrompts.size ? 'success' : 'warning');
+                    await loadData();
+                    cancelBatchMode();
+                } else {
+                    showToast('删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('批量删除失败:', error);
+                showToast('批量删除失败', 'error');
+            }
+        }
+
+        async function batchMove() {
+            if (selectedPrompts.size === 0) {
+                showToast('请至少选择一个提示词', 'error');
+                return;
+            }
+
+            // 显示分类选择对话框
+            showBatchMoveModal();
+        }
+
+        function showBatchMoveModal() {
+            const modal = document.getElementById('batchMoveModal');
+            const countSpan = document.getElementById('batchMoveCount');
+
+            countSpan.textContent = selectedPrompts.size;
+
+            // 填充分类下拉列表
+            renderBatchMoveCategoryList();
+
+            modal.style.display = 'flex';
+        }
+
+        function hideBatchMoveModal() {
+            const modal = document.getElementById('batchMoveModal');
+            modal.style.display = 'none';
+
+            // 重置选择
+            document.getElementById('batchMoveTargetCategory').value = '';
+            document.getElementById('batchMoveSelectedCategoryText').textContent = '请选择分类';
+        }
+
+        function renderBatchMoveCategoryList() {
+            const listContainer = document.getElementById('batchMoveCategoryList');
+
+            function renderCategory(category, level = 0) {
+                const indent = '&nbsp;&nbsp;'.repeat(level);
+                const hasChildren = category.children && category.children.length > 0;
+
+                let html = `
+                    <button type="button"
+                            class="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-2"
+                            onclick="selectBatchMoveCategory('${category.id}', '${escapeHtml(category.name)}', '${category.parent_id || ''}')">
+                        <span class="text-gray-500">${indent}</span>
+                        <span class="flex-1">${escapeHtml(category.name)}</span>
+                    </button>
+                `;
+
+                if (hasChildren) {
+                    category.children.forEach(child => {
+                        html += renderCategory(child, level + 1);
+                    });
+                }
+
+                return html;
+            }
+
+            let html = '';
+            categoriesTree.forEach(category => {
+                html += renderCategory(category);
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function toggleBatchMoveCategoryDropdown() {
+            const list = document.getElementById('batchMoveCategoryList');
+            const icon = document.getElementById('batchMoveCategoryIcon');
+
+            if (list.classList.contains('hidden')) {
+                list.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                list.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function selectBatchMoveCategory(categoryId, categoryName, parentId) {
+            document.getElementById('batchMoveTargetCategory').value = categoryId;
+            document.getElementById('batchMoveSelectedCategoryText').textContent = categoryName;
+
+            // 关闭下拉菜单
+            const list = document.getElementById('batchMoveCategoryList');
+            const icon = document.getElementById('batchMoveCategoryIcon');
+            list.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        }
+
+        async function confirmBatchMove() {
+            const targetCategoryId = document.getElementById('batchMoveTargetCategory').value;
+
+            if (!targetCategoryId) {
+                showToast('请选择目标分类', 'error');
+                return;
+            }
+
+            try {
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const promptId of selectedPrompts) {
+                    try {
+                        const prompt = prompts.find(p => p.id === promptId);
+                        if (!prompt) continue;
+
+                        const response = await fetch(`/api/prompts/${promptId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...prompt,
+                                category_id: targetCategoryId
+                            })
+                        });
+
+                        if (response.ok) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (error) {
+                        failCount++;
+                    }
+                }
+
+                if (successCount > 0) {
+                    showToast(`成功移动 ${successCount} 个提示词${failCount > 0 ? `，${failCount} 个失败` : ''}`, successCount === selectedPrompts.size ? 'success' : 'warning');
+                    await loadData();
+                    hideBatchMoveModal();
+                    cancelBatchMode();
+                } else {
+                    showToast('移动失败', 'error');
+                }
+            } catch (error) {
+                console.error('批量移动失败:', error);
+                showToast('批量移动失败', 'error');
+            }
         }
 
         async function deletePrompt(promptId) {
