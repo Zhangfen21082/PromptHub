@@ -110,17 +110,24 @@
             padding-left: 2.5rem !important;
         }
 
+        .recycle-card.batch-active {
+            padding-left: 2.5rem !important;
+        }
+
         /* 复选框样式优化 */
-        .batch-checkbox-container label {
+        .batch-checkbox-container label,
+        .recycle-checkbox-container label {
             transition: all 0.2s ease;
         }
 
-        .batch-checkbox-container label:has(input:checked) {
+        .batch-checkbox-container label:has(input:checked),
+        .recycle-checkbox-container label:has(input:checked) {
             background-color: #3b82f6;
             border-color: #3b82f6;
         }
 
-        .batch-checkbox-container input:checked {
+        .batch-checkbox-container input:checked,
+        .recycle-checkbox-container input:checked {
             background-color: transparent;
         }
 
@@ -350,6 +357,10 @@
                         <div class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 whitespace-nowrap">
                             已选 <span id="selectedCount" class="font-bold">0</span> 项
                         </div>
+                        <button onclick="toggleSelectAll()"
+                                class="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                            ☑️ 全选
+                        </button>
                         <button onclick="batchDelete()"
                                 class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
                             🗑️ 删除
@@ -794,7 +805,7 @@
 
 
     <!-- 确认对话框 -->
-    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[60]" style="display: none;">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-gray-200">
             <div class="p-6">
                 <div class="text-center mb-6">
@@ -952,6 +963,10 @@
                             <div class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 whitespace-nowrap">
                                 已选 <span id="recycleSelectedCount" class="font-bold">0</span> 项
                             </div>
+                            <button onclick="toggleRecycleSelectAll()"
+                                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                                ☑️ 全选
+                            </button>
                             <button onclick="batchRestoreFromRecycle()"
                                     class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
                                 ↩️ 恢复
@@ -2664,6 +2679,18 @@ code block
             }
         }
 
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.batch-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+
+            updateSelectedCount();
+        }
+
         async function batchDelete() {
             if (selectedPrompts.size === 0) {
                 showToast('请至少选择一个提示词', 'error');
@@ -4053,7 +4080,7 @@ code block
             emptyMessage.style.display = 'none';
 
             container.innerHTML = deletedPrompts.map(prompt => `
-                <div class="bg-white rounded-xl shadow-md p-4 border border-gray-200 relative recycle-card" data-prompt-id="${prompt.id}">
+                <div class="bg-white rounded-xl shadow-md p-4 border border-gray-200 relative recycle-card transition-all duration-200" data-prompt-id="${prompt.id}">
                     <!-- 批量选择复选框 -->
                     <div class="recycle-checkbox-container absolute top-3 left-3 z-10" style="display: none;">
                         <label class="flex items-center justify-center w-6 h-6 bg-white border-2 border-gray-300 rounded-md shadow-sm hover:border-blue-500 transition-all cursor-pointer">
@@ -4062,7 +4089,7 @@ code block
                         </label>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-3 recycle-content">
                         <h4 class="text-lg font-bold text-gray-800 mb-1">${escapeHtml(prompt.title)}</h4>
                         ${prompt.description ? `<p class="text-gray-600 text-sm italic">"${escapeHtml(prompt.description)}"</p>` : ''}
                     </div>
@@ -4202,6 +4229,18 @@ code block
             if (countSpan) {
                 countSpan.textContent = selectedRecyclePrompts.size;
             }
+        }
+
+        // 回收站全选/取消全选
+        function toggleRecycleSelectAll() {
+            const checkboxes = document.querySelectorAll('.recycle-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+
+            updateRecycleSelectedCount();
         }
 
         // 批量恢复
