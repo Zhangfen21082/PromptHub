@@ -301,14 +301,68 @@
             </div>
         </div>
 
-        <!-- 搜索区域 -->
+        <!-- 搜索区域和分页组件 -->
         <div class="glass-effect rounded-2xl p-4 mb-6 shadow-lg">
-            <div class="relative">
-                <input type="text" id="searchInput"
-                       placeholder="搜索标题、内容、描述..."
-                       class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
-                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    🔍
+            <div class="flex flex-col lg:flex-row gap-4 items-center">
+                <!-- 搜索框 -->
+                <div class="relative flex-1 w-full">
+                    <input type="text" id="searchInput"
+                           placeholder="搜索标题、内容、描述..."
+                           class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+                    <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        🔍
+                    </div>
+                </div>
+
+                <!-- 分页组件 -->
+                <div id="paginationContainer" class="flex flex-col md:flex-row justify-center items-center gap-4" style="display: none;">
+                    <!-- 左侧：每页显示条数 -->
+                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
+                        <span>每页显示</span>
+                        <input type="number"
+                               id="itemsPerPageInput"
+                               value="20"
+                               min="1"
+                               max="500"
+                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onchange="changeItemsPerPage()"
+                               onkeypress="if(event.key==='Enter') changeItemsPerPage()">
+                        <span>条</span>
+                    </div>
+
+                    <!-- 中间：分页控件 -->
+                    <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 px-3 py-2">
+                        <button id="prevPageBtn" onclick="changePage(currentPage - 1)"
+                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
+                                disabled>
+                            ←
+                        </button>
+
+                        <div id="pageNumbers" class="flex gap-1 items-center">
+                            <!-- 动态生成页码 -->
+                        </div>
+
+                        <button id="nextPageBtn" onclick="changePage(currentPage + 1)"
+                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
+                                disabled>
+                            →
+                        </button>
+                    </div>
+
+                    <!-- 右侧：跳转页码 -->
+                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
+                        <span>跳转到</span>
+                        <input type="number"
+                               id="jumpToPageInput"
+                               min="1"
+                               placeholder="页码"
+                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               onkeypress="if(event.key==='Enter') jumpToPage()">
+                        <button onclick="jumpToPage()"
+                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium">
+                            GO
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -368,58 +422,6 @@
             <div class="lg:w-3/4">
                 <div id="promptsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <!-- 动态加载 -->
-                </div>
-
-                <!-- 分页组件 -->
-                <div id="paginationContainer" class="flex flex-col md:flex-row justify-center items-center mt-8 mb-6 gap-4 w-full" style="display: none;">
-                    <!-- 左侧：每页显示条数 -->
-                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
-                        <span>每页显示</span>
-                        <input type="number"
-                               id="itemsPerPageInput"
-                               value="20"
-                               min="1"
-                               max="500"
-                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               onchange="changeItemsPerPage()"
-                               onkeypress="if(event.key==='Enter') changeItemsPerPage()">
-                        <span>条</span>
-                    </div>
-
-                    <!-- 中间：分页控件 -->
-                    <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 px-3 py-2">
-                        <button id="prevPageBtn" onclick="changePage(currentPage - 1)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
-                                disabled>
-                            ←
-                        </button>
-
-                        <div id="pageNumbers" class="flex gap-1 items-center">
-                            <!-- 动态生成页码 -->
-                        </div>
-
-                        <button id="nextPageBtn" onclick="changePage(currentPage + 1)"
-                                class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500 transition-all duration-200"
-                                disabled>
-                            →
-                        </button>
-                    </div>
-
-                    <!-- 右侧：跳转页码 -->
-                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm text-sm text-gray-600">
-                        <span>跳转到</span>
-                        <input type="number"
-                               id="jumpToPageInput"
-                               min="1"
-                               placeholder="页码"
-                               class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               onkeypress="if(event.key==='Enter') jumpToPage()">
-                        <span>页</span>
-                        <button onclick="jumpToPage()"
-                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm">
-                            GO
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
