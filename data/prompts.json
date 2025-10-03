@@ -14,7 +14,18 @@
       ],
       "usage_count": 15,
       "created_at": "2025-08-16T12:59:11.996749",
-      "updated_at": "2025-08-16T15:08:48.733235"
+      "updated_at": "2025-08-16T15:08:48.733235",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "Corona啤酒瓶海滩派对变形视频提示词",
+          "content": "{\n  \"description\": \"Cinematic close-up of a cold, dewy Corona bottle sitting alone on a weathered beach table. It begins to hum, vibrate. The bottle cap *pops*—and the entire environment unfolds from inside: palm trees rise, lights string themselves, speakers assemble mid-air, sand shifts into a dance floor. A DJ booth builds from driftwood. Music kicks in. A beach rave is born. No text.\",\n  \"style\": \"cinematic, magical realism\",\n  \"camera\": \"starts ultra close, zooms out and cranes overhead as the world expands\",\n  \"lighting\": \"sunset turning to neon—golden hour into party glow\",\n  \"environment\": \"quiet beach transforms into high-energy beach rave\",\n  \"elements\": [\n    \"Corona bottle (label visible, condensation dripping)\",\n    \"pop-top cap in slow motion\",\n    \"exploding citrus slice\",\n    \"sand morphing into dance floor\",\n    \"palm trees rising\",\n    \"neon lights snapping on\",\n    \"DJ booth building itself\",\n    \"crowd materializing mid-dance\",\n    \"fire pit lighting\",\n    \"surfboards as signage\"\n  ],\n  \"motion\": \"explosion of elements from bottle, everything assembles in rapid time-lapse\",\n  \"ending\": \"Corona bottle in foreground, beach rave in full swing behind it\",\n  \"text\": \"none\",\n  \"keywords\": [\n    \"Corona\",\n    \"beach party\",\n    \"bottle transforms\",\n    \"rave build\",\n    \"sunset to night\",\n    \"cinematic\",\n    \"no text\"\n  ]\n}",
+          "description": "Corona啤酒瓶海滩派对变形视频提示词",
+          "created_at": "2025-08-16T12:59:11.996749",
+          "change_note": "初始版本"
+        }
+      ],
+      "current_version": "1.0"
     },
     {
       "id": "1",
@@ -109,7 +120,18 @@
       ],
       "usage_count": 18,
       "created_at": "2025-08-16T10:06:00.000000",
-      "updated_at": "2025-08-16T14:36:32.879509"
+      "updated_at": "2025-08-16T14:36:32.879509",
+      "versions": [
+        {
+          "version": "1.0",
+          "title": "商业计划书撰写专家",
+          "content": "作为商业咨询专家，请帮我撰写商业计划书：\n\n项目名称：{项目名称}\n行业领域：{行业}\n目标市场：{市场}\n\n请包含：\n1. 执行摘要\n2. 市场分析\n3. 竞争分析\n4. 营销策略\n5. 财务预测\n6. 风险评估\n7. 实施计划",
+          "description": "专业的商业计划书撰写指导",
+          "created_at": "2025-08-16T10:06:00.000000",
+          "change_note": "初始版本"
+        }
+      ],
+      "current_version": "1.0"
     },
     {
       "id": "10",
@@ -431,7 +453,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-10-03T22:41:36.267809",
+      "last_updated": "2025-10-03T22:56:00.292515",
       "version": "2.0"
     }
   }
