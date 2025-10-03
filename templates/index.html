@@ -87,6 +87,13 @@
             transform: translateY(0);
         }
 
+        /* 被点击激活的分类保持展开状态 */
+        .category-item.active .category-submenu {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
+        }
+
         .category-submenu .category-btn {
             width: 100%;
             margin-bottom: 0.25rem;
@@ -2063,6 +2070,11 @@ code block
             currentFilters.category_id = categoryId;
             currentPage = 1; // 重置到第一页
 
+            // 移除所有分类项的 active 类
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
             // 更新按钮状态
             document.querySelectorAll('.category-btn').forEach(btn => {
                 if (btn.dataset.category === category || (categoryId && btn.dataset.categoryId === categoryId)) {
@@ -2071,6 +2083,12 @@ code block
                         btn.className = 'category-btn filter-button w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200';
                     } else {
                         btn.className = 'category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center gap-2 shadow-md text-left';
+
+                        // 为点击的分类按钮的父级 category-item 添加 active 类
+                        const parentItem = btn.closest('.category-item');
+                        if (parentItem) {
+                            parentItem.classList.add('active');
+                        }
                     }
                 } else {
                     // 判断是否是"全部"按钮（未选中状态）
