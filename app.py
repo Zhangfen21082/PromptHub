@@ -7,6 +7,10 @@ from datetime import datetime
 from pathlib import Path
 import shutil
 
+# 导入SQLite存储类
+from database import SQLiteStorage, check_migration_needed
+from database.migrate_from_json import migrate_from_json
+
 app = Flask(__name__)
 
 def load_config():
@@ -755,7 +759,22 @@ class FileStorage:
             raise
 
 # 初始化存储
-storage = FileStorage()
+# 检查是否需要从JSON迁移到SQLite
+if check_migration_needed("data/prompts.json", "data/prompthub.db"):
+    print("检测到JSON数据，正在迁移到SQLite数据库...")
+    try:
+        migrate_from_json("data/prompts.json", "data/prompthub.db", "database/schema.sql")
+        print("数据迁移完成")
+    except Exception as e:
+        print(f"数据迁移失败: {e}")
+        # 如果迁移失败，继续使用JSON存储
+        storage = FileStorage()
+    else:
+        # 迁移成功，使用SQLite存储
+        storage = SQLiteStorage()
+else:
+    # 不需要迁移，直接使用SQLite存储
+    storage = SQLiteStorage()
 
 # API 路由保持不变，但实现逻辑更新
 @app.route('/')
