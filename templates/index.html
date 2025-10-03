@@ -2640,15 +2640,16 @@ code block
             const listContainer = document.getElementById('batchMoveCategoryList');
 
             function renderCategory(category, level = 0) {
-                const indent = '&nbsp;&nbsp;'.repeat(level);
+                const indent = '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(level);
                 const hasChildren = category.children && category.children.length > 0;
+                const dot = level === 0 ? '●' : '○';
 
                 let html = `
                     <button type="button"
                             class="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-2"
                             onclick="selectBatchMoveCategory('${category.id}', '${escapeHtml(category.name)}', '${category.parent_id || ''}')">
-                        <span class="text-gray-500">${indent}</span>
-                        <span class="flex-1">${escapeHtml(category.name)}</span>
+                        <span class="text-gray-400">${indent}${dot}</span>
+                        <span class="flex-1 text-gray-700">${escapeHtml(category.name)}</span>
                     </button>
                 `;
 
