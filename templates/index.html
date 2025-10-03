@@ -312,9 +312,16 @@
                             class="h-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
                         📤 导入数据
                     </button>
+                    <div class="w-px bg-gray-300 mx-1"></div>
                     <button onclick="exportPrompts()"
                             class="h-full px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px]">
                         📥 导出数据
+                    </button>
+                    <div class="w-px bg-gray-300 mx-1"></div>
+                    <button onclick="showRecycleBin()"
+                            class="h-full px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105 font-medium text-sm flex items-center justify-center min-h-[78px] relative">
+                        🗑️ 回收站
+                        <span id="recycleBinCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold" style="display: none;">0</span>
                     </button>
                 </div>
             </div>
@@ -920,6 +927,65 @@
         </div>
     </div>
 
+    <!-- 回收站模态框 -->
+    <div id="recycleBinModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 relative overflow-hidden" style="width: 90vw; max-width: 1200px; height: 85vh; max-height: 800px;">
+            <button onclick="hideRecycleBin()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-500 hover:from-gray-200 hover:to-gray-300 hover:text-gray-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md z-10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="p-8 h-full flex flex-col">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">🗑️ 回收站</h3>
+                    <p class="text-gray-600 mt-2">已删除的提示词将保留在此，可以恢复或彻底删除</p>
+                </div>
+
+                <!-- 批量操作工具栏 -->
+                <div class="flex justify-between items-center mb-4 pb-4 border-b">
+                    <div class="flex items-center gap-2">
+                        <button id="recycleBatchModeBtn" onclick="toggleRecycleBatchMode()"
+                                class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                            📋 批量操作
+                        </button>
+                        <div id="recycleBatchActionsContainer" class="flex items-center gap-2" style="display: none;">
+                            <div class="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium border border-blue-200 whitespace-nowrap">
+                                已选 <span id="recycleSelectedCount" class="font-bold">0</span> 项
+                            </div>
+                            <button onclick="batchRestoreFromRecycle()"
+                                    class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                                ↩️ 恢复
+                            </button>
+                            <button onclick="batchPermanentDelete()"
+                                    class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                                🗑️ 彻底删除
+                            </button>
+                            <button onclick="cancelRecycleBatchMode()"
+                                    class="px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg hover:from-gray-500 hover:to-gray-600 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg whitespace-nowrap">
+                                ❌ 取消
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="clearRecycleBin()" class="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg">
+                        🗑️ 清空回收站
+                    </button>
+                </div>
+
+                <!-- 回收站内容列表 -->
+                <div class="flex-1 overflow-y-auto">
+                    <div id="recycleBinList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <!-- 动态加载回收站内容 -->
+                    </div>
+                    <div id="recycleBinEmpty" class="text-center py-12" style="display: none;">
+                        <div class="text-gray-400 text-6xl mb-4">🗑️</div>
+                        <div class="text-gray-500 text-lg">回收站是空的</div>
+                        <p class="text-gray-400 mt-2">已删除的提示词会出现在这里</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 版本查看窗口 -->
     <div id="versionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
         <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 relative resize overflow-auto" style="resize: both; width: 800px; height: 600px; min-width: 500px; min-height: 400px; max-width: 95vw; max-height: 95vh;">
@@ -969,6 +1035,11 @@
         let batchMode = false;
         let selectedPrompts = new Set();
 
+        // 回收站相关
+        let recycleBatchMode = false;
+        let selectedRecyclePrompts = new Set();
+        let deletedPrompts = [];
+
 
         // Toast 通知函数
         function showToast(message, type = 'success') {
@@ -1017,12 +1088,40 @@
                 // 清空版本下拉缓存，确保数据更新后重新加载
                 versionDropdownCache = {};
 
+                // 加载回收站数据
+                loadDeletedPrompts();
+
                 renderPrompts();
                 renderCategoryButtons();
                 renderTagButtons();
                 renderCategoryOptions();
+                updateRecycleBinCount();
             } catch (error) {
                 console.error('Error loading data:', error);
+            }
+        }
+
+        // 加载回收站数据
+        function loadDeletedPrompts() {
+            try {
+                const stored = localStorage.getItem('deletedPrompts');
+                if (stored) {
+                    deletedPrompts = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error('Error loading deleted prompts:', error);
+                deletedPrompts = [];
+            }
+        }
+
+        // 更新回收站数量显示
+        function updateRecycleBinCount() {
+            const countBadge = document.getElementById('recycleBinCount');
+            if (deletedPrompts.length > 0) {
+                countBadge.textContent = deletedPrompts.length;
+                countBadge.style.display = 'flex';
+            } else {
+                countBadge.style.display = 'none';
             }
         }
 
@@ -2311,13 +2410,24 @@ code block
                 return;
             }
 
+            // 检查回收站是否有提示词
+            if (deletedPrompts.length > 0) {
+                const confirmed = await customConfirm(
+                    '导出提示词',
+                    `当前回收站中有 ${deletedPrompts.length} 个已删除的提示词，这些提示词不会被导出。\n\n确定要继续导出吗？`
+                );
+                if (!confirmed) return;
+            }
+
             try {
                 // 准备导出数据（包含完整的提示词信息，包括版本）
+                // 确保不包含已删除的提示词
                 const exportData = {
                     prompts: filteredPrompts,
                     metadata: {
                         exported_at: new Date().toISOString(),
                         total_count: filteredPrompts.length,
+                        recycled_count: deletedPrompts.length,
                         app_name: "PromptHub",
                         version: "2.0"
                     }
@@ -2562,7 +2672,7 @@ code block
 
             const confirmed = await customConfirm(
                 '批量删除提示词',
-                `确定要删除选中的 ${selectedPrompts.size} 个提示词吗？此操作不可撤销！`
+                `确定要删除选中的 ${selectedPrompts.size} 个提示词吗？删除后可在回收站中恢复。`
             );
 
             if (!confirmed) {
@@ -2571,34 +2681,29 @@ code block
 
             try {
                 let successCount = 0;
-                let failCount = 0;
 
                 for (const promptId of selectedPrompts) {
-                    try {
-                        const response = await fetch(`/api/prompts/${promptId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        if (response.ok) {
-                            successCount++;
-                        } else {
-                            failCount++;
-                        }
-                    } catch (error) {
-                        failCount++;
+                    const prompt = prompts.find(p => p.id === promptId);
+                    if (prompt) {
+                        // 添加删除时间戳
+                        prompt.deleted_at = new Date().toISOString();
+                        deletedPrompts.push(prompt);
+                        successCount++;
                     }
                 }
 
-                if (successCount > 0) {
-                    showToast(`成功删除 ${successCount} 个提示词${failCount > 0 ? `，${failCount} 个失败` : ''}`, successCount === selectedPrompts.size ? 'success' : 'warning');
-                    await loadData();
-                    cancelBatchMode();
-                } else {
-                    showToast('删除失败', 'error');
-                }
+                // 从本地数组中移除已删除的
+                prompts = prompts.filter(p => !selectedPrompts.has(p.id));
+
+                // 更新本地存储
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                renderPrompts();
+                renderCategoryButtons();
+                renderTagButtons();
+                updateRecycleBinCount();
+                showToast(`成功将 ${successCount} 个提示词移至回收站`);
+                cancelBatchMode();
             } catch (error) {
                 console.error('批量删除失败:', error);
                 showToast('批量删除失败', 'error');
@@ -2749,30 +2854,31 @@ code block
         async function deletePrompt(promptId) {
             const confirmed = await customConfirm(
                 '删除提示词',
-                '确定要删除这个提示词吗？此操作不可撤销！'
+                '确定要删除这个提示词吗？删除后可在回收站中恢复。'
             );
             if (!confirmed) {
                 return;
             }
 
             try {
-                const response = await fetch(`/api/prompts/${promptId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // 将提示词移到回收站（本地存储）
+                const prompt = prompts.find(p => p.id === promptId);
+                if (prompt) {
+                    // 添加删除时间戳
+                    prompt.deleted_at = new Date().toISOString();
+                    deletedPrompts.push(prompt);
 
-                if (response.ok) {
                     // 从本地数组中删除
                     prompts = prompts.filter(p => p.id !== promptId);
+
+                    // 更新本地存储
+                    localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
                     renderPrompts();
                     renderCategoryButtons();
                     renderTagButtons();
-                    showToast('删除成功');
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || '删除失败');
+                    updateRecycleBinCount();
+                    showToast('已移至回收站');
                 }
             } catch (error) {
                 console.error('Error deleting prompt:', error);
@@ -3911,6 +4017,316 @@ code block
             } catch (error) {
                 console.error('删除版本失败:', error);
                 showToast('删除版本失败', 'error');
+            }
+        }
+
+        // ==================== 回收站功能 ====================
+
+        // 显示回收站
+        function showRecycleBin() {
+            const modal = document.getElementById('recycleBinModal');
+            modal.style.display = 'flex';
+            renderRecycleBinList();
+        }
+
+        // 隐藏回收站
+        function hideRecycleBin() {
+            const modal = document.getElementById('recycleBinModal');
+            modal.style.display = 'none';
+            if (recycleBatchMode) {
+                cancelRecycleBatchMode();
+            }
+        }
+
+        // 渲染回收站列表
+        function renderRecycleBinList() {
+            const container = document.getElementById('recycleBinList');
+            const emptyMessage = document.getElementById('recycleBinEmpty');
+
+            if (deletedPrompts.length === 0) {
+                container.style.display = 'none';
+                emptyMessage.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyMessage.style.display = 'none';
+
+            container.innerHTML = deletedPrompts.map(prompt => `
+                <div class="bg-white rounded-xl shadow-md p-4 border border-gray-200 relative recycle-card" data-prompt-id="${prompt.id}">
+                    <!-- 批量选择复选框 -->
+                    <div class="recycle-checkbox-container absolute top-3 left-3 z-10" style="display: none;">
+                        <label class="flex items-center justify-center w-6 h-6 bg-white border-2 border-gray-300 rounded-md shadow-sm hover:border-blue-500 transition-all cursor-pointer">
+                            <input type="checkbox" class="recycle-checkbox w-4 h-4 text-blue-600 border-0 rounded focus:ring-0 focus:ring-offset-0"
+                                   data-prompt-id="${prompt.id}" onchange="updateRecycleSelectedCount()">
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4 class="text-lg font-bold text-gray-800 mb-1">${escapeHtml(prompt.title)}</h4>
+                        ${prompt.description ? `<p class="text-gray-600 text-sm italic">"${escapeHtml(prompt.description)}"</p>` : ''}
+                    </div>
+
+                    <div class="mb-3 bg-gray-50 p-3 rounded-lg">
+                        <p class="text-gray-700 text-sm line-clamp-3">
+                            ${escapeHtml(prompt.content.substring(0, 100))}${prompt.content.length > 100 ? '...' : ''}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span>📁 ${escapeHtml(prompt.category || '未分类')}</span>
+                        <span>🗑️ ${new Date(prompt.deleted_at).toLocaleString()}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="restorePrompt('${prompt.id}')" class="flex-1 px-3 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium">
+                            ↩️ 恢复
+                        </button>
+                        <button onclick="permanentDeletePrompt('${prompt.id}')" class="flex-1 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all text-sm font-medium">
+                            🗑️ 彻底删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 恢复单个提示词
+        async function restorePrompt(promptId) {
+            try {
+                const prompt = deletedPrompts.find(p => p.id === promptId);
+                if (!prompt) return;
+
+                // 移除删除标记
+                delete prompt.deleted_at;
+
+                // 从回收站移除
+                deletedPrompts = deletedPrompts.filter(p => p.id !== promptId);
+
+                // 添加回prompts数组
+                prompts.push(prompt);
+
+                // 更新本地存储
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                // 更新显示
+                renderRecycleBinList();
+                updateRecycleBinCount();
+                renderPrompts();
+                renderCategoryButtons();
+                renderTagButtons();
+
+                showToast('恢复成功');
+            } catch (error) {
+                console.error('恢复失败:', error);
+                showToast('恢复失败', 'error');
+            }
+        }
+
+        // 彻底删除单个提示词
+        async function permanentDeletePrompt(promptId) {
+            const confirmed = await customConfirm(
+                '彻底删除提示词',
+                '确定要彻底删除这个提示词吗？此操作不可撤销！'
+            );
+            if (!confirmed) return;
+
+            try {
+                const prompt = deletedPrompts.find(p => p.id === promptId);
+                if (!prompt) return;
+
+                // 真正删除（调用API）
+                const response = await fetch(`/api/prompts/${promptId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // 无论API调用是否成功，都从回收站移除
+                deletedPrompts = deletedPrompts.filter(p => p.id !== promptId);
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                renderRecycleBinList();
+                updateRecycleBinCount();
+
+                showToast('已彻底删除');
+            } catch (error) {
+                console.error('彻底删除失败:', error);
+                showToast('彻底删除失败', 'error');
+            }
+        }
+
+        // 回收站批量操作模式
+        function toggleRecycleBatchMode() {
+            recycleBatchMode = !recycleBatchMode;
+            const checkboxes = document.querySelectorAll('.recycle-checkbox-container');
+            const recycleCards = document.querySelectorAll('.recycle-card');
+            const batchActionsContainer = document.getElementById('recycleBatchActionsContainer');
+            const batchModeBtn = document.getElementById('recycleBatchModeBtn');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.style.display = recycleBatchMode ? 'block' : 'none';
+            });
+
+            recycleCards.forEach(card => {
+                if (recycleBatchMode) {
+                    card.classList.add('batch-active');
+                } else {
+                    card.classList.remove('batch-active');
+                }
+            });
+
+            if (recycleBatchMode) {
+                batchActionsContainer.style.display = 'flex';
+                batchModeBtn.style.display = 'none';
+            } else {
+                batchActionsContainer.style.display = 'none';
+                batchModeBtn.style.display = 'block';
+                selectedRecyclePrompts.clear();
+                document.querySelectorAll('.recycle-checkbox').forEach(cb => cb.checked = false);
+                updateRecycleSelectedCount();
+            }
+        }
+
+        function cancelRecycleBatchMode() {
+            toggleRecycleBatchMode();
+        }
+
+        function updateRecycleSelectedCount() {
+            selectedRecyclePrompts.clear();
+            document.querySelectorAll('.recycle-checkbox:checked').forEach(cb => {
+                selectedRecyclePrompts.add(cb.dataset.promptId);
+            });
+
+            const countSpan = document.querySelector('#recycleSelectedCount');
+            if (countSpan) {
+                countSpan.textContent = selectedRecyclePrompts.size;
+            }
+        }
+
+        // 批量恢复
+        async function batchRestoreFromRecycle() {
+            if (selectedRecyclePrompts.size === 0) {
+                showToast('请至少选择一个提示词', 'error');
+                return;
+            }
+
+            try {
+                let successCount = 0;
+
+                for (const promptId of selectedRecyclePrompts) {
+                    const prompt = deletedPrompts.find(p => p.id === promptId);
+                    if (prompt) {
+                        delete prompt.deleted_at;
+                        prompts.push(prompt);
+                        successCount++;
+                    }
+                }
+
+                // 从回收站移除已恢复的
+                deletedPrompts = deletedPrompts.filter(p => !selectedRecyclePrompts.has(p.id));
+
+                // 更新本地存储
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                renderRecycleBinList();
+                updateRecycleBinCount();
+                renderPrompts();
+                renderCategoryButtons();
+                renderTagButtons();
+                cancelRecycleBatchMode();
+
+                showToast(`成功恢复 ${successCount} 个提示词`);
+            } catch (error) {
+                console.error('批量恢复失败:', error);
+                showToast('批量恢复失败', 'error');
+            }
+        }
+
+        // 批量彻底删除
+        async function batchPermanentDelete() {
+            if (selectedRecyclePrompts.size === 0) {
+                showToast('请至少选择一个提示词', 'error');
+                return;
+            }
+
+            const confirmed = await customConfirm(
+                '批量彻底删除',
+                `确定要彻底删除选中的 ${selectedRecyclePrompts.size} 个提示词吗？此操作不可撤销！`
+            );
+            if (!confirmed) return;
+
+            try {
+                let successCount = 0;
+
+                for (const promptId of selectedRecyclePrompts) {
+                    try {
+                        await fetch(`/api/prompts/${promptId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        successCount++;
+                    } catch (error) {
+                        console.error(`删除 ${promptId} 失败:`, error);
+                    }
+                }
+
+                // 从回收站移除
+                deletedPrompts = deletedPrompts.filter(p => !selectedRecyclePrompts.has(p.id));
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                renderRecycleBinList();
+                updateRecycleBinCount();
+                cancelRecycleBatchMode();
+
+                showToast(`已彻底删除 ${successCount} 个提示词`);
+            } catch (error) {
+                console.error('批量删除失败:', error);
+                showToast('批量删除失败', 'error');
+            }
+        }
+
+        // 清空回收站
+        async function clearRecycleBin() {
+            if (deletedPrompts.length === 0) {
+                showToast('回收站是空的', 'info');
+                return;
+            }
+
+            const confirmed = await customConfirm(
+                '清空回收站',
+                `确定要清空回收站吗？将彻底删除 ${deletedPrompts.length} 个提示词，此操作不可撤销！`
+            );
+            if (!confirmed) return;
+
+            try {
+                // 彻底删除所有
+                for (const prompt of deletedPrompts) {
+                    try {
+                        await fetch(`/api/prompts/${prompt.id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                    } catch (error) {
+                        console.error(`删除 ${prompt.id} 失败:`, error);
+                    }
+                }
+
+                // 清空回收站
+                deletedPrompts = [];
+                localStorage.setItem('deletedPrompts', JSON.stringify(deletedPrompts));
+
+                renderRecycleBinList();
+                updateRecycleBinCount();
+
+                showToast('回收站已清空');
+            } catch (error) {
+                console.error('清空失败:', error);
+                showToast('清空失败', 'error');
             }
         }
 
