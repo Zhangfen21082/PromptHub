@@ -318,9 +318,9 @@
                         </h3>
                         <div class="space-y-2">
                             <button onclick="filterByCategory('')"
-                                    class="category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md text-left"
+                                    class="category-btn filter-button w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200"
                                     data-category="">
-                                全部
+                                📋 显示全部提示词
                             </button>
                             <div id="categoryButtons" class="space-y-2"></div>
                         </div>
@@ -333,18 +333,10 @@
                         </h3>
                         <div class="space-y-2">
                             <button onclick="clearTagFilters()"
-                                    class="tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md text-left"
+                                    class="tag-btn filter-button w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200"
                                     id="allTagsBtn">
-                                全部
+                                📋 显示全部提示词
                             </button>
-                            
-                            <!-- 标签搜索框 -->
-                            <div class="relative">
-                                <input type="text" id="tagSearchInput"
-                                       placeholder="🔍 搜索标签..."
-                                       class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                       oninput="filterTagButtons()">
-                            </div>
                         </div>
                         
                         <!-- 标签按钮区域 -->
@@ -2074,9 +2066,19 @@ code block
             // 更新按钮状态
             document.querySelectorAll('.category-btn').forEach(btn => {
                 if (btn.dataset.category === category || (categoryId && btn.dataset.categoryId === categoryId)) {
-                    btn.className = 'category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center gap-2 shadow-md text-left';
+                    // 判断是否是"全部"按钮
+                    if (category === '') {
+                        btn.className = 'category-btn filter-button w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200';
+                    } else {
+                        btn.className = 'category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center gap-2 shadow-md text-left';
+                    }
                 } else {
-                    btn.className = 'category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm text-left';
+                    // 判断是否是"全部"按钮（未选中状态）
+                    if (btn.dataset.category === '') {
+                        btn.className = 'category-btn filter-button w-full px-4 py-3 rounded-xl text-base font-medium bg-white border-2 border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 shadow transition-all duration-200';
+                    } else {
+                        btn.className = 'category-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 flex items-center gap-2 shadow-sm text-left';
+                    }
                 }
             });
 
@@ -2109,9 +2111,9 @@ code block
                 if (btn.id === 'allTagsBtn') {
                     // 全部按钮的样式
                     if (currentFilters.tags.length === 0) {
-                        btn.className = 'tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md text-left';
+                        btn.className = 'tag-btn filter-button w-full px-4 py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200';
                     } else {
-                        btn.className = 'tag-btn filter-button w-full px-3 py-2 rounded-lg text-sm bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50 shadow-sm text-left';
+                        btn.className = 'tag-btn filter-button w-full px-4 py-3 rounded-xl text-base font-medium bg-white border-2 border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 shadow transition-all duration-200';
                     }
                 } else if (btn.dataset.tag) {
                     // 具体标签按钮的样式
