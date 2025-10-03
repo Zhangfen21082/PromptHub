@@ -1,7 +1,7 @@
 {
   "prompts": [
     {
-      "category": "商业",
+      "category": "市场营销",
       "content": "{\n  \"description\": \"Cinematic close-up of a cold, dewy Corona bottle sitting alone on a weathered beach table. It begins to hum, vibrate. The bottle cap *pops*—and the entire environment unfolds from inside: palm trees rise, lights string themselves, speakers assemble mid-air, sand shifts into a dance floor. A DJ booth builds from driftwood. Music kicks in. A beach rave is born. No text.\",\n  \"style\": \"cinematic, magical realism\",\n  \"camera\": \"starts ultra close, zooms out and cranes overhead as the world expands\",\n  \"lighting\": \"sunset turning to neon—golden hour into party glow\",\n  \"environment\": \"quiet beach transforms into high-energy beach rave\",\n  \"elements\": [\n    \"Corona bottle (label visible, condensation dripping)\",\n    \"pop-top cap in slow motion\",\n    \"exploding citrus slice\",\n    \"sand morphing into dance floor\",\n    \"palm trees rising\",\n    \"neon lights snapping on\",\n    \"DJ booth building itself\",\n    \"crowd materializing mid-dance\",\n    \"fire pit lighting\",\n    \"surfboards as signage\"\n  ],\n  \"motion\": \"explosion of elements from bottle, everything assembles in rapid time-lapse\",\n  \"ending\": \"Corona bottle in foreground, beach rave in full swing behind it\",\n  \"text\": \"none\",\n  \"keywords\": [\n    \"Corona\",\n    \"beach party\",\n    \"bottle transforms\",\n    \"rave build\",\n    \"sunset to night\",\n    \"cinematic\",\n    \"no text\"\n  ]\n}",
       "created_at": "2025-08-16T12:59:11.996749",
       "description": "Corona啤酒瓶海滩派对变形视频提示词",
@@ -13,7 +13,7 @@
         "品牌"
       ],
       "title": "Corona啤酒瓶海滩派对变形视频提示词",
-      "updated_at": "2025-08-16T15:08:48.733235",
+      "updated_at": "2025-10-03T20:25:19.039428",
       "usage_count": 15,
       "versions": [
         {
@@ -25,7 +25,9 @@
           "change_note": "导入版本"
         }
       ],
-      "current_version": "1.0"
+      "current_version": "1.0",
+      "category_id": "51ee0335-493d-441f-80ac-26810c7daa61",
+      "category_path": "商业/市场营销"
     },
     {
       "category": "编程",
@@ -388,6 +390,24 @@
         "parent_id": null,
         "level": 1,
         "path": "其他"
+      },
+      {
+        "id": "51ee0335-493d-441f-80ac-26810c7daa61",
+        "name": "市场营销",
+        "color": "#3b82f6",
+        "description": "",
+        "parent_id": "5",
+        "level": 2,
+        "path": "商业/市场营销"
+      },
+      {
+        "id": "e7c7d39c-aa62-4b61-b81b-9fa476108f18",
+        "name": "年后",
+        "color": "#3b82f6",
+        "description": "",
+        "parent_id": "51ee0335-493d-441f-80ac-26810c7daa61",
+        "level": 3,
+        "path": "商业/市场营销/年后"
       }
     ],
     "tags": [
@@ -548,7 +568,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-09-30T16:38:52.534677",
+      "last_updated": "2025-10-03T20:34:00.530341",
       "version": "2.0"
     }
   }
