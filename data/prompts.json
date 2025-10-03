@@ -5,7 +5,7 @@
       "title": "Corona啤酒瓶海滩派对变形视频提示词",
       "content": "{\n  \"description\": \"Cinematic close-up of a cold, dewy Corona bottle sitting alone on a weathered beach table. It begins to hum, vibrate. The bottle cap *pops*—and the entire environment unfolds from inside: palm trees rise, lights string themselves, speakers assemble mid-air, sand shifts into a dance floor. A DJ booth builds from driftwood. Music kicks in. A beach rave is born. No text.\",\n  \"style\": \"cinematic, magical realism\",\n  \"camera\": \"starts ultra close, zooms out and cranes overhead as the world expands\",\n  \"lighting\": \"sunset turning to neon—golden hour into party glow\",\n  \"environment\": \"quiet beach transforms into high-energy beach rave\",\n  \"elements\": [\n    \"Corona bottle (label visible, condensation dripping)\",\n    \"pop-top cap in slow motion\",\n    \"exploding citrus slice\",\n    \"sand morphing into dance floor\",\n    \"palm trees rising\",\n    \"neon lights snapping on\",\n    \"DJ booth building itself\",\n    \"crowd materializing mid-dance\",\n    \"fire pit lighting\",\n    \"surfboards as signage\"\n  ],\n  \"motion\": \"explosion of elements from bottle, everything assembles in rapid time-lapse\",\n  \"ending\": \"Corona bottle in foreground, beach rave in full swing behind it\",\n  \"text\": \"none\",\n  \"keywords\": [\n    \"Corona\",\n    \"beach party\",\n    \"bottle transforms\",\n    \"rave build\",\n    \"sunset to night\",\n    \"cinematic\",\n    \"no text\"\n  ]\n}",
       "description": "Corona啤酒瓶海滩派对变形视频提示词",
-      "category": "商业",
+      "category": "年后",
       "tags": [
         "视频",
         "创意",
@@ -14,7 +14,7 @@
       ],
       "usage_count": 15,
       "created_at": "2025-08-16T12:59:11.996749",
-      "updated_at": "2025-08-16T15:08:48.733235",
+      "updated_at": "2025-10-03T23:21:37.597370",
       "versions": [
         {
           "version": "1.0",
@@ -23,192 +23,27 @@
           "description": "Corona啤酒瓶海滩派对变形视频提示词",
           "created_at": "2025-08-16T12:59:11.996749",
           "change_note": "初始版本"
-        }
-      ],
-      "current_version": "1.0"
-    },
-    {
-      "id": "1",
-      "title": "Python代码优化专家",
-      "content": "你是一个Python代码优化专家。请分析以下代码并提供优化建议：\n1. 性能优化方面\n2. 代码可读性\n3. 最佳实践\n\n请提供详细的分析和改进后的代码示例。",
-      "description": "专门用于Python代码审查和优化的提示词",
-      "category": "其他",
-      "tags": [
-        "python",
-        "优化",
-        "代码审查"
-      ],
-      "usage_count": 28,
-      "created_at": "2025-08-16T10:00:00.000000",
-      "updated_at": "2025-10-03T22:41:20.029904",
-      "versions": [
+        },
         {
-          "version": "1.0",
-          "title": "Python代码优化专家",
-          "content": "你是一个Python代码优化专家。请分析以下代码并提供优化建议：\n1. 性能优化方面\n2. 代码可读性\n3. 最佳实践\n\n请提供详细的分析和改进后的代码示例。",
-          "description": "专门用于Python代码审查和优化的提示词",
-          "created_at": "2025-08-16T10:00:00.000000",
-          "change_note": "初始版本"
+          "version": "1.1",
+          "title": "Corona啤酒瓶海滩派对变形视频提示词阿松大",
+          "content": "{\n  \"description\": \"Cinematic close-up of a cold, dewy Corona bottle sitting alone on a weathered beach table. It begins to hum, vibrate. The bottle cap *pops*—and the entire environment unfolds from inside: palm trees rise, lights string themselves, speakers assemble mid-air, sand shifts into a dance floor. A DJ booth builds from driftwood. Music kicks in. A beach rave is born. No text.\",\n  \"style\": \"cinematic, magical realism\",\n  \"camera\": \"starts ultra close, zooms out and cranes overhead as the world expands\",\n  \"lighting\": \"sunset turning to neon—golden hour into party glow\",\n  \"environment\": \"quiet beach transforms into high-energy beach rave\",\n  \"elements\": [\n    \"Corona bottle (label visible, condensation dripping)\",\n    \"pop-top cap in slow motion\",\n    \"exploding citrus slice\",\n    \"sand morphing into dance floor\",\n    \"palm trees rising\",\n    \"neon lights snapping on\",\n    \"DJ booth building itself\",\n    \"crowd materializing mid-dance\",\n    \"fire pit lighting\",\n    \"surfboards as signage\"\n  ],\n  \"motion\": \"explosion of elements from bottle, everything assembles in rapid time-lapse\",\n  \"ending\": \"Corona bottle in foreground, beach rave in full swing behind it\",\n  \"text\": \"none\",\n  \"keywords\": [\n    \"Corona\",\n    \"beach party\",\n    \"bottle transforms\",\n    \"rave build\",\n    \"sunset to night\",\n    \"cinematic\",阿斯顿撒旦\n    \"no text\"\n  ]\n}",
+          "description": "Corona啤酒瓶海滩派对变形视频提示词阿松大",
+          "created_at": "2025-10-03T23:20:31.496946",
+          "change_note": "修改"
+        },
+        {
+          "version": "1.2",
+          "title": "Corona啤酒瓶海滩派对变形视频提示词阿松大撒旦",
+          "content": "{\n  \"description\": \"Cinematic close-up of a cold, dewy Corona bottle sitting alone on a weathered beach table. It begins to hum, vibrate. The bottle cap *pops*—and the entire environment unfolds from inside: palm trees rise, lights string themselves, speakers assemble mid-air, sand shifts into a dance floor. A DJ booth builds from driftwood. Music kicks in. A beach rave is born. No text.\",\n  \"style\": \"cinematic, magical realism\",\n  \"camera\": \"starts ultra close, zooms out and cranes overhead as the world expands\",\n  \"lighting\": \"sunset turning to neon—golden hour into party glow\",\n  \"environment\": \"quiet beach transforms into high-energy beach rave\",\n  \"elements\": [\n    \"Corona bottle (label visible, condensation dripping)\",\n    \"pop-top cap in slow motion\",\n    \"exploding citrus slice\",\n    \"sand morphing into dance floor\",\n    \"palm trees rising\",\n    \"neon lights snapping on\",\n    \"DJ booth building itself\",\n    \"crowd materializing mid-dance\",\n    \"fire pit lighting\",\n    \"surfboards as signage\"\n  ],\n  \"motion\": \"explosion of elements from bottle, everything assembles in rapid time-lapse\",\n  \"ending\": \"Corona bottle in foreground, beach rave in full swing behind it\",\n  \"text\": \"none\",\n  \"keywords\": [\n    \"Corona\",\n    \"beach party\",\n    \"bottle transforms\",\n    \"rave build\",\n    \"sunset to night\",阿松大\n    \"cinematic\",阿斯顿撒旦\n    \"no text\"\n  ]\n}",
+          "description": "Corona啤酒瓶海滩派对变形视频提示词阿松大阿松大",
+          "created_at": "2025-10-03T23:21:13.494705",
+          "change_note": "阿松大"
         }
       ],
       "current_version": "1.0",
-      "category_id": "7",
-      "category_path": "其他"
-    },
-    {
-      "id": "2",
-      "title": "React组件设计助手",
-      "content": "作为React开发专家，请帮我设计一个可复用的组件：\n- 功能需求：{描述功能}\n- 样式要求：{样式要求}\n- 性能考虑：{性能需求}\n\n请提供完整的组件代码，包括TypeScript类型定义、样式和使用示例。",
-      "description": "React组件开发的专业指导",
-      "category": "编程",
-      "tags": [
-        "react",
-        "typescript",
-        "组件"
-      ],
-      "usage_count": 22,
-      "created_at": "2025-08-16T10:01:00.000000",
-      "updated_at": "2025-08-16T10:01:00.000000",
-      "versions": [
-        {
-          "version": "1.0",
-          "title": "React组件设计助手",
-          "content": "作为React开发专家，请帮我设计一个可复用的组件：\n- 功能需求：{描述功能}\n- 样式要求：{样式要求}\n- 性能考虑：{性能需求}\n\n请提供完整的组件代码，包括TypeScript类型定义、样式和使用示例。",
-          "description": "React组件开发的专业指导",
-          "created_at": "2025-08-16T10:01:00.000000",
-          "change_note": "初始版本"
-        }
-      ],
-      "current_version": "1.0"
-    },
-    {
-      "id": "6",
-      "title": "小说创作助手",
-      "content": "你是一位经验丰富的小说作家。请帮我创作一个故事：\n\n主题：{故事主题}\n类型：{小说类型}\n背景：{故事背景}\n\n请提供：\n1. 故事大纲\n2. 主要人物设定\n3. 情节发展脉络\n4. 关键场景描述\n5. 对话样例\n6. 写作建议",
-      "description": "小说创作的专业指导和灵感启发",
-      "category": "写作",
-      "tags": [
-        "小说",
-        "创作",
-        "故事"
-      ],
-      "usage_count": 35,
-      "created_at": "2025-08-16T10:05:00.000000",
-      "updated_at": "2025-08-16T10:05:00.000000",
-      "versions": [
-        {
-          "version": "1.0",
-          "title": "小说创作助手",
-          "content": "你是一位经验丰富的小说作家。请帮我创作一个故事：\n\n主题：{故事主题}\n类型：{小说类型}\n背景：{故事背景}\n\n请提供：\n1. 故事大纲\n2. 主要人物设定\n3. 情节发展脉络\n4. 关键场景描述\n5. 对话样例\n6. 写作建议",
-          "description": "小说创作的专业指导和灵感启发",
-          "created_at": "2025-08-16T10:05:00.000000",
-          "change_note": "初始版本"
-        }
-      ],
-      "current_version": "1.0"
-    },
-    {
-      "id": "7",
-      "title": "商业计划书撰写专家",
-      "content": "作为商业咨询专家，请帮我撰写商业计划书：\n\n项目名称：{项目名称}\n行业领域：{行业}\n目标市场：{市场}\n\n请包含：\n1. 执行摘要\n2. 市场分析\n3. 竞争分析\n4. 营销策略\n5. 财务预测\n6. 风险评估\n7. 实施计划",
-      "description": "专业的商业计划书撰写指导",
-      "category": "商业",
-      "tags": [
-        "商业计划",
-        "创业",
-        "投资"
-      ],
-      "usage_count": 18,
-      "created_at": "2025-08-16T10:06:00.000000",
-      "updated_at": "2025-08-16T14:36:32.879509",
-      "versions": [
-        {
-          "version": "1.0",
-          "title": "商业计划书撰写专家",
-          "content": "作为商业咨询专家，请帮我撰写商业计划书：\n\n项目名称：{项目名称}\n行业领域：{行业}\n目标市场：{市场}\n\n请包含：\n1. 执行摘要\n2. 市场分析\n3. 竞争分析\n4. 营销策略\n5. 财务预测\n6. 风险评估\n7. 实施计划",
-          "description": "专业的商业计划书撰写指导",
-          "created_at": "2025-08-16T10:06:00.000000",
-          "change_note": "初始版本"
-        }
-      ],
-      "current_version": "1.0"
-    },
-    {
-      "id": "10",
-      "title": "创意广告文案策划",
-      "content": "你是一位资深广告创意总监。请为以下产品策划广告文案：\n\n产品：{产品名称}\n目标用户：{用户群体}\n核心卖点：{产品优势}\n传播渠道：{媒体渠道}\n\n请提供：\n1. 创意概念\n2. 主标题和副标题\n3. 正文内容\n4. 行动号召\n5. 视觉元素建议\n6. 传播策略",
-      "description": "创意广告文案的专业策划",
-      "category": "其他",
-      "tags": [
-        "广告",
-        "文案",
-        "营销"
-      ],
-      "usage_count": 31,
-      "created_at": "2025-08-16T10:09:00.000000",
-      "updated_at": "2025-10-03T22:41:20.034274",
-      "category_id": "7",
-      "category_path": "其他"
-    },
-    {
-      "id": "12",
-      "title": "产品需求文档撰写",
-      "content": "你是产品经理专家。请帮我撰写PRD文档：\n\n产品名称：{产品名称}\n功能模块：{功能描述}\n用户场景：{使用场景}\n\n请包含：\n1. 需求背景和目标\n2. 用户故事和用例\n3. 功能详细说明\n4. 交互流程设计\n5. 技术要求\n6. 验收标准\n7. 优先级规划",
-      "description": "产品需求文档的专业撰写指导",
-      "category": "商业",
-      "tags": [
-        "产品",
-        "需求",
-        "PRD"
-      ],
-      "usage_count": 25,
-      "created_at": "2025-08-16T10:11:00.000000",
-      "updated_at": "2025-08-16T10:11:00.000000"
-    },
-    {
-      "id": "14",
-      "title": "UI/UX设计评审专家",
-      "content": "你是UI/UX设计专家。请评审以下设计方案：\n\n设计类型：{设计类型}\n目标用户：{用户群体}\n使用场景：{场景描述}\n\n请从以下角度评审：\n1. 用户体验流程\n2. 界面视觉设计\n3. 交互设计合理性\n4. 可用性和可访问性\n5. 设计一致性\n6. 改进建议",
-      "description": "UI/UX设计的专业评审和改进建议",
-      "category": "创意",
-      "tags": [
-        "UI",
-        "UX",
-        "设计"
-      ],
-      "usage_count": 19,
-      "created_at": "2025-08-16T10:13:00.000000",
-      "updated_at": "2025-08-16T10:13:00.000000"
-    },
-    {
-      "id": "15",
-      "title": "技术架构设计顾问",
-      "content": "作为系统架构师，请设计技术架构方案：\n\n项目规模：{项目规模}\n技术要求：{技术需求}\n性能要求：{性能指标}\n\n请提供：\n1. 整体架构设计\n2. 技术选型建议\n3. 数据库设计\n4. 安全策略\n5. 部署方案\n6. 扩展性考虑\n7. 监控和运维",
-      "description": "系统技术架构的专业设计指导",
-      "category": "编程",
-      "tags": [
-        "架构",
-        "系统设计",
-        "技术"
-      ],
-      "usage_count": 33,
-      "created_at": "2025-08-16T10:14:00.000000",
-      "updated_at": "2025-08-16T10:14:00.000000"
-    },
-    {
-      "id": "26",
-      "title": "机器学习模型设计",
-      "content": "你是机器学习专家。请设计ML模型：\n\n业务问题：{问题描述}\n数据情况：{数据说明}\n性能要求：{性能指标}\n\n请提供：\n1. 问题建模分析\n2. 算法选择建议\n3. 特征工程设计\n4. 模型架构方案\n5. 训练策略制定\n6. 评估方法设计\n7. 部署运维方案",
-      "description": "机器学习模型的专业设计指导",
-      "category": "编程",
-      "tags": [
-        "机器学习",
-        "AI",
-        "模型"
-      ],
-      "usage_count": 27,
-      "created_at": "2025-08-16T10:25:00.000000",
-      "updated_at": "2025-08-16T10:25:00.000000"
+      "category_id": "e7c7d39c-aa62-4b61-b81b-9fa476108f18",
+      "category_path": "商业/市场营销/年后"
     }
   ],
   "metadata": {
@@ -453,7 +288,7 @@
       }
     ],
     "settings": {
-      "last_updated": "2025-10-03T22:56:00.292515",
+      "last_updated": "2025-10-03T23:21:37.597382",
       "version": "2.0"
     }
   }
