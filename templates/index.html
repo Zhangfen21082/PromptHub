@@ -1364,7 +1364,7 @@
         function getCategoryPath(categoryId, categoryName) {
             // 如果没有分类ID，直接返回分类名
             if (!categoryId) {
-                return categoryName;
+                return categoryName || '未分类';
             }
 
             // 查找分类
@@ -1383,13 +1383,13 @@
 
             const category = findCategory(categoryId, categoriesTree);
             if (!category) {
-                return categoryName;
+                return categoryName || '未分类';
             }
 
             // 构建路径
             const buildPath = (cat, path = []) => {
                 path.unshift(cat.name);
-                
+
                 // 查找父分类
                 if (cat.parent_id) {
                     const parent = findCategory(cat.parent_id, categoriesTree);
@@ -1397,7 +1397,7 @@
                         return buildPath(parent, path);
                     }
                 }
-                
+
                 return path;
             };
 

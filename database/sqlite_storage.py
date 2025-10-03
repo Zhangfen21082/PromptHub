@@ -82,8 +82,145 @@ class SQLiteStorage:
                 WHERE prompt_id = ?
                 ORDER BY created_at ASC
             """, (prompt_id,))
-            
+
             return [self._row_to_dict(row) for row in cursor.fetchall()]
+        finally:
+            conn.close()
+
+    def create_prompt_version(self, prompt_id: str, version_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """创建新版本"""
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+
+            # 检查提示词是否存在
+            if not self._prompt_exists(cursor, prompt_id):
+                return None
+
+            now = datetime.now().isoformat()
+
+            # 插入新版本
+            cursor.execute("""
+                INSERT INTO prompt_versions (
+                    prompt_id, version, title, content, description, change_note, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                prompt_id,
+                version_data.get("version"),
+                version_data.get("title"),
+                version_data.get("content"),
+                version_data.get("description", ""),
+                version_data.get("change_note", ""),
+                now
+            ))
+
+            # 更新提示词的当前版本和内容
+            cursor.execute("""
+                UPDATE prompts
+                SET current_version = ?, title = ?, content = ?, description = ?, updated_at = ?
+                WHERE id = ?
+            """, (
+                version_data.get("version"),
+                version_data.get("title"),
+                version_data.get("content"),
+                version_data.get("description", ""),
+                now,
+                prompt_id
+            ))
+
+            conn.commit()
+
+            return {
+                "version": version_data.get("version"),
+                "title": version_data.get("title"),
+                "content": version_data.get("content"),
+                "description": version_data.get("description", ""),
+                "created_at": now,
+                "change_note": version_data.get("change_note", "")
+            }
+        finally:
+            conn.close()
+
+    def switch_prompt_version(self, prompt_id: str, version: str) -> Optional[Dict[str, Any]]:
+        """切换到指定版本"""
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+
+            # 检查提示词是否存在
+            if not self._prompt_exists(cursor, prompt_id):
+                return None
+
+            # 查找指定版本
+            cursor.execute("""
+                SELECT version, title, content, description
+                FROM prompt_versions
+                WHERE prompt_id = ? AND version = ?
+            """, (prompt_id, version))
+
+            target_version = cursor.fetchone()
+            if not target_version:
+                return None
+
+            target_version = self._row_to_dict(target_version)
+
+            # 更新提示词到指定版本
+            cursor.execute("""
+                UPDATE prompts
+                SET current_version = ?, title = ?, content = ?, description = ?, updated_at = ?
+                WHERE id = ?
+            """, (
+                version,
+                target_version["title"],
+                target_version["content"],
+                target_version["description"],
+                datetime.now().isoformat(),
+                prompt_id
+            ))
+
+            conn.commit()
+
+            # 返回更新后的提示词
+            return self.get_prompt_by_id(prompt_id)
+        finally:
+            conn.close()
+
+    def delete_prompt_version(self, prompt_id: str, version: str) -> Dict[str, Any]:
+        """删除指定版本"""
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+
+            # 检查提示词是否存在
+            if not self._prompt_exists(cursor, prompt_id):
+                return {"success": False, "error": "提示词不存在"}
+
+            # 检查版本数量
+            cursor.execute("""
+                SELECT COUNT(*) as count FROM prompt_versions WHERE prompt_id = ?
+            """, (prompt_id,))
+            version_count = cursor.fetchone()['count']
+
+            if version_count <= 1:
+                return {"success": False, "error": "不能删除唯一的版本"}
+
+            # 获取当前版本
+            cursor.execute("SELECT current_version FROM prompts WHERE id = ?", (prompt_id,))
+            current_version = cursor.fetchone()['current_version']
+
+            if current_version == version:
+                return {"success": False, "error": "不能删除当前版本，请先切换到其他版本"}
+
+            # 删除版本
+            cursor.execute("""
+                DELETE FROM prompt_versions WHERE prompt_id = ? AND version = ?
+            """, (prompt_id, version))
+
+            if cursor.rowcount == 0:
+                return {"success": False, "error": "版本不存在"}
+
+            conn.commit()
+            return {"success": True}
         finally:
             conn.close()
     
@@ -382,8 +519,8 @@ class SQLiteStorage:
         finally:
             conn.close()
     
-    def _get_category_descendants(self, category_id: str) -> List[str]:
-        """获取分类的所有后代分类ID"""
+    def get_category_descendants(self, category_id: str) -> List[str]:
+        """获取分类的所有后代分类ID（公开方法）"""
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
@@ -543,7 +680,7 @@ class SQLiteStorage:
             return True
         
         # 获取所有后代分类
-        descendants = self._get_category_descendants(category_id)
+        descendants = self.get_category_descendants(category_id)
         return new_parent_id in descendants
     
     def delete_category(self, category_id: str) -> Dict[str, Any]:
@@ -602,7 +739,7 @@ class SQLiteStorage:
             category = self._row_to_dict(category)
             
             # 获取所有子分类（包括递归的）
-            all_descendants = self._get_category_descendants(category_id)
+            all_descendants = self.get_category_descendants(category_id)
             categories_to_delete = [category_id] + all_descendants
             
             # 找到"其他"分类
@@ -808,7 +945,7 @@ class SQLiteStorage:
             
             if category_id:
                 # 按分类ID搜索，包括其子分类
-                descendants = self._get_category_descendants(category_id)
+                descendants = self.get_category_descendants(category_id)
                 target_category_ids = [category_id] + descendants
                 placeholders = ','.join(['?' for _ in target_category_ids])
                 conditions.append(f"p.category_id IN ({placeholders})")
@@ -942,15 +1079,15 @@ class SQLiteStorage:
         """加载测试数据"""
         # 先备份数据
         backup_file = self.backup_data()
-        
+
         try:
             examples_dir = Path("data/examples")
             example_prompts_file = examples_dir / "prompts.json"
-            
+
             if example_prompts_file.exists():
                 with open(example_prompts_file, 'r', encoding='utf-8') as f:
                     example_data = json.load(f)
-                
+
                 # 清空现有提示词
                 conn = self._get_connection()
                 try:
@@ -961,13 +1098,154 @@ class SQLiteStorage:
                     conn.commit()
                 finally:
                     conn.close()
-                
+
                 # 加载测试数据
                 for prompt_data in example_data.get("prompts", []):
                     self.create_prompt(prompt_data)
-                
+
                 return backup_file
             else:
                 raise FileNotFoundError("测试数据文件不存在")
         except Exception as e:
             raise Exception(f"加载测试数据失败: {str(e)}")
+
+    def import_prompts(self, prompts_data: List[Dict[str, Any]]) -> Dict[str, int]:
+        """
+        导入提示词列表
+
+        Args:
+            prompts_data: 要导入的提示词列表
+
+        Returns:
+            包含统计信息的字典: {success_count, update_count, skip_count}
+        """
+        success_count = 0
+        skip_count = 0
+        update_count = 0
+
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+
+            for prompt in prompts_data:
+                # 验证必需字段
+                if 'id' not in prompt or 'title' not in prompt or 'content' not in prompt:
+                    skip_count += 1
+                    continue
+
+                prompt_id = prompt['id']
+
+                # 检查提示词是否存在
+                existing_prompt = self.get_prompt_by_id(prompt_id)
+
+                if existing_prompt:
+                    # 更新现有提示词（保留usage_count）
+                    update_data = {
+                        'title': prompt['title'],
+                        'content': prompt['content'],
+                        'description': prompt.get('description', ''),
+                        'category_id': prompt.get('category_id'),
+                        'tags': prompt.get('tags', [])
+                    }
+
+                    self.update_prompt(prompt_id, update_data)
+
+                    # 导入版本信息（如果有）
+                    if 'versions' in prompt:
+                        self._import_prompt_versions(cursor, prompt_id, prompt['versions'])
+
+                    update_count += 1
+                else:
+                    # 创建新提示词
+                    # 使用传入的ID而不是生成新ID
+                    now = datetime.now().isoformat()
+
+                    # 获取分类信息
+                    category_id = prompt.get("category_id")
+                    category_name = prompt.get("category", "其他")
+                    category_path = category_name
+
+                    if category_id:
+                        cursor.execute("SELECT name, path FROM categories WHERE id = ?", (category_id,))
+                        category = cursor.fetchone()
+                        if category:
+                            category_name = category['name']
+                            category_path = category['path']
+
+                    # 插入提示词
+                    cursor.execute("""
+                        INSERT INTO prompts (
+                            id, title, content, description, category_id,
+                            category_name, category_path, usage_count,
+                            current_version, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        prompt_id,
+                        prompt["title"],
+                        prompt["content"],
+                        prompt.get("description", ""),
+                        category_id,
+                        category_name,
+                        category_path,
+                        prompt.get("usage_count", 0),
+                        prompt.get("current_version", "1.0"),
+                        prompt.get("created_at", now),
+                        prompt.get("updated_at", now)
+                    ))
+
+                    # 插入版本信息
+                    if 'versions' in prompt and prompt['versions']:
+                        self._import_prompt_versions(cursor, prompt_id, prompt['versions'])
+                    else:
+                        # 创建默认版本
+                        cursor.execute("""
+                            INSERT INTO prompt_versions (
+                                prompt_id, version, title, content, description, change_note, created_at
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            prompt_id,
+                            "1.0",
+                            prompt["title"],
+                            prompt["content"],
+                            prompt.get("description", ""),
+                            "导入版本",
+                            prompt.get("created_at", now)
+                        ))
+
+                    # 添加标签
+                    tags = prompt.get("tags", [])
+                    for tag_name in tags:
+                        self._add_tag_to_prompt(cursor, prompt_id, tag_name)
+
+                    success_count += 1
+
+            conn.commit()
+
+            return {
+                "success_count": success_count,
+                "update_count": update_count,
+                "skip_count": skip_count
+            }
+        finally:
+            conn.close()
+
+    def _import_prompt_versions(self, cursor: sqlite3.Cursor, prompt_id: str, versions: List[Dict[str, Any]]):
+        """导入提示词的版本信息"""
+        # 先删除现有版本
+        cursor.execute("DELETE FROM prompt_versions WHERE prompt_id = ?", (prompt_id,))
+
+        # 插入新版本
+        for version in versions:
+            cursor.execute("""
+                INSERT INTO prompt_versions (
+                    prompt_id, version, title, content, description, change_note, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                prompt_id,
+                version.get("version", "1.0"),
+                version.get("title", ""),
+                version.get("content", ""),
+                version.get("description", ""),
+                version.get("change_note", ""),
+                version.get("created_at", datetime.now().isoformat())
+            ))
