@@ -6,7 +6,6 @@ PromptHub SQLite数据库存储类
 """
 
 import sqlite3
-import json
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -1098,8 +1097,6 @@ class SQLiteStorage:
     
     def load_test_data(self) -> str:
         """加载测试数据 - 生成完善的测试数据用于开发"""
-        import random
-
         # 先备份数据
         backup_file = self.backup_data()
 

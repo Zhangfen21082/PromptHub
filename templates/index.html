@@ -415,7 +415,7 @@
                         
                         <!-- 标签按钮区域 -->
                         <div class="relative">
-                            <div id="tagButtons" class="flex flex-wrap gap-2 max-h-60 overflow-y-auto" style="transition: max-height 0.3s ease;">
+                            <div id="tagButtons" class="flex flex-wrap gap-2 overflow-hidden" style="max-height: 120px; transition: max-height 0.3s ease;">
                                 <!-- 动态生成标签按钮 -->
                             </div>
 
@@ -1337,8 +1337,18 @@
                 }).join('');
             }
 
-            // 渲染顶级分类
-            container.innerHTML = renderCategoryTree(categoriesTree);
+            // 分离"未分类"和其他分类
+            const uncategorized = categoriesTree.find(cat => cat.id === '0');
+            const otherCategories = categoriesTree.filter(cat => cat.id !== '0');
+
+            // 渲染分类：先渲染"未分类"，再渲染其他分类
+            let html = '';
+            if (uncategorized) {
+                html += renderCategoryTree([uncategorized]);
+            }
+            html += renderCategoryTree(otherCategories);
+
+            container.innerHTML = html;
         }
 
         function getAllDescendantIds(category) {
@@ -1432,17 +1442,33 @@
                     </button>
                 `;
             }).join('');
-            
-            // 检查是否需要显示展开/收起按钮
-            const containerHeight = container.scrollHeight;
-            if (containerHeight > 120 && !searchTerm) {
-                toggleContainer.style.display = 'block';
-                updateTagToggleState();
-            } else {
-                toggleContainer.style.display = 'none';
-                container.style.maxHeight = searchTerm ? 'none' : '120px';
-            }
-            
+
+            // 等待DOM渲染完成后检查高度
+            // 使用 requestAnimationFrame 确保在浏览器下一次重绘前执行
+            requestAnimationFrame(() => {
+                // 检查是否需要显示展开/收起按钮
+                // 先临时移除高度限制以获取真实内容高度
+                container.style.maxHeight = 'none';
+                const containerHeight = container.scrollHeight;
+
+                if (containerHeight > 120 && !searchTerm) {
+                    // 内容超过120px且不在搜索状态，显示展开/收起按钮
+                    toggleContainer.style.display = 'block';
+                    // 保持当前展开状态
+                    updateTagToggleState();
+                } else {
+                    // 内容不多或在搜索状态，隐藏按钮
+                    toggleContainer.style.display = 'none';
+                    // 如果是搜索状态或内容不多，直接显示全部
+                    if (searchTerm) {
+                        container.style.maxHeight = 'none';
+                    } else {
+                        // 没有搜索且内容不多时，根据当前展开状态设置
+                        container.style.maxHeight = tagsExpanded ? 'none' : '120px';
+                    }
+                }
+            });
+
             // 更新按钮样式
             updateTagButtonStyles();
         }
@@ -3508,9 +3534,7 @@ code block
                                 <span class="category-text">${escapeHtml(category.name)}</span>
                                 ${category.name.length > 20 ? `<span class="tooltip-text">${escapeHtml(category.name)}</span>` : ''}
                             </span>
-                            <!-- 移除分类路径显示 -->
-                            <!--<span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>-->
-                            <!--<span class="text-xs text-gray-400">Level ${category.level || 1}</span>-->
+                            <span class="text-sm text-gray-500">(${promptCount} 个提示词)</span>
                         </div>
                         <div class="flex gap-2">
                             ${category.id !== '0' && (category.level || 1) < 5 ? `
@@ -3543,7 +3567,15 @@ code block
                 });
             }
 
-            renderCategoryItems(categoriesTree);
+            // 分离"未分类"和其他分类
+            const uncategorized = categoriesTree.find(cat => cat.id === '0');
+            const otherCategories = categoriesTree.filter(cat => cat.id !== '0');
+
+            // 先渲染"未分类"，再渲染其他分类
+            if (uncategorized) {
+                renderCategoryItems([uncategorized]);
+            }
+            renderCategoryItems(otherCategories);
         }
 
         async function addCategory() {
