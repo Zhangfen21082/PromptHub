@@ -790,12 +790,17 @@ def get_prompts():
 def create_prompt():
     """创建提示词"""
     try:
+        # 将空字符串转换为None，避免外键约束错误
+        category_id = request.json.get('category_id')
+        if category_id == '':
+            category_id = None
+
         prompt_data = {
             "title": request.json.get('title'),
             "content": request.json.get('content'),
             "description": request.json.get('description', ''),
             "category": request.json.get('category', '其他'),
-            "category_id": request.json.get('category_id'),
+            "category_id": category_id,
             "tags": request.json.get('tags', [])
         }
 
@@ -808,6 +813,10 @@ def create_prompt():
 def update_prompt(prompt_id):
     """更新提示词"""
     try:
+        # 打印请求数据用于调试
+        print(f"[DEBUG] 更新提示词 {prompt_id}")
+        print(f"[DEBUG] 请求数据: {request.json}")
+
         update_data = {}
         if request.json.get('title') is not None:
             update_data["title"] = request.json.get('title')
@@ -815,12 +824,14 @@ def update_prompt(prompt_id):
             update_data["content"] = request.json.get('content')
         if request.json.get('description') is not None:
             update_data["description"] = request.json.get('description')
-        if request.json.get('category') is not None:
-            update_data["category"] = request.json.get('category')
         if 'category_id' in request.json:
-            update_data["category_id"] = request.json.get('category_id')
+            # 将空字符串转换为None，避免外键约束错误
+            category_id = request.json.get('category_id')
+            update_data["category_id"] = None if category_id == '' else category_id
         if request.json.get('tags') is not None:
             update_data["tags"] = request.json.get('tags')
+
+        print(f"[DEBUG] 处理后的数据: {update_data}")
 
         updated_prompt = storage.update_prompt(prompt_id, update_data)
         if updated_prompt:
@@ -828,6 +839,9 @@ def update_prompt(prompt_id):
         else:
             return jsonify({"error": "提示词不存在"}), 404
     except Exception as e:
+        import traceback
+        print(f"[ERROR] 更新提示词失败:")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/prompts/<prompt_id>', methods=['DELETE'])

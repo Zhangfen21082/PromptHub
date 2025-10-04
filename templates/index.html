@@ -1089,18 +1089,20 @@
 
         async function loadData() {
             try {
-                const [promptsRes, categoriesRes, categoriesTreeRes] = await Promise.all([
+                const [promptsRes, categoriesRes, categoriesTreeRes, tagsRes] = await Promise.all([
                     fetch('/api/prompts'),
                     fetch('/api/categories'),
-                    fetch('/api/categories/tree')
+                    fetch('/api/categories/tree'),
+                    fetch('/api/tags')
                 ]);
 
                 prompts = await promptsRes.json();
                 categories = await categoriesRes.json();
                 categoriesTree = await categoriesTreeRes.json();
+                const allTagsData = await tagsRes.json();
 
-                // 提取所有唯一标签
-                allTags = [...new Set(prompts.flatMap(p => p.tags || []))];
+                // 从tags API获取所有标签名称
+                allTags = allTagsData.map(t => t.name);
 
                 // 清空版本下拉缓存，确保数据更新后重新加载
                 versionDropdownCache = {};
@@ -1522,6 +1524,7 @@
                     </div>
                 `;
                 document.getElementById('paginationContainer').style.display = 'none';
+                updateStatistics(); // 即使没有提示词，也要更新统计信息
                 return;
             }
             

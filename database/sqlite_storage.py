@@ -8,10 +8,9 @@ PromptHub SQLite数据库存储类
 import sqlite3
 import json
 import uuid
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from database.init_db import get_database_connection, init_database
 
 class SQLiteStorage:
@@ -358,24 +357,24 @@ class SQLiteStorage:
             # 构建更新SQL
             update_fields = []
             update_values = []
-            
+
             for field, value in update_data.items():
                 if field in ["title", "content", "description", "category_id", "category_name", "category_path"]:
                     update_fields.append(f"{field} = ?")
                     update_values.append(value)
-            
+
             if update_fields:
                 update_fields.append("updated_at = ?")
                 update_values.append(datetime.now().isoformat())
                 update_values.append(prompt_id)
-                
+
                 sql = f"UPDATE prompts SET {', '.join(update_fields)} WHERE id = ?"
                 cursor.execute(sql, update_values)
-                
-                # 如果更新了标签，需要更新prompt_tags表
-                if "tags" in update_data:
-                    self._update_prompt_tags(cursor, prompt_id, update_data["tags"])
-            
+
+            # 如果更新了标签，需要更新prompt_tags表
+            if "tags" in update_data:
+                self._update_prompt_tags(cursor, prompt_id, update_data["tags"])
+
             conn.commit()
             return self.get_prompt_by_id(prompt_id)
         finally:
@@ -398,7 +397,7 @@ class SQLiteStorage:
         cursor.execute("SELECT name FROM tags WHERE name = ?", (tag_name,))
         if not cursor.fetchone():
             cursor.execute("""
-                INSERT INTO tags (id, name, color, created_at, updated_at)
+                INSERT OR IGNORE INTO tags (id, name, color, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 str(uuid.uuid4()),
@@ -796,46 +795,12 @@ class SQLiteStorage:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            
-            # 从prompts中提取实际使用的标签
-            cursor.execute("SELECT DISTINCT tag_name FROM prompt_tags")
-            used_tags = {row['tag_name'] for row in cursor.fetchall()}
-            
-            # 获取metadata中的标签定义
-            cursor.execute("SELECT * FROM tags")
-            metadata_tags = {tag["name"]: self._row_to_dict(tag) for tag in cursor.fetchall()}
-            
-            # 合并：确保所有使用的标签都有定义
-            result_tags = []
-            for tag_name in used_tags:
-                if tag_name in metadata_tags:
-                    # 使用metadata中的定义
-                    result_tags.append(metadata_tags[tag_name])
-                else:
-                    # 为没有定义的标签创建默认定义
-                    tag_def = {
-                        "id": f"auto-{str(uuid.uuid4())[:8]}",
-                        "name": tag_name,
-                        "color": "#3B82F6"  # 默认蓝色
-                    }
-                    result_tags.append(tag_def)
-                    # 同时添加到metadata中
-                    cursor.execute("""
-                        INSERT INTO tags (id, name, color, created_at, updated_at)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        tag_def["id"],
-                        tag_def["name"],
-                        tag_def["color"],
-                        datetime.now().isoformat(),
-                        datetime.now().isoformat()
-                    ))
-            
-            # 如果有新标签添加到metadata，保存数据
-            if len(result_tags) > len(metadata_tags):
-                conn.commit()
-            
-            return result_tags
+
+            # 直接从tags表获取所有标签
+            cursor.execute("SELECT * FROM tags ORDER BY created_at DESC")
+            tags = [self._row_to_dict(row) for row in cursor.fetchall()]
+
+            return tags
         finally:
             conn.close()
     
@@ -844,26 +809,36 @@ class SQLiteStorage:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            
+
+            tag_name = tag_data["name"]
+
+            # 检查标签是否已存在
+            cursor.execute("SELECT * FROM tags WHERE name = ?", (tag_name,))
+            existing_tag = cursor.fetchone()
+
+            if existing_tag:
+                # 如果标签已存在，返回已有标签信息
+                return self._row_to_dict(existing_tag)
+
             tag_id = str(uuid.uuid4())
             now = datetime.now().isoformat()
-            
+
             cursor.execute("""
                 INSERT INTO tags (id, name, color, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
             """, (
                 tag_id,
-                tag_data["name"],
+                tag_name,
                 tag_data.get("color", "#3B82F6"),
                 now,
                 now
             ))
-            
+
             conn.commit()
-            
+
             return {
                 "id": tag_id,
-                "name": tag_data["name"],
+                "name": tag_name,
                 "color": tag_data.get("color", "#3B82F6"),
                 "created_at": now,
                 "updated_at": now
