@@ -889,6 +889,10 @@ def create_category():
 @app.route('/api/categories/<category_id>', methods=['PUT'])
 def update_category(category_id):
     """更新分类"""
+    # 禁止修改"未分类"
+    if category_id == '0':
+        return jsonify({"error": "不能修改'未分类'分类"}), 403
+
     try:
         update_data = {}
         if request.json.get('name') is not None:
@@ -913,6 +917,10 @@ def update_category(category_id):
 @app.route('/api/categories/<category_id>', methods=['DELETE'])
 def delete_category(category_id):
     """删除分类"""
+    # 禁止删除"未分类"
+    if category_id == '0':
+        return jsonify({"error": "不能删除'未分类'分类"}), 403
+
     result = storage.delete_category(category_id)
     if result.get("success"):
         return jsonify({
@@ -926,10 +934,14 @@ def delete_category(category_id):
 @app.route('/api/categories/<category_id>/force-delete', methods=['DELETE'])
 def force_delete_category(category_id):
     """强制删除分类（已确认）"""
+    # 禁止删除"未分类"
+    if category_id == '0':
+        return jsonify({"error": "不能删除'未分类'分类"}), 403
+
     result = storage.force_delete_category(category_id)
     if result.get("success"):
         return jsonify({
-            "message": f"分类删除成功，共删除 {result['deleted_categories_count']} 个分类，{result['affected_prompts_count']} 个提示词已移动到'其他'分类"
+            "message": f"分类删除成功，共删除 {result['deleted_categories_count']} 个分类，{result['affected_prompts_count']} 个提示词已移动到'未分类'"
         })
     else:
         return jsonify({"error": result.get("error", "删除失败")}), 404

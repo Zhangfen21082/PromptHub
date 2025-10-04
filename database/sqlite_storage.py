@@ -512,27 +512,33 @@ class SQLiteStorage:
         parent_path = self._build_category_path(category["parent_id"], categories_dict)
         return f"{parent_path}/{category['name']}" if parent_path else category["name"]
     
-    def _update_category_paths(self):
+    def _update_category_paths(self, cursor=None):
         """更新所有分类的路径"""
-        conn = self._get_connection()
-        try:
+        # 如果没有传入cursor，创建新连接（向后兼容）
+        own_connection = cursor is None
+        if own_connection:
+            conn = self._get_connection()
             cursor = conn.cursor()
-            
+
+        try:
             # 获取所有分类
             cursor.execute("SELECT * FROM categories")
             categories = [self._row_to_dict(row) for row in cursor.fetchall()]
             categories_dict = {cat["id"]: cat for cat in categories}
-            
+
             # 更新路径
             for category in categories:
                 path = self._build_category_path(category["id"], categories_dict)
                 cursor.execute("""
                     UPDATE categories SET path = ? WHERE id = ?
                 """, (path, category["id"]))
-            
-            conn.commit()
+
+            # 只有在自己创建连接时才commit和close
+            if own_connection:
+                conn.commit()
         finally:
-            conn.close()
+            if own_connection:
+                conn.close()
     
     def get_category_descendants(self, category_id: str) -> List[str]:
         """获取分类的所有后代分类ID（公开方法）"""
@@ -590,14 +596,18 @@ class SQLiteStorage:
                 datetime.now().isoformat(),
                 datetime.now().isoformat()
             ))
-            
+
+            # 重新计算所有分类的路径（传入cursor避免创建新连接）
+            self._update_category_paths(cursor)
+
+            # 获取创建的分类（使用当前cursor）
+            cursor.execute("SELECT * FROM categories WHERE id = ?", (category_id,))
+            created_category = self._row_to_dict(cursor.fetchone())
+
             conn.commit()
-            
-            # 重新计算所有分类的路径
-            self._update_category_paths()
-            
+
             # 返回创建的分类
-            return self.get_category_by_id(category_id)
+            return created_category
         finally:
             conn.close()
     
@@ -661,16 +671,19 @@ class SQLiteStorage:
                 update_fields.append("updated_at = ?")
                 update_values.append(datetime.now().isoformat())
                 update_values.append(category_id)
-                
+
                 sql = f"UPDATE categories SET {', '.join(update_fields)} WHERE id = ?"
                 cursor.execute(sql, update_values)
-            
-            # 重新计算所有分类的路径
-            self._update_category_paths()
-            
-            # 更新提示词中的分类信息
-            updated_category = self.get_category_by_id(category_id)
+
+            # 重新计算所有分类的路径（传入cursor避免创建新连接）
+            self._update_category_paths(cursor)
+
+            # 获取更新后的分类信息（使用当前cursor）
+            cursor.execute("SELECT * FROM categories WHERE id = ?", (category_id,))
+            updated_category = self._row_to_dict(cursor.fetchone())
             new_path = updated_category["path"]
+
+            # 更新提示词中的分类信息
             if old_path != new_path:
                 cursor.execute("""
                     UPDATE prompts
@@ -683,7 +696,7 @@ class SQLiteStorage:
                     category_id,
                     old_name
                 ))
-            
+
             conn.commit()
             return updated_category
         finally:
@@ -756,22 +769,22 @@ class SQLiteStorage:
             # 获取所有子分类（包括递归的）
             all_descendants = self.get_category_descendants(category_id)
             categories_to_delete = [category_id] + all_descendants
-            
-            # 找到"其他"分类
-            cursor.execute("SELECT * FROM categories WHERE name = '其他'")
-            other_category = cursor.fetchone()
-            other_category = self._row_to_dict(other_category) if other_category else None
-            
-            # 移动关联的提示词到"其他"分类
+
+            # 找到"未分类"分类
+            cursor.execute("SELECT * FROM categories WHERE id = '0' OR name = '未分类'")
+            uncategorized = cursor.fetchone()
+            uncategorized = self._row_to_dict(uncategorized) if uncategorized else None
+
+            # 移动关联的提示词到"未分类"
             affected_prompts_count = 0
-            if other_category:
+            if uncategorized:
                 placeholders = ','.join(['?' for _ in categories_to_delete])
                 cursor.execute(f"""
                     UPDATE prompts
                     SET category_id = ?, category_name = ?, category_path = ?, updated_at = ?
-                    WHERE category_id IN ({placeholders}) OR category_name = ?
-                """, [other_category["id"], other_category["name"], other_category["path"],
-                       datetime.now().isoformat()] + categories_to_delete + [category["name"]])
+                    WHERE category_id IN ({placeholders})
+                """, [uncategorized["id"], uncategorized["name"], uncategorized["path"],
+                       datetime.now().isoformat()] + categories_to_delete)
                 affected_prompts_count = cursor.rowcount
             
             # 删除分类及其所有子分类
@@ -1035,13 +1048,7 @@ class SQLiteStorage:
             
             # 重新插入默认分类
             default_categories = [
-                ("1", "编程", "#3B82F6", "编程相关提示词", None, 1, "编程"),
-                ("2", "写作", "#10B981", "写作相关提示词", None, 1, "写作"),
-                ("3", "分析", "#F59E0B", "分析相关提示词", None, 1, "分析"),
-                ("4", "创意", "#8B5CF6", "创意相关提示词", None, 1, "创意"),
-                ("5", "商业", "#EF4444", "商业相关提示词", None, 1, "商业"),
-                ("6", "教育", "#06B6D4", "教育相关提示词", None, 1, "教育"),
-                ("7", "其他", "#6B7280", "其他类型提示词", None, 1, "其他")
+                ("0", "未分类", "#9CA3AF", "未分类的提示词", None, 1, "未分类")
             ]
             
             now = datetime.now().isoformat()

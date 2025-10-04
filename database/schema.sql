@@ -86,13 +86,7 @@ CREATE INDEX IF NOT EXISTS idx_prompt_tags_tag_name ON prompt_tags(tag_name);
 
 -- 插入默认分类
 INSERT OR IGNORE INTO categories (id, name, color, description, parent_id, level, path) VALUES
-('1', '编程', '#3B82F6', '编程相关提示词', NULL, 1, '编程'),
-('2', '写作', '#10B981', '写作相关提示词', NULL, 1, '写作'),
-('3', '分析', '#F59E0B', '分析相关提示词', NULL, 1, '分析'),
-('4', '创意', '#8B5CF6', '创意相关提示词', NULL, 1, '创意'),
-('5', '商业', '#EF4444', '商业相关提示词', NULL, 1, '商业'),
-('6', '教育', '#06B6D4', '教育相关提示词', NULL, 1, '教育'),
-('7', '其他', '#6B7280', '其他类型提示词', NULL, 1, '其他');
+('0', '未分类', '#9CA3AF', '未分类的提示词', NULL, 1, '未分类');
 
 -- 插入默认设置
 INSERT OR IGNORE INTO settings (key, value) VALUES

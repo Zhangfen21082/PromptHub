@@ -1180,22 +1180,11 @@
 
             // 从根分类开始渲染
             renderCategoryTree(categoriesTree);
-
-            // 确保有"其他"分类
-            if (!categories.find(c => c.name === '其他')) {
-                const otherOption = document.createElement('div');
-                otherOption.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150 flex items-center gap-2';
-                otherOption.innerHTML = `
-                    <span class="text-2xl">${getCategoryIcon('其他')}</span>
-                    <span class="text-gray-700">其他</span>
-                `;
-                otherOption.onclick = () => selectCategory('其他', null);
-                categoryList.appendChild(otherOption);
-            }
         }
 
         function getCategoryIcon(categoryName) {
             const icons = {
+                '未分类': '📂',
                 '编程': '💻',
                 '写作': '✍️',
                 '分析': '📊',
@@ -1577,10 +1566,10 @@
                     
                     <div class="mb-4">
                         <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-full cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all duration-200"
-                              onclick="filterByCategory('${prompt.category}', '${prompt.category_id || ''}')">
+                              onclick="filterByCategory('${prompt.category_name}', '${prompt.category_id || ''}')">
                             📁 <span class="tooltip">
-                                <span class="category-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category))}</span>
-                                ${getCategoryPath(prompt.category_id, prompt.category).length > 15 ? `<span class="tooltip-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category))}</span>` : ''}
+                                <span class="category-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category_name))}</span>
+                                ${getCategoryPath(prompt.category_id, prompt.category_name).length > 15 ? `<span class="tooltip-text">${escapeHtml(getCategoryPath(prompt.category_id, prompt.category_name))}</span>` : ''}
                             </span>
                         </span>
                     </div>
@@ -1631,10 +1620,10 @@
                     }
                     categoryMatch = !currentFilters.category_id ||
                         targetCategoryIds.includes(prompt.category_id) ||
-                        prompt.category === currentFilters.category;
+                        prompt.category_name === currentFilters.category;
                 } else if (currentFilters.category) {
                     // 向后兼容：按分类名称筛选
-                    categoryMatch = prompt.category === currentFilters.category;
+                    categoryMatch = prompt.category_name === currentFilters.category;
                 }
 
                 // 标签过滤 - OR逻辑：只要包含任一选中标签就显示
@@ -1798,8 +1787,8 @@
             document.getElementById('content').value = prompt.content;
             document.getElementById('description').value = prompt.description || '';
 
-            // 设置分类下拉框
-            selectCategory(prompt.category);
+            // 设置分类下拉框（使用category_name和category_id）
+            selectCategory(prompt.category_name || '其他', prompt.category_id || null);
 
             // 自动检测内容格式
             const detectedFormat = detectContentFormat(prompt.content);
@@ -2236,7 +2225,7 @@ code block
             document.getElementById('detailTitle').textContent = prompt.title;
             document.getElementById('detailDescription').textContent = prompt.description || '无描述';
             document.getElementById('detailContent').textContent = prompt.content;
-            const categoryText = prompt.category;
+            const categoryText = getCategoryPath(prompt.category_id, prompt.category_name);
             document.getElementById('detailCategory').innerHTML = `📁 <span class="tooltip">
                 <span class="category-text">${escapeHtml(categoryText)}</span>
                 ${categoryText.length > 15 ? `<span class="tooltip-text">${escapeHtml(categoryText)}</span>` : ''}
@@ -3432,20 +3421,22 @@ code block
                             <!--<span class="text-xs text-gray-400">Level ${category.level || 1}</span>-->
                         </div>
                         <div class="flex gap-2">
-                            ${(category.level || 1) < 5 ? `
+                            ${category.id !== '0' && (category.level || 1) < 5 ? `
                                 <button onclick="selectParentCategory('${category.id}', '${escapeHtml(category.name)}')"
                                         class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm">
                                     ➕ 添加子分类
                                 </button>
                             ` : ''}
-                            <button onclick="editCategory('${category.id}', '${escapeHtml(category.name)}', '${category.color}', '${category.parent_id || ''}')"
-                                    class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
-                                ✏️ 编辑
-                            </button>
-                            <button onclick="deleteCategory('${category.id}')"
-                                    class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm">
-                                🗑️ 删除
-                            </button>
+                            ${category.id !== '0' ? `
+                                <button onclick="editCategory('${category.id}', '${escapeHtml(category.name)}', '${category.color}', '${category.parent_id || ''}')"
+                                        class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
+                                    ✏️ 编辑
+                                </button>
+                                <button onclick="deleteCategory('${category.id}')"
+                                        class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm">
+                                    🗑️ 删除
+                                </button>
+                            ` : ''}
                         </div>
                     `;
 
@@ -3522,13 +3513,18 @@ code block
                 });
 
                 if (response.ok) {
-                    const updatedCategory = await response.json();
-                    const index = categories.findIndex(c => c.id === id);
-                    if (index !== -1) {
-                        categories[index] = updatedCategory;
-                    }
+                    // 重新加载分类数据以确保categories和categoriesTree同步
+                    const [categoriesRes, categoriesTreeRes] = await Promise.all([
+                        fetch('/api/categories'),
+                        fetch('/api/categories/tree')
+                    ]);
+
+                    categories = await categoriesRes.json();
+                    categoriesTree = await categoriesTreeRes.json();
+
                     renderCategoryList();
                     renderCategoryButtons();
+                    renderCategoryOptions();
                     renderPrompts();
                     updateStatistics(); // 更新统计
                     showToast('分类更新成功');
@@ -3564,7 +3560,7 @@ code block
                     }
 
                     if (result.affected_prompts_count > 0) {
-                        confirmMessage += `⚠️ 有 ${result.affected_prompts_count} 个提示词将被移动到"其他"分类。\n\n`;
+                        confirmMessage += `⚠️ 有 ${result.affected_prompts_count} 个提示词将被移动到"未分类"。\n\n`;
                     }
 
                     confirmMessage += '所有子分类也将被删除。此操作不可撤销。';
@@ -4106,7 +4102,7 @@ code block
                     </div>
 
                     <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                        <span>📁 ${escapeHtml(prompt.category || '未分类')}</span>
+                        <span>📁 ${escapeHtml(prompt.category_name || '未分类')}</span>
                         <span>🗑️ ${new Date(prompt.deleted_at).toLocaleString()}</span>
                     </div>
 
