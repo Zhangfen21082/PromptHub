@@ -10,17 +10,19 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .card-hover {
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
         }
         .card-hover:hover {
-            transform: translateY(-4px);
+            transform: translateY(-4px) translateZ(0);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .filter-button {
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            will-change: transform;
         }
         .filter-button:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) translateZ(0);
         }
         .glass-effect {
             backdrop-filter: blur(10px);
@@ -265,6 +267,23 @@
         /* 平滑滚动 */
         html {
             scroll-behavior: smooth;
+        }
+
+        /* 性能优化 */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 减少重绘 */
+        .prompt-card, .category-btn, .tag-btn {
+            contain: layout style paint;
+        }
+
+        /* 硬件加速 */
+        .card-hover, .filter-button, .prompt-card {
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
     </style>
 </head>
@@ -1733,6 +1752,31 @@
             return div.innerHTML;
         }
 
+        // 防抖函数：延迟执行，频繁触发只执行最后一次
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 节流函数：固定时间间隔执行
+        function throttle(func, limit) {
+            let inThrottle;
+            return function(...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
         // 高亮提示词卡片的通用函数
         function highlightPromptCard(promptId) {
             // 等待DOM更新
@@ -3194,8 +3238,9 @@ code block
             }
         }
 
-        // 搜索框事件监听
-        document.getElementById('searchInput').addEventListener('input', updateSearch);
+        // 搜索框事件监听 - 使用防抖优化性能
+        const debouncedUpdateSearch = debounce(updateSearch, 300);
+        document.getElementById('searchInput').addEventListener('input', debouncedUpdateSearch);
 
         // 分类管理相关函数
         function showCategoryModal() {
@@ -3989,7 +4034,8 @@ code block
         let hideDropdownTimer = null;
 
         // 加载版本下拉菜单
-        async function loadVersionDropdown(promptId) {
+        // 节流加载版本下拉菜单
+        const loadVersionDropdown = throttle(async function(promptId) {
             // 如果已经加载过，直接显示
             if (versionDropdownCache[promptId]) {
                 return;
@@ -4027,7 +4073,7 @@ code block
             } catch (error) {
                 console.error('加载版本列表失败:', error);
             }
-        }
+        }, 200);
 
         // 显示/隐藏版本下拉菜单
         function toggleVersionDropdown(event, promptId) {
