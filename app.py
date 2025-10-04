@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import json
 import hashlib
 import os
@@ -1129,6 +1129,76 @@ def import_data():
         })
     except Exception as e:
         return jsonify({"error": f"导入失败: {str(e)}"}), 500
+
+# 数据库文件导入导出
+@app.route('/api/export-database', methods=['GET'])
+def export_database():
+    """导出数据库文件"""
+    try:
+        export_file = storage.export_database()
+        # 返回文件供下载
+        return send_file(
+            export_file,
+            as_attachment=True,
+            download_name=f"prompthub_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db",
+            mimetype='application/x-sqlite3'
+        )
+    except Exception as e:
+        return jsonify({"error": f"导出数据库失败: {str(e)}"}), 500
+
+@app.route('/api/import-database', methods=['POST'])
+def import_database():
+    """导入数据库文件"""
+    try:
+        # 检查是否有上传的文件
+        if 'file' not in request.files:
+            return jsonify({"error": "没有上传文件"}), 400
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return jsonify({"error": "没有选择文件"}), 400
+
+        # 检查文件扩展名
+        if not file.filename.endswith('.db'):
+            return jsonify({"error": "只能导入 .db 文件"}), 400
+
+        # 保存上传的文件到临时位置
+        import tempfile
+        import os
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as temp_file:
+            file.save(temp_file.name)
+            temp_path = temp_file.name
+
+        try:
+            # 导入数据库
+            backup_file = storage.import_database(temp_path)
+
+            # 删除临时文件
+            os.unlink(temp_path)
+
+            # 获取导入后的数据统计
+            prompts = storage.get_all_prompts()
+            categories = storage.get_all_categories()
+            tags = storage.get_all_tags()
+
+            return jsonify({
+                "message": f"数据库导入成功！原数据已备份到 {backup_file}",
+                "stats": {
+                    "prompts": len(prompts),
+                    "categories": len(categories),
+                    "tags": len(tags)
+                }
+            })
+        except Exception as e:
+            # 导入失败，删除临时文件
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            raise e
+
+    except Exception as e:
+        return jsonify({"error": f"导入数据库失败: {str(e)}"}), 500
 
 # 管理员功能
 @app.route('/api/admin/load-test-data', methods=['POST'])

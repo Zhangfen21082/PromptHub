@@ -990,46 +990,69 @@ class SQLiteStorage:
     
     # 数据管理方法
     def backup_data(self) -> str:
-        """备份数据（导出为JSON格式）"""
-        conn = self._get_connection()
+        """备份数据（复制数据库文件）"""
+        import shutil
+
+        # 创建备份目录
+        backup_dir = Path("data/backup")
+        backup_dir.mkdir(exist_ok=True)
+
+        # 生成备份文件名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_file = backup_dir / f"prompthub_backup_{timestamp}.db"
+
+        # 复制数据库文件
+        shutil.copy2(self.db_path, backup_file)
+
+        return str(backup_file)
+
+    def export_database(self) -> str:
+        """导出数据库文件"""
+        import shutil
+
+        # 创建导出目录
+        export_dir = Path("data/exports")
+        export_dir.mkdir(exist_ok=True)
+
+        # 生成导出文件名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        export_file = export_dir / f"prompthub_export_{timestamp}.db"
+
+        # 复制数据库文件
+        shutil.copy2(self.db_path, export_file)
+
+        return str(export_file)
+
+    def import_database(self, db_file_path: str) -> str:
+        """导入数据库文件（替换当前数据库）"""
+        import shutil
+
+        # 先备份当前数据库
+        backup_file = self.backup_data()
+
+        # 验证导入文件是否存在
+        import_file = Path(db_file_path)
+        if not import_file.exists():
+            raise FileNotFoundError(f"导入文件不存在: {db_file_path}")
+
+        # 验证是否为有效的SQLite数据库
         try:
-            # 获取所有数据
-            prompts = self.get_all_prompts()
-            categories = self.get_all_categories()
-            tags = self.get_all_tags()
-            
-            # 获取设置
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM settings")
-            settings = {self._row_to_dict(row)['key']: self._row_to_dict(row)['value'] 
-                       for row in cursor.fetchall()}
-            
-            # 构建备份数据
-            backup_data = {
-                "prompts": prompts,
-                "metadata": {
-                    "categories": categories,
-                    "tags": tags,
-                    "settings": settings
-                },
-                "backup_time": datetime.now().isoformat()
-            }
-            
-            # 创建备份目录
-            backup_dir = Path("data/backup")
-            backup_dir.mkdir(exist_ok=True)
-            
-            # 保存备份文件
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_file = backup_dir / f"prompts_sqlite_backup_{timestamp}.json"
-            
-            with open(backup_file, 'w', encoding='utf-8') as f:
-                json.dump(backup_data, f, ensure_ascii=False, indent=2)
-            
-            return str(backup_file)
-        finally:
-            conn.close()
-    
+            test_conn = sqlite3.connect(str(import_file))
+            # 检查是否包含必要的表
+            cursor = test_conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='prompts'")
+            if not cursor.fetchone():
+                test_conn.close()
+                raise ValueError("导入的文件不是有效的PromptHub数据库（缺少prompts表）")
+            test_conn.close()
+        except sqlite3.Error as e:
+            raise ValueError(f"导入的文件不是有效的SQLite数据库: {str(e)}")
+
+        # 替换当前数据库
+        shutil.copy2(import_file, self.db_path)
+
+        return backup_file
+
     def clear_all_data(self) -> str:
         """清空所有数据，但保留默认分类"""
         # 先备份数据
