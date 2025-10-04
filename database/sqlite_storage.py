@@ -234,13 +234,16 @@ class SQLiteStorage:
             category_id = prompt_data.get("category_id")
             category_name = prompt_data.get("category", "其他")
             category_path = category_name
-            
+
             if category_id:
                 cursor.execute("SELECT name, path FROM categories WHERE id = ?", (category_id,))
                 category = cursor.fetchone()
                 if category:
                     category_name = category['name']
                     category_path = category['path']
+                else:
+                    # 如果分类不存在，设置为NULL以满足外键约束
+                    category_id = None
             
             # 生成ID和时间戳
             prompt_id = str(uuid.uuid4())
@@ -346,13 +349,18 @@ class SQLiteStorage:
                     if category:
                         update_data["category_name"] = category['name']
                         update_data["category_path"] = category['path']
+                    else:
+                        # 如果分类不存在，设置为NULL以满足外键约束
+                        update_data["category_id"] = None
+                        update_data["category_name"] = "其他"
+                        update_data["category_path"] = "其他"
             
             # 构建更新SQL
             update_fields = []
             update_values = []
             
             for field, value in update_data.items():
-                if field in ["title", "content", "description", "category_id", "category_name", "category_path", "tags"]:
+                if field in ["title", "content", "description", "category_id", "category_name", "category_path"]:
                     update_fields.append(f"{field} = ?")
                     update_values.append(value)
             
@@ -380,23 +388,31 @@ class SQLiteStorage:
     
     def _add_tag_to_prompt(self, cursor: sqlite3.Cursor, prompt_id: str, tag_name: str):
         """为提示词添加标签"""
+        if not tag_name or not tag_name.strip():
+            return
+
+        tag_name = tag_name.strip()
+        now = datetime.now().isoformat()
+
         # 确保标签存在
-        cursor.execute("""
-            INSERT OR IGNORE INTO tags (id, name, color, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            str(uuid.uuid4()),
-            tag_name,
-            "#3B82F6",
-            datetime.now().isoformat(),
-            datetime.now().isoformat()
-        ))
-        
+        cursor.execute("SELECT name FROM tags WHERE name = ?", (tag_name,))
+        if not cursor.fetchone():
+            cursor.execute("""
+                INSERT INTO tags (id, name, color, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                str(uuid.uuid4()),
+                tag_name,
+                "#3B82F6",
+                now,
+                now
+            ))
+
         # 添加关联
         cursor.execute("""
             INSERT OR IGNORE INTO prompt_tags (prompt_id, tag_name, created_at)
             VALUES (?, ?, ?)
-        """, (prompt_id, tag_name, datetime.now().isoformat()))
+        """, (prompt_id, tag_name, now))
     
     def _update_prompt_tags(self, cursor: sqlite3.Cursor, prompt_id: str, tags: List[str]):
         """更新提示词的标签"""
@@ -658,9 +674,9 @@ class SQLiteStorage:
             new_path = updated_category["path"]
             if old_path != new_path:
                 cursor.execute("""
-                    UPDATE prompts 
-                    SET category = ?, category_path = ?, updated_at = ?
-                    WHERE category_id = ? OR category = ?
+                    UPDATE prompts
+                    SET category_name = ?, category_path = ?, updated_at = ?
+                    WHERE category_id = ? OR category_name = ?
                 """, (
                     updated_category["name"],
                     new_path,
@@ -703,8 +719,8 @@ class SQLiteStorage:
             
             # 检查关联的提示词
             cursor.execute("""
-                SELECT COUNT(*) as count FROM prompts 
-                WHERE category_id = ? OR category = ?
+                SELECT COUNT(*) as count FROM prompts
+                WHERE category_id = ? OR category_name = ?
             """, (category_id, category["name"]))
             affected_prompts_count = cursor.fetchone()['count']
             
@@ -752,10 +768,10 @@ class SQLiteStorage:
             if other_category:
                 placeholders = ','.join(['?' for _ in categories_to_delete])
                 cursor.execute(f"""
-                    UPDATE prompts 
+                    UPDATE prompts
                     SET category_id = ?, category_name = ?, category_path = ?, updated_at = ?
-                    WHERE category_id IN ({placeholders}) OR category = ?
-                """, [other_category["id"], other_category["name"], other_category["path"], 
+                    WHERE category_id IN ({placeholders}) OR category_name = ?
+                """, [other_category["id"], other_category["name"], other_category["path"],
                        datetime.now().isoformat()] + categories_to_delete + [category["name"]])
                 affected_prompts_count = cursor.rowcount
             
@@ -1064,10 +1080,10 @@ class SQLiteStorage:
             # 更新设置
             cursor.execute("""
                 INSERT OR REPLACE INTO settings (key, value, updated_at)
-                VALUES (?, ?, ?), (?, ?)
+                VALUES (?, ?, ?), (?, ?, ?)
             """, (
                 "version", "2.0", now,
-                "last_updated", now
+                "last_updated", now, now
             ))
             
             conn.commit()

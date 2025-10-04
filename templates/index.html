@@ -3584,7 +3584,7 @@ code block
                         // 重新加载数据
                         await loadData();
                         renderCategoryList();
-                        renderCategoryParentOptions();
+                        renderCategoryOptions();
                         showToast(deleteResult.message || '分类删除成功');
                     } else {
                         const error = await forceResponse.json();
@@ -3596,7 +3596,7 @@ code block
                     const result = await response.json();
                     await loadData();
                     renderCategoryList();
-                    renderCategoryParentOptions();
+                    renderCategoryOptions();
                     showToast(result.message || '分类删除成功');
                 } else {
                     const error = await response.json();
