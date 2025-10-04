@@ -863,44 +863,63 @@ class SQLiteStorage:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            
+
             # 获取旧标签信息
             cursor.execute("SELECT * FROM tags WHERE id = ?", (tag_id,))
             old_tag = cursor.fetchone()
             if not old_tag:
                 return None
-            
+
             old_tag = self._row_to_dict(old_tag)
             old_name = old_tag["name"]
-            
+            new_name = update_data.get("name", old_name)
+
+            # 如果标签名称发生变化，先检查新名称是否已存在（排除当前标签）
+            if new_name != old_name:
+                cursor.execute("SELECT id FROM tags WHERE name = ? AND id != ?", (new_name, tag_id))
+                if cursor.fetchone():
+                    raise ValueError(f"标签名称 '{new_name}' 已存在")
+
+                # 临时禁用外键约束
+                cursor.execute("PRAGMA foreign_keys = OFF")
+
+                # 先更新 prompt_tags 表中的 tag_name
+                cursor.execute("""
+                    UPDATE prompt_tags SET tag_name = ? WHERE tag_name = ?
+                """, (new_name, old_name))
+
             # 构建更新SQL
             update_fields = []
             update_values = []
-            
+
             for field, value in update_data.items():
                 if field in ["name", "color"]:
                     update_fields.append(f"{field} = ?")
                     update_values.append(value)
-            
+
             if update_fields:
                 update_fields.append("updated_at = ?")
                 update_values.append(datetime.now().isoformat())
                 update_values.append(tag_id)
-                
+
                 sql = f"UPDATE tags SET {', '.join(update_fields)} WHERE id = ?"
                 cursor.execute(sql, update_values)
-            
-            # 如果标签名称发生变化，更新所有使用该标签的提示词
-            if "name" in update_data and update_data["name"] != old_name:
-                cursor.execute("""
-                    UPDATE prompt_tags SET tag_name = ? WHERE tag_name = ?
-                """, (update_data["name"], old_name))
-            
+
+            # 重新启用外键约束
+            if new_name != old_name:
+                cursor.execute("PRAGMA foreign_keys = ON")
+
             conn.commit()
-            
+
             # 返回更新后的标签
             cursor.execute("SELECT * FROM tags WHERE id = ?", (tag_id,))
             return self._row_to_dict(cursor.fetchone())
+        except ValueError as e:
+            conn.rollback()
+            raise e
+        except Exception as e:
+            conn.rollback()
+            raise e
         finally:
             conn.close()
     
