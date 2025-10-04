@@ -1074,36 +1074,313 @@ class SQLiteStorage:
             conn.close()
     
     def load_test_data(self) -> str:
-        """加载测试数据"""
+        """加载测试数据 - 生成完善的测试数据用于开发"""
+        import random
+
         # 先备份数据
         backup_file = self.backup_data()
 
         try:
-            examples_dir = Path("data/examples")
-            example_prompts_file = examples_dir / "prompts.json"
+            # 清空现有数据（保留未分类）
+            conn = self._get_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM prompt_tags")
+                cursor.execute("DELETE FROM prompt_versions")
+                cursor.execute("DELETE FROM prompts")
+                cursor.execute("DELETE FROM tags")
+                cursor.execute("DELETE FROM categories WHERE id != '0'")
+                conn.commit()
+            finally:
+                conn.close()
 
-            if example_prompts_file.exists():
-                with open(example_prompts_file, 'r', encoding='utf-8') as f:
-                    example_data = json.load(f)
+            # 1. 创建分类树结构
+            # 一级分类
+            cat_programming = self.create_category({
+                "name": "编程开发",
+                "color": "#3B82F6",
+                "description": "编程和软件开发相关提示词"
+            })
 
-                # 清空现有提示词
-                conn = self._get_connection()
-                try:
-                    cursor = conn.cursor()
-                    cursor.execute("DELETE FROM prompt_tags")
-                    cursor.execute("DELETE FROM prompt_versions")
-                    cursor.execute("DELETE FROM prompts")
-                    conn.commit()
-                finally:
-                    conn.close()
+            cat_writing = self.create_category({
+                "name": "写作创作",
+                "color": "#10B981",
+                "description": "写作、文案、内容创作"
+            })
 
-                # 加载测试数据
-                for prompt_data in example_data.get("prompts", []):
-                    self.create_prompt(prompt_data)
+            cat_business = self.create_category({
+                "name": "商业分析",
+                "color": "#EF4444",
+                "description": "商业、市场、数据分析"
+            })
 
-                return backup_file
-            else:
-                raise FileNotFoundError("测试数据文件不存在")
+            cat_learning = self.create_category({
+                "name": "学习教育",
+                "color": "#8B5CF6",
+                "description": "教育、学习、知识分享"
+            })
+
+            # 二级分类 - 编程开发
+            cat_python = self.create_category({
+                "name": "Python",
+                "color": "#3776AB",
+                "description": "Python 编程相关",
+                "parent_id": cat_programming["id"]
+            })
+
+            cat_web = self.create_category({
+                "name": "Web开发",
+                "color": "#F59E0B",
+                "description": "前端和后端Web开发",
+                "parent_id": cat_programming["id"]
+            })
+
+            cat_ai = self.create_category({
+                "name": "AI/机器学习",
+                "color": "#06B6D4",
+                "description": "人工智能和机器学习",
+                "parent_id": cat_programming["id"]
+            })
+
+            # 三级分类 - Web开发
+            cat_frontend = self.create_category({
+                "name": "前端开发",
+                "color": "#F97316",
+                "description": "HTML/CSS/JavaScript",
+                "parent_id": cat_web["id"]
+            })
+
+            cat_backend = self.create_category({
+                "name": "后端开发",
+                "color": "#84CC16",
+                "description": "服务器端开发",
+                "parent_id": cat_web["id"]
+            })
+
+            # 二级分类 - 写作创作
+            cat_article = self.create_category({
+                "name": "文章写作",
+                "color": "#14B8A6",
+                "description": "博客、技术文章等",
+                "parent_id": cat_writing["id"]
+            })
+
+            cat_marketing = self.create_category({
+                "name": "营销文案",
+                "color": "#EC4899",
+                "description": "广告、营销、推广文案",
+                "parent_id": cat_writing["id"]
+            })
+
+            # 2. 创建标签
+            tags_data = [
+                {"name": "代码生成", "color": "#3B82F6"},
+                {"name": "代码审查", "color": "#10B981"},
+                {"name": "Bug修复", "color": "#EF4444"},
+                {"name": "性能优化", "color": "#F59E0B"},
+                {"name": "API设计", "color": "#8B5CF6"},
+                {"name": "SEO优化", "color": "#06B6D4"},
+                {"name": "内容创作", "color": "#EC4899"},
+                {"name": "数据分析", "color": "#14B8A6"},
+                {"name": "教程编写", "color": "#F97316"},
+                {"name": "文档生成", "color": "#84CC16"},
+            ]
+
+            for tag_data in tags_data:
+                self.create_tag(tag_data)
+
+            # 3. 创建提示词（包含详细内容）
+            prompts_data = [
+                {
+                    "title": "Python 代码审查助手",
+                    "content": """你是一位经验丰富的 Python 开发者。请仔细审查以下代码，并提供：
+
+1. 代码质量评估
+2. 潜在的 bug 或问题
+3. 性能优化建议
+4. 最佳实践建议
+5. 安全性问题
+
+代码：
+{code}
+
+请提供详细的分析和改进建议。""",
+                    "description": "帮助审查 Python 代码，发现问题并提供优化建议",
+                    "category_id": cat_python["id"],
+                    "tags": ["代码审查", "Bug修复", "性能优化"]
+                },
+                {
+                    "title": "Python 数据分析脚本生成器",
+                    "content": """请根据以下需求生成 Python 数据分析脚本：
+
+需求：{requirements}
+
+请使用 pandas、numpy、matplotlib 等库，生成包含以下内容的完整脚本：
+1. 数据加载和预处理
+2. 数据探索性分析
+3. 数据可视化
+4. 统计分析
+5. 结果总结""",
+                    "description": "自动生成数据分析脚本",
+                    "category_id": cat_python["id"],
+                    "tags": ["代码生成", "数据分析"]
+                },
+                {
+                    "title": "React 组件生成器",
+                    "content": """作为一名资深的 React 开发者，请根据以下需求创建一个 React 组件：
+
+组件需求：{requirements}
+
+请提供完整的组件代码（使用 TypeScript）和使用示例。""",
+                    "description": "快速生成符合最佳实践的 React 组件",
+                    "category_id": cat_frontend["id"],
+                    "tags": ["代码生成", "API设计"]
+                },
+                {
+                    "title": "CSS 性能优化顾问",
+                    "content": """你是 CSS 性能优化专家。请分析以下 CSS 代码并提供优化建议：
+
+CSS 代码：
+{css_code}
+
+请提供性能问题识别和具体优化方案。""",
+                    "description": "分析和优化 CSS 性能",
+                    "category_id": cat_frontend["id"],
+                    "tags": ["性能优化", "代码审查"]
+                },
+                {
+                    "title": "RESTful API 设计助手",
+                    "content": """作为 API 设计专家，请为以下业务场景设计 RESTful API：
+
+业务场景：{business_scenario}
+
+请提供完整的 API 端点设计和文档。""",
+                    "description": "设计符合最佳实践的 RESTful API",
+                    "category_id": cat_backend["id"],
+                    "tags": ["API设计", "文档生成"]
+                },
+                {
+                    "title": "机器学习模型选择顾问",
+                    "content": """你是机器学习专家。根据以下问题描述，推荐合适的机器学习模型并提供实现示例。
+
+问题描述：
+- 任务类型：{task_type}
+- 数据规模：{data_size}""",
+                    "description": "根据具体场景推荐合适的机器学习模型",
+                    "category_id": cat_ai["id"],
+                    "tags": ["数据分析", "代码生成"]
+                },
+                {
+                    "title": "技术博客文章生成器",
+                    "content": """你是一位优秀的技术博客作者。请根据主题创作一篇技术文章。
+
+主题：{topic}
+
+请包含吸引人的标题、清晰的技术讲解和实用的案例。""",
+                    "description": "生成高质量的技术博客文章",
+                    "category_id": cat_article["id"],
+                    "tags": ["内容创作", "SEO优化", "教程编写"]
+                },
+                {
+                    "title": "教程文档编写助手",
+                    "content": """作为技术文档专家，请为技术主题创建完整的教程文档。
+
+主题：{topic}
+
+请提供清晰的目录结构和分步骤讲解。""",
+                    "description": "创建结构化的技术教程文档",
+                    "category_id": cat_article["id"],
+                    "tags": ["教程编写", "文档生成", "内容创作"]
+                },
+                {
+                    "title": "产品营销文案生成器",
+                    "content": """你是创意营销文案专家。请为产品创作营销文案。
+
+产品信息：
+- 产品名称：{product_name}
+- 核心卖点：{key_features}
+
+请提供有创意、有说服力的文案。""",
+                    "description": "创作有吸引力的产品营销文案",
+                    "category_id": cat_marketing["id"],
+                    "tags": ["内容创作", "SEO优化"]
+                },
+                {
+                    "title": "商业数据分析报告生成器",
+                    "content": """你是资深的商业数据分析师。请根据数据生成商业分析报告。
+
+数据描述：{data_description}
+
+请提供执行摘要、数据分析和商业建议。""",
+                    "description": "生成专业的商业数据分析报告",
+                    "category_id": cat_business["id"],
+                    "tags": ["数据分析", "文档生成"]
+                },
+                {
+                    "title": "概念解释专家",
+                    "content": """你是优秀的教育者。请用简单易懂的方式解释概念。
+
+概念：{concept}
+
+请提供简明定义、通俗比喻和实际应用场景。""",
+                    "description": "用通俗易懂的方式解释复杂概念",
+                    "category_id": cat_learning["id"],
+                    "tags": ["教程编写", "内容创作"]
+                },
+                {
+                    "title": "问题解决框架",
+                    "content": """你是问题解决专家。请使用结构化的方法分析和解决问题。
+
+问题描述：{problem}
+
+请按框架提供系统化、可操作的分析。""",
+                    "description": "使用结构化方法分析和解决问题",
+                    "category_id": "0",
+                    "tags": ["数据分析"]
+                },
+            ]
+
+            created_prompts = []
+            for i, prompt_data in enumerate(prompts_data):
+                prompt = self.create_prompt(prompt_data)
+                created_prompts.append(prompt)
+
+                # 为部分提示词添加版本历史
+                if i % 3 == 0:
+                    self.create_prompt_version(
+                        prompt["id"],
+                        {
+                            "version": "1.1",
+                            "title": prompt_data["title"],
+                            "content": prompt_data["content"] + "\n\n更新：添加了更多细节。",
+                            "description": prompt_data["description"] + "（已优化）",
+                            "change_note": "优化了提示词结构"
+                        }
+                    )
+
+                    self.create_prompt_version(
+                        prompt["id"],
+                        {
+                            "version": "1.2",
+                            "title": prompt_data["title"] + " Pro",
+                            "content": prompt_data["content"] + "\n\n更新：增强了输出质量。",
+                            "description": prompt_data["description"] + "（专业版）",
+                            "change_note": "重大更新：增强了输出质量"
+                        }
+                    )
+
+                    self.update_prompt(prompt["id"], {"current_version": "1.2"})
+
+            # 4. 随机设置使用次数
+            conn = self._get_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE prompts SET usage_count = ABS(RANDOM() % 50)")
+                conn.commit()
+            finally:
+                conn.close()
+
+            return backup_file
         except Exception as e:
             raise Exception(f"加载测试数据失败: {str(e)}")
 

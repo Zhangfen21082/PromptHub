@@ -3718,6 +3718,41 @@ code block
             }
         }
 
+        async function loadTestData() {
+            try {
+                const confirmed = await customConfirm(
+                    '加载测试数据？',
+                    '这将清空现有数据并加载完整的测试数据集，包括：\n\n• 12个分类（3级层级结构）\n• 10个标签\n• 12个提示词（含版本历史）\n\n原数据会自动备份到 data/backup/ 目录。\n\n是否继续？'
+                );
+
+                if (!confirmed) return;
+
+                showToast('正在加载测试数据...', 'info');
+
+                const response = await fetch('/api/admin/load-test-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('✅ ' + result.message, 'success');
+                    // 重新加载页面数据
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(result.error || '加载测试数据失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载测试数据失败:', error);
+                showToast('加载测试数据失败', 'error');
+            }
+        }
+
         async function clearAllData() {
             try {
                 const confirmed = await customConfirm(
