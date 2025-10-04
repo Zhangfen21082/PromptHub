@@ -44,10 +44,11 @@ class SQLiteStorage:
         try:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT p.*, 
-                       GROUP_CONCAT(pt.tag_name) as tags
+                SELECT p.*,
+                       GROUP_CONCAT(t.name) as tags
                 FROM prompts p
                 LEFT JOIN prompt_tags pt ON p.id = pt.prompt_id
+                LEFT JOIN tags t ON pt.tag_id = t.id
                 GROUP BY p.id
                 ORDER BY p.updated_at DESC
             """)
@@ -301,10 +302,11 @@ class SQLiteStorage:
         try:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT p.*, 
-                       GROUP_CONCAT(pt.tag_name) as tags
+                SELECT p.*,
+                       GROUP_CONCAT(t.name) as tags
                 FROM prompts p
                 LEFT JOIN prompt_tags pt ON p.id = pt.prompt_id
+                LEFT JOIN tags t ON pt.tag_id = t.id
                 WHERE p.id = ?
                 GROUP BY p.id
             """, (prompt_id,))
@@ -392,25 +394,30 @@ class SQLiteStorage:
         tag_name = tag_name.strip()
         now = datetime.now().isoformat()
 
-        # 确保标签存在
-        cursor.execute("SELECT name FROM tags WHERE name = ?", (tag_name,))
-        if not cursor.fetchone():
+        # 确保标签存在，获取或创建 tag_id
+        cursor.execute("SELECT id FROM tags WHERE name = ?", (tag_name,))
+        result = cursor.fetchone()
+
+        if result:
+            tag_id = result['id']
+        else:
+            tag_id = str(uuid.uuid4())
             cursor.execute("""
-                INSERT OR IGNORE INTO tags (id, name, color, created_at, updated_at)
+                INSERT INTO tags (id, name, color, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
             """, (
-                str(uuid.uuid4()),
+                tag_id,
                 tag_name,
                 "#3B82F6",
                 now,
                 now
             ))
 
-        # 添加关联
+        # 添加关联（使用 tag_id）
         cursor.execute("""
-            INSERT OR IGNORE INTO prompt_tags (prompt_id, tag_name, created_at)
+            INSERT OR IGNORE INTO prompt_tags (prompt_id, tag_id, created_at)
             VALUES (?, ?, ?)
-        """, (prompt_id, tag_name, now))
+        """, (prompt_id, tag_id, now))
     
     def _update_prompt_tags(self, cursor: sqlite3.Cursor, prompt_id: str, tags: List[str]):
         """更新提示词的标签"""
@@ -880,14 +887,6 @@ class SQLiteStorage:
                 if cursor.fetchone():
                     raise ValueError(f"标签名称 '{new_name}' 已存在")
 
-                # 临时禁用外键约束
-                cursor.execute("PRAGMA foreign_keys = OFF")
-
-                # 先更新 prompt_tags 表中的 tag_name
-                cursor.execute("""
-                    UPDATE prompt_tags SET tag_name = ? WHERE tag_name = ?
-                """, (new_name, old_name))
-
             # 构建更新SQL
             update_fields = []
             update_values = []
@@ -904,10 +903,6 @@ class SQLiteStorage:
 
                 sql = f"UPDATE tags SET {', '.join(update_fields)} WHERE id = ?"
                 cursor.execute(sql, update_values)
-
-            # 重新启用外键约束
-            if new_name != old_name:
-                cursor.execute("PRAGMA foreign_keys = ON")
 
             conn.commit()
 
@@ -928,24 +923,22 @@ class SQLiteStorage:
         conn = self._get_connection()
         try:
             cursor = conn.cursor()
-            
+
             # 找到要删除的标签
             cursor.execute("SELECT * FROM tags WHERE id = ?", (tag_id,))
             tag = cursor.fetchone()
             if not tag:
                 return False
-            
-            tag_name = tag['name']
-            
-            # 处理关联的提示词：从所有提示词中移除该标签
-            cursor.execute("DELETE FROM prompt_tags WHERE tag_name = ?", (tag_name,))
-            affected_count = cursor.rowcount
-            
-            # 删除标签
+
+            # 统计受影响的提示词数量（在删除前）
+            cursor.execute("SELECT COUNT(DISTINCT prompt_id) FROM prompt_tags WHERE tag_id = ?", (tag_id,))
+            affected_count = cursor.fetchone()[0]
+
+            # 删除标签（由于有 ON DELETE CASCADE，会自动删除 prompt_tags 中的关联）
             cursor.execute("DELETE FROM tags WHERE id = ?", (tag_id,))
-            
+
             conn.commit()
-            
+
             return {"success": True, "affected_prompts": affected_count}
         finally:
             conn.close()
@@ -979,10 +972,11 @@ class SQLiteStorage:
             
             # 构建SQL
             sql = """
-                SELECT p.*, 
-                       GROUP_CONCAT(pt.tag_name) as tags
+                SELECT p.*,
+                       GROUP_CONCAT(t.name) as tags
                 FROM prompts p
                 LEFT JOIN prompt_tags pt ON p.id = pt.prompt_id
+                LEFT JOIN tags t ON pt.tag_id = t.id
             """
             
             if conditions:

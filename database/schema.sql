@@ -57,11 +57,11 @@ CREATE TABLE IF NOT EXISTS prompt_versions (
 -- 提示词标签关联表
 CREATE TABLE IF NOT EXISTS prompt_tags (
     prompt_id TEXT NOT NULL,
-    tag_name TEXT NOT NULL,
+    tag_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (prompt_id, tag_name),
+    PRIMARY KEY (prompt_id, tag_id),
     FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_name) REFERENCES tags(name) ON DELETE CASCADE
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- 系统设置表
@@ -82,7 +82,7 @@ CREATE INDEX IF NOT EXISTS idx_categories_level ON categories(level);
 CREATE INDEX IF NOT EXISTS idx_categories_path ON categories(path);
 CREATE INDEX IF NOT EXISTS idx_prompt_versions_prompt_id ON prompt_versions(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_prompt_tags_prompt_id ON prompt_tags(prompt_id);
-CREATE INDEX IF NOT EXISTS idx_prompt_tags_tag_name ON prompt_tags(tag_name);
+CREATE INDEX IF NOT EXISTS idx_prompt_tags_tag_id ON prompt_tags(tag_id);
 
 -- 插入默认分类
 INSERT OR IGNORE INTO categories (id, name, color, description, parent_id, level, path) VALUES
